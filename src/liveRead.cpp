@@ -35,7 +35,7 @@ int32_t LiveRead::parse_code(std::string input_code)
 }
 
 
-int32_t LiveRead::zbar_video_detect(int32_t argc, char* argv[])
+int32_t LiveRead::zbar_video_detect(void)
 {
 	int32_t ret;
 	m_data = "";

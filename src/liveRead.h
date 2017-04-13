@@ -21,7 +21,7 @@ public:
 	~LiveRead(){};
 
 	//! QR code detection from live video using zbar library
-	int32_t zbar_video_detect(int32_t argc, char** argv);
+	int32_t zbar_video_detect(void);
 
 	//! QR code parsing to code format
 	int32_t parse_code(std::string input_code);
