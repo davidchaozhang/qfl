@@ -43,7 +43,7 @@ int32_t main(int32_t argc, char** argv) {
 		} /* while */
 	}
 
-	while (lread.zbar_video_detect(argc, argv) == 0)
+	while (lread.zbar_video_detect() == 0)
 	{
 		std::string code = lread.getCode();
 		if (lread.parse_code(code) != 0) {
