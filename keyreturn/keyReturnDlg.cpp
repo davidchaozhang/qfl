@@ -57,7 +57,9 @@ CkeyReturnDlg::CkeyReturnDlg(CWnd* pParent /*=NULL*/)
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_refund = true;
 	m_qrcode_flag = false;
+	m_running_status = 0;
 }
+
 
 void CkeyReturnDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -71,6 +73,7 @@ BEGIN_MESSAGE_MAP(CkeyReturnDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_REFUND, &CkeyReturnDlg::OnBnClickedButtonRefund)
 	ON_BN_CLICKED(IDC_BUTTON_DONATE, &CkeyReturnDlg::OnBnClickedButtonDonate)
 	ON_BN_CLICKED(IDC_BUTTON_QRCODE, &CkeyReturnDlg::OnBnClickedButtonQrcode)
+	ON_BN_CLICKED(IDOK, &CkeyReturnDlg::OnBnClickedOk)
 END_MESSAGE_MAP()
 
 
@@ -173,8 +176,10 @@ void CkeyReturnDlg::OnBnClickedButtonRefund()
 			return;
 		}
 		else {
-			refund_code = "name=" + m_lread.getKeyword() + ",key=refund";
-			m_lread.checkSalesforce(m_url, refund_code);
+			if (DisplayConfirmMessageBox()) {
+				refund_code = "name=" + m_lread.getKeyword() + ",key=refund";
+				m_lread.checkSalesforce(m_url, refund_code);
+			}
 		}
 
 		m_qrcode_flag = false;
@@ -195,8 +200,10 @@ void CkeyReturnDlg::OnBnClickedButtonDonate()
 			return;
 		}
 		else {
-			donate_code = "name=" + m_lread.getKeyword() + ",key=donate";
-			m_lread.checkSalesforce(m_url, donate_code);
+			if (DisplayConfirmMessageBox()) {
+				donate_code = "name=" + m_lread.getKeyword() + ",key=donate";
+				m_lread.checkSalesforce(m_url, donate_code);
+			}
 		}
 
 		m_qrcode_flag = false;
@@ -213,7 +220,9 @@ void CkeyReturnDlg::OnBnClickedButtonQrcode()
 
 	m_url = m_lread.getTestURL();
 
-	if (m_lread.zbar_video_detect() == 0)
+	m_running_status = m_lread.zbar_video_detect();
+
+	if (m_running_status == 0)
 	{
 		m_qrcode_flag = true;
 		GetDlgItem(IDC_BUTTON_DONATE)->EnableWindow(TRUE);
@@ -222,4 +231,25 @@ void CkeyReturnDlg::OnBnClickedButtonQrcode()
 	}
 
 	return;
+}
+
+
+int CkeyReturnDlg::DisplayConfirmMessageBox()
+{
+	int msgboxID = 0;
+	// Display a message box asking user to confirm the action
+	msgboxID = AfxMessageBox(_T("Please Confirm to Proceed:"), MB_YESNO | MB_ICONSTOP);
+	if (msgboxID == IDYES)
+		return 1;
+	else if (msgboxID == IDNO)
+		return 0;
+
+	return 0;
+
+}
+
+void CkeyReturnDlg::OnBnClickedOk()
+{
+	_sleep(100);
+	CDialogEx::OnOK();
 }

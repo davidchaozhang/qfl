@@ -35,9 +35,13 @@ public:
 	afx_msg void OnBnClickedButtonRefund();
 	afx_msg void OnBnClickedButtonDonate();
 	afx_msg void OnBnClickedButtonQrcode();
+	int DisplayConfirmMessageBox();
 private:
 	bool m_qrcode_flag;
 	bool m_refund;
 	LiveRead m_lread;
 	std::string m_url;
+	int32_t m_running_status;
+public:
+	afx_msg void OnBnClickedOk();
 };
