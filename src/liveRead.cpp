@@ -12,6 +12,7 @@ LiveRead::LiveRead()
 {
 	m_test_base_URL = "\"C:\\Program Files (x86)\\Internet Explorer\\iexplore.exe\" https://csdev1-registerqfl.cs41.force.com/PassQR?";
 	m_official_base_URL = "\"C:\\Program Files (x86)\\Internet Explorer\\iexplore.exe\" https://csdev1-registerqfl.cs41.force.com/PassQR?";
+	m_stop_flag = false;
 }
 
 int32_t LiveRead::parse_code(std::string input_code)
@@ -114,12 +115,20 @@ int32_t LiveRead::zbar_video_detect(void)
 		if(c == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
 		{
 			std::cout << "Esc key is pressed by user" << std::endl;
+			cvDestroyWindow("QR Code Scanning Window");
 			ret = -3;
 			break;
 		}
 
 		if (detected) {
 			ret = 0;
+			cvDestroyWindow("QR Code Scanning Window");
+			break;
+		}
+
+		if (m_stop_flag) {
+			ret = -4;
+			cvDestroyWindow("QR Code Scanning Window");
 			break;
 		}
 	}
@@ -138,4 +147,9 @@ int32_t LiveRead::checkSalesforce(std::string base_URL, std::string words)
 	return 0;
 }
 
+
+void LiveRead::stop()
+{
+	m_stop_flag = true;
+}
 

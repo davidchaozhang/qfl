@@ -23,6 +23,9 @@ public:
 	//! QR code detection from live video using zbar library
 	int32_t zbar_video_detect(void);
 
+	//! stop QR code detect
+	void stop();
+
 	//! QR code parsing to code format
 	int32_t parse_code(std::string input_code);
 
@@ -40,12 +43,15 @@ public:
 	//! get official url
 	inline std::string getOfficialURL() { return m_official_base_URL; }
 
+	inline void EnableStopFlag(bool flag) { m_stop_flag = flag; }
+
 private:
 
 	std::string m_test_base_URL; //!< salesforce URL for test
 	std::string m_official_base_URL; //!< salesforce URL for official check-in
 	std::string m_data; //!< detected QR code string
 	KeyWords m_kwords;  //!< parsed key words
+	bool m_stop_flag; //!< stop bar code detect
 };
 
 #endif
