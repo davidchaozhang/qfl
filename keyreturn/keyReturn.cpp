@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "keyReturn.h"
 #include "keyReturnDlg.h"
+#include "debugWindow.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -69,6 +70,8 @@ BOOL CkeyReturnApp::InitInstance()
 	// TODO: You should modify this string to be something appropriate
 	// such as the name of your company or organization
 	SetRegistryKey(_T("Local AppWizard-Generated Applications"));
+
+	useConsoleWindow();
 
 	CkeyReturnDlg dlg;
 	m_pMainWnd = &dlg;

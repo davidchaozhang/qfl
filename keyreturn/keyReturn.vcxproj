@@ -187,6 +187,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="debugWindow.h" />
     <ClInclude Include="keyReturn.h" />
     <ClInclude Include="keyReturnDlg.h" />
     <ClInclude Include="Resource.h" />

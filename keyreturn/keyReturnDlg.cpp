@@ -108,7 +108,6 @@ BOOL CkeyReturnDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
-	GetDlgItem(IDC_BUTTON_DONATE)->EnableWindow(FALSE);
 	GetDlgItem(IDC_BUTTON_REFUND)->EnableWindow(FALSE);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
@@ -177,13 +176,12 @@ void CkeyReturnDlg::OnBnClickedButtonRefund()
 		}
 		else {
 			if (DisplayConfirmMessageBox()) {
-				refund_code = "name=" + m_lread.getKeyword() + ",key=refund";
+				refund_code = "name=" + m_lread.getKeyword() + "&refund=-20";
 				m_lread.checkSalesforce(m_url, refund_code);
 			}
 		}
 
 		m_qrcode_flag = false;
-		GetDlgItem(IDC_BUTTON_DONATE)->EnableWindow(FALSE);
 		GetDlgItem(IDC_BUTTON_REFUND)->EnableWindow(FALSE);
 	}
 }
@@ -201,13 +199,12 @@ void CkeyReturnDlg::OnBnClickedButtonDonate()
 		}
 		else {
 			if (DisplayConfirmMessageBox()) {
-				donate_code = "name=" + m_lread.getKeyword() + ",key=donate";
+				donate_code = "name=" + m_lread.getKeyword() + "&refund=0";
 				m_lread.checkSalesforce(m_url, donate_code);
 			}
 		}
 
 		m_qrcode_flag = false;
-		GetDlgItem(IDC_BUTTON_DONATE)->EnableWindow(FALSE);
 		GetDlgItem(IDC_BUTTON_REFUND)->EnableWindow(FALSE);
 	}
 }
@@ -225,7 +222,6 @@ void CkeyReturnDlg::OnBnClickedButtonQrcode()
 	if (m_running_status == 0)
 	{
 		m_qrcode_flag = true;
-		GetDlgItem(IDC_BUTTON_DONATE)->EnableWindow(TRUE);
 		GetDlgItem(IDC_BUTTON_REFUND)->EnableWindow(TRUE);
 		_sleep(100);
 	}
@@ -238,7 +234,7 @@ int CkeyReturnDlg::DisplayConfirmMessageBox()
 {
 	int msgboxID = 0;
 	// Display a message box asking user to confirm the action
-	msgboxID = AfxMessageBox(_T("Please Confirm to Proceed:"), MB_YESNO | MB_ICONSTOP);
+	msgboxID = AfxMessageBox(_T("Please Confirm to Proceed: "), MB_YESNO | MB_ICONSTOP);
 	if (msgboxID == IDYES)
 		return 1;
 	else if (msgboxID == IDNO)

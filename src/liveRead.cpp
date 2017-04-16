@@ -5,13 +5,14 @@
 #include <opencv2/opencv.hpp>
 #include <zbar.h>
 #include "liveRead.h"
+#include <process.h>
 
 using namespace zbar;
 
 LiveRead::LiveRead()
 {
-	m_test_base_URL = "\"C:\\Program Files (x86)\\Internet Explorer\\iexplore.exe\" https://csdev1-registerqfl.cs41.force.com/PassQR?";
-	m_official_base_URL = "\"C:\\Program Files (x86)\\Internet Explorer\\iexplore.exe\" https://csdev1-registerqfl.cs41.force.com/PassQR?";
+	m_test_base_URL = "start \"C:/Program Files (x86)/Internet Explorer/iexplore.exe\" \"https://csdev1-registerqfl.cs41.force.com/PassQR?";
+	m_official_base_URL = "start \"C:/Program Files (x86)/Internet Explorer/iexplore.exe\" \"https://csdev1-registerqfl.cs41.force.com/PassQR?";
 	m_stop_flag = false;
 }
 
@@ -138,9 +139,9 @@ int32_t LiveRead::zbar_video_detect(void)
 int32_t LiveRead::checkSalesforce(std::string base_URL, std::string words)
 {
 	std::string search_URL;
-	search_URL = base_URL + words;
+	search_URL = base_URL + words + "\"";
 	const char *url = search_URL.c_str();
-	system(url);
+	std::system(url);
 	std::cout << "Attendee ID: \"" << words << "\"\n";
 
 	//ShellExecuteA(NULL, "open", search_URL.c_str(), NULL, NULL, SW_SHOWNORMAL);
