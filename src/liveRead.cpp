@@ -2,8 +2,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <opencv2/opencv.hpp>
-#include <zbar.h>
 #include "liveRead.h"
 #include <process.h>
 
@@ -14,6 +12,7 @@ LiveRead::LiveRead()
 	m_test_base_URL = "start \"C:/Program Files (x86)/Internet Explorer/iexplore.exe\" \"https://csdev1-registerqfl.cs41.force.com/PassQR?";
 	m_official_base_URL = "start \"C:/Program Files (x86)/Internet Explorer/iexplore.exe\" \"https://csdev1-registerqfl.cs41.force.com/PassQR?";
 	m_stop_flag = false;
+	m_scanner.set_config(ZBAR_NONE, ZBAR_CFG_ENABLE, 1);
 }
 
 int32_t LiveRead::parse_code(std::string input_code)
@@ -36,7 +35,60 @@ int32_t LiveRead::parse_code(std::string input_code)
 	return 0;
 }
 
+//! QR code detection on an image
+int32_t LiveRead::zbar_qrcode_detect(cv::Mat &frame)
+{
+	if (frame.empty())
+		return -1;
 
+	m_data = "";
+	cv::Mat grey;
+	cvtColor(frame, grey, CV_BGR2GRAY);
+
+	bool detected = false;
+	int32_t width = grey.cols;
+	int32_t height = grey.rows;
+	uchar *raw = (uchar *)grey.data;
+	// wrap image data  
+	Image image(width, height, "Y800", raw, width * height);
+	// scan the image for barcodes  
+	int32_t n = m_scanner.scan(image);
+
+	if (n != 0)
+		detected = true;
+	// extract results  
+	for (Image::SymbolIterator symbol = image.symbol_begin();
+		symbol != image.symbol_end();
+		++symbol) {
+		std::vector<cv::Point> vp;
+		// do something useful with results  
+		m_data = symbol->get_data();
+		std::cout << "decoded " << symbol->get_type_name() << " symbol \"" << symbol->get_data() << '"' << " " << std::endl;
+
+		// find 4 corners of qrcode
+		int32_t n = symbol->get_location_size();
+		for (int32_t i = 0; i < n; i++){
+			vp.push_back(cv::Point(symbol->get_location_x(i), symbol->get_location_y(i)));
+		}
+		cv::RotatedRect r = minAreaRect(vp);
+		cv::Point2f pts[4];
+		r.points(pts);
+		for (int32_t i = 0; i < 4; i++){
+			line(frame, pts[i], pts[(i + 1) % 4], cv::Scalar(255, 0, 0), 3);
+		}
+		std::cout << "Angle: " << r.angle << std::endl;
+	}
+
+	cv::imshow("QR Code Scanning Window", frame); //show the frame
+	cv::waitKey(30);
+
+	if (detected)
+		cvDestroyWindow("QR Code Scanning Window");
+
+	return n;
+}
+
+// the function is for individual test only
 int32_t LiveRead::zbar_video_detect(void)
 {
 	int32_t ret;
@@ -59,7 +111,7 @@ int32_t LiveRead::zbar_video_detect(void)
 
 	std::cout << "Frame size : " << dWidth << " x " << dHeight << std::endl;
 
-	cv::namedWindow("QR Code Scanning Window", CV_WINDOW_AUTOSIZE); //create a window called "MyVideo"
+	cv::namedWindow("QR Code Scanning Window", CV_WINDOW_AUTOSIZE); //create a window
 
 	while (1)
 	{

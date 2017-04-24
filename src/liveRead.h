@@ -4,6 +4,8 @@
 #include "qflLib_defs.h"
 #include <string> /*for size_t*/
 #include <cstdint>
+#include <zbar.h>
+#include <opencv2/opencv.hpp>
 
 class QFLLIB_EXPORT LiveRead {
 public:
@@ -22,6 +24,9 @@ public:
 
 	//! QR code detection from live video using zbar library
 	int32_t zbar_video_detect(void);
+
+	//! QR code detection on an image
+	int32_t zbar_qrcode_detect(cv::Mat &img);
 
 	//! stop QR code detect
 	void stop();
@@ -52,6 +57,8 @@ private:
 	std::string m_data; //!< detected QR code string
 	KeyWords m_kwords;  //!< parsed key words
 	bool m_stop_flag; //!< stop bar code detect
+
+	zbar::ImageScanner m_scanner;
 };
 
 #endif
