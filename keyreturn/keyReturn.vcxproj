@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -27,21 +27,21 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
@@ -49,7 +49,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
@@ -113,13 +113,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(cvpath)\include;$(zbarpath)\include;$(zbarpath)\include\zbar;..\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(cvpath)\include;$(zbarpath)\include;$(zbarpath)\include\zbar;$(boostpath);..\src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>libzbar64-0.lib;opencv_core$(cv_ver)d.lib;opencv_features2d$(cv_ver)d.lib;opencv_flann$(cv_ver)d.lib;opencv_highgui$(cv_ver)d.lib;opencv_imgcodecs$(cv_ver)d.lib;opencv_imgproc$(cv_ver)d.lib;opencv_objdetect$(cv_ver)d.lib;opencv_video$(cv_ver)d.lib;opencv_videoio$(cv_ver)d.lib;opencv_videostab$(cv_ver)d.lib;qflLib_d.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir);$(cvpath)\x64\vc12\lib;$(zbarpath)\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);$(cvpath)\x64\vc12\lib;$(zbarpath)\lib;$(boostpath)\lib64-msvc-12.0</AdditionalLibraryDirectories>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -165,7 +165,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(cvpath)\include;$(zbarpath)\include;$(zbarpath)\include\zbar;..\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(cvpath)\include;$(zbarpath)\include;$(zbarpath)\include\zbar;$(boostpath);..\src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -173,7 +173,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>libzbar64-0.lib;opencv_core$(cv_ver).lib;opencv_features2d$(cv_ver).lib;opencv_flann$(cv_ver).lib;opencv_highgui$(cv_ver).lib;opencv_imgcodecs$(cv_ver).lib;opencv_imgproc$(cv_ver).lib;opencv_objdetect$(cv_ver).lib;opencv_video$(cv_ver).lib;opencv_videoio$(cv_ver).lib;opencv_videostab$(cv_ver).lib;qflLib.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir);$(cvpath)\x64\vc12\lib;$(zbarpath)\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);$(cvpath)\x64\vc12\lib;$(zbarpath)\lib;$(boostpath)\lib64-msvc-12.0</AdditionalLibraryDirectories>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
