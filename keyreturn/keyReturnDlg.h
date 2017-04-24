@@ -13,13 +13,13 @@ class CkeyReturnDlg : public CDialogEx
 // Construction
 public:
 	CkeyReturnDlg(CWnd* pParent = NULL);	// standard constructor
-
+	~CkeyReturnDlg();	
 // Dialog Data
 	enum { IDD = IDD_KEYRETURN_DIALOG };
 
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
-
+	LiveRead *getLiveReadHandle(void) { return &m_lread; }
 
 // Implementation
 protected:
@@ -36,12 +36,14 @@ public:
 	afx_msg void OnBnClickedButtonDonate();
 	afx_msg void OnBnClickedButtonQrcode();
 	int DisplayConfirmMessageBox();
+	static int32_t videoDetectFunction(void *);
 private:
 	bool m_qrcode_flag;
 	bool m_refund;
 	LiveRead m_lread;
 	std::string m_url;
 	int32_t m_running_status;
+	uintptr_t m_handle;
 public:
 	afx_msg void OnBnClickedOk();
 };

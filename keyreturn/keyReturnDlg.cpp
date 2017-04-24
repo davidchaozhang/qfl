@@ -15,6 +15,7 @@
 #define new DEBUG_NEW
 #endif
 
+BOOL _exit_signal = false;
 
 // CAboutDlg dialog used for App About
 
@@ -60,6 +61,11 @@ CkeyReturnDlg::CkeyReturnDlg(CWnd* pParent /*=NULL*/)
 	m_running_status = 0;
 }
 
+CkeyReturnDlg::~CkeyReturnDlg()
+{
+	_exit_signal = true;
+	_sleep(500);
+}
 
 void CkeyReturnDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -109,6 +115,8 @@ BOOL CkeyReturnDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	GetDlgItem(IDC_BUTTON_REFUND)->EnableWindow(FALSE);
+
+	//m_handle = _beginthread(videoDetectFunction, 0, this);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -217,9 +225,9 @@ void CkeyReturnDlg::OnBnClickedButtonQrcode()
 
 	m_url = m_lread.getTestURL();
 
-	m_running_status = m_lread.zbar_video_detect();
+	m_running_status = videoDetectFunction(this);
 
-	if (m_running_status == 0)
+	if (m_running_status > 0)
 	{
 		m_qrcode_flag = true;
 		GetDlgItem(IDC_BUTTON_REFUND)->EnableWindow(TRUE);
@@ -246,6 +254,48 @@ int CkeyReturnDlg::DisplayConfirmMessageBox()
 
 void CkeyReturnDlg::OnBnClickedOk()
 {
-	_sleep(100);
+	_exit_signal = true;
+	_sleep(500);
 	CDialogEx::OnOK();
+}
+
+
+int32_t CkeyReturnDlg::videoDetectFunction(void* lpParam)
+{
+	CkeyReturnDlg *thisapp = (CkeyReturnDlg*)lpParam;
+
+	int32_t ret = 0;
+
+	cv::VideoCapture cap(0); // open the video camera no. 0
+
+	if (!cap.isOpened())  // if not success, exit program
+	{
+		std::cout << "Cannot open the video cam" << std::endl;
+		return -1;
+	}
+
+	double dWidth = cap.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
+	double dHeight = cap.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
+	std::cout << "Frame size : " << dWidth << " x " << dHeight << std::endl;
+	cv::namedWindow("QR Code Scanning Window", CV_WINDOW_AUTOSIZE); //create a window
+
+	while (1)
+	{
+		if (_exit_signal)
+			break;
+		cv::Mat frame;
+		bool bSuccess = cap.read(frame); // read a new frame from video
+		if (!bSuccess) //if not success, break loop
+		{
+			std::cout << "Cannot read a frame from video stream" << std::endl;
+			ret = -2;
+			break;
+		}
+
+		LiveRead *lread = thisapp->getLiveReadHandle();
+		ret = lread->zbar_qrcode_detect(frame);
+		if (ret > 0)
+			break;
+	}
+	return ret;
 }
