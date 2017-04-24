@@ -10,6 +10,11 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/utime.h>
+
+#include <boost/timer/timer.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -59,11 +64,15 @@ CkeyReturnDlg::CkeyReturnDlg(CWnd* pParent /*=NULL*/)
 	m_refund = true;
 	m_qrcode_flag = false;
 	m_running_status = 0;
+	m_record_filename.clear();
+	m_font.CreateFont(20, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 0, 0, TEXT("Arial"));
+	m_title.CreateFont(28, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 0, 0, TEXT("Times"));
 }
 
 CkeyReturnDlg::~CkeyReturnDlg()
 {
 	_exit_signal = true;
+	m_record_filename.clear();
 	_sleep(500);
 }
 
@@ -114,9 +123,11 @@ BOOL CkeyReturnDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
+	GetDlgItem(IDOK)->SendMessage(WM_SETFONT, WPARAM(HFONT(m_font)), 0);
+	GetDlgItem(IDC_STATIC)->SendMessage(WM_SETFONT, WPARAM(HFONT(m_title)), 0);
+	GetDlgItem(IDC_BUTTON_QRCODE)->SendMessage(WM_SETFONT, WPARAM(HFONT(m_font)), 0);
+	GetDlgItem(IDC_BUTTON_REFUND)->SendMessage(WM_SETFONT, WPARAM(HFONT(m_font)), 0);
 	GetDlgItem(IDC_BUTTON_REFUND)->EnableWindow(FALSE);
-
-	//m_handle = _beginthread(videoDetectFunction, 0, this);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -170,6 +181,22 @@ HCURSOR CkeyReturnDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+bool CkeyReturnDlg::createRecordFolder(const char* foldername)
+{
+	std::string recorder_folder, record_filename;
+	if (foldername == NULL)
+		return false;
+
+	if (!boost::filesystem::exists(foldername)) {
+		boost::filesystem::create_directory(foldername);
+		recorder_folder = foldername + std::string("/2017");
+		boost::filesystem::create_directory(recorder_folder);
+		record_filename = recorder_folder + std::string("/key_return.txt");
+	}
+	else
+		record_filename = foldername + std::string("/2017") + std::string("/key_return.txt");
+	return true;
+}
 
 
 void CkeyReturnDlg::OnBnClickedButtonRefund()
@@ -191,12 +218,30 @@ void CkeyReturnDlg::OnBnClickedButtonRefund()
 
 		m_qrcode_flag = false;
 		GetDlgItem(IDC_BUTTON_REFUND)->EnableWindow(FALSE);
+
+		FILE *hf = fopen(m_record_filename.c_str(), "a+");
+		if (hf == NULL) {
+			fprintf(stderr, "Can't open input !\n");
+			return;
+		}
+
+
 	}
 }
 
 
 void CkeyReturnDlg::OnBnClickedButtonDonate()
 {
+	SYSTEMTIME  system_time;;
+	GetLocalTime(&system_time);
+	std::string cur_time = std::to_string(system_time.wYear) + "." +
+		std::to_string(system_time.wMonth) + "." +
+		std::to_string(system_time.wDay) + "." +
+		std::to_string(system_time.wHour) + "." +
+		std::to_string(system_time.wMinute) + "." +
+		std::to_string(system_time.wSecond);
+
+	std::string record_string;
 	std::string donate_code;
 	m_refund = false;
 	if (m_qrcode_flag) {
@@ -206,9 +251,25 @@ void CkeyReturnDlg::OnBnClickedButtonDonate()
 			return;
 		}
 		else {
+			LiveRead::KeyWords *kw = this->getLiveReadHandle()->getRecordWords();
+			FILE *fh = fopen(m_record_filename.c_str(), "a+");
+			if (fh == NULL)
+			{
+				fprintf(stderr, "Not able to open file %s\n", m_record_filename.c_str());
+				return;
+			}
+
 			if (DisplayConfirmMessageBox()) {
-				donate_code = "name=" + m_lread.getKeyword() + "&refund=0";
+				donate_code = "name=" + m_lread.getKeyword() + "&refund=1";
 				m_lread.checkSalesforce(m_url, donate_code);
+				record_string = cur_time + " " + kw->person_id + " " + kw->party_type + " " + kw->church + " " + "refund";
+				fprintf(fh, "%s\n", record_string.c_str());
+				fclose(fh);
+			}
+			else {
+				record_string = cur_time + " " + kw->person_id + " " + kw->party_type + " " + kw->church + " " + "donate";
+				fprintf(fh, "%s\n", record_string.c_str());
+				fclose(fh);
 			}
 		}
 
