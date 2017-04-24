@@ -42,6 +42,9 @@ public:
 	//! key word
 	inline std::string getKeyword() { return m_kwords.person_id; }
 
+	//! get record words
+	inline KeyWords *getRecordWords() { return &m_kwords; }
+
 	//! get test url
 	inline std::string getTestURL() { return m_test_base_URL; }
 
@@ -57,7 +60,6 @@ private:
 	std::string m_data; //!< detected QR code string
 	KeyWords m_kwords;  //!< parsed key words
 	bool m_stop_flag; //!< stop bar code detect
-
 	zbar::ImageScanner m_scanner;
 };
 
