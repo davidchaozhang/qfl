@@ -20,6 +20,7 @@
 #define new DEBUG_NEW
 #endif
 
+std::string qfl_folder = "C:/qfl";
 BOOL _exit_signal = false;
 
 // CAboutDlg dialog used for App About
@@ -123,6 +124,7 @@ BOOL CkeyReturnDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
+	createRecordFolder(qfl_folder.c_str());
 	GetDlgItem(IDOK)->SendMessage(WM_SETFONT, WPARAM(HFONT(m_font)), 0);
 	GetDlgItem(IDC_STATIC)->SendMessage(WM_SETFONT, WPARAM(HFONT(m_title)), 0);
 	GetDlgItem(IDC_BUTTON_QRCODE)->SendMessage(WM_SETFONT, WPARAM(HFONT(m_font)), 0);
