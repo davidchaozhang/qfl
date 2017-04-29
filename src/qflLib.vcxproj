@@ -19,11 +19,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="buildings.cpp" />
+    <ClCompile Include="churches.cpp" />
     <ClCompile Include="liveRead.cpp" />
+    <ClCompile Include="qflRegLog.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="buildings.h" />
+    <ClInclude Include="churches.h" />
     <ClInclude Include="liveRead.h" />
     <ClInclude Include="qflLib_defs.h" />
+    <ClInclude Include="qflRegLog.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGUID>{5678DE35-45C7-3D33-00D7-BAA98611C9E2}</ProjectGUID>
@@ -65,10 +71,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
-    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:\users\dzhang\church\rccc\QRCodeDetector\zxing-cpp\win7-vc2012-64\MinSizeRel\</OutDir>
