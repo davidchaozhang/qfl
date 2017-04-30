@@ -93,7 +93,9 @@ public:
 	int32_t classifications();
 	int32_t sortAttendeesByChurches();
 	int32_t ageStatistics();
-	void printOut(const char*filename);
+	void printOutStatistics(const char*filename);
+	void printOutForChildWorkers(const char*filename);
+
 
 	void upperCaseConvert(std::vector<int> entries);
 

@@ -45,6 +45,25 @@ std::string QflReg::intToString(int i)
 	return s;
 }
 
+std::string QflReg::getCurTime()
+{
+	std::string cur_time;
+#ifdef WIN32
+	SYSTEMTIME  system_time;
+	GetLocalTime(&system_time);
+	cur_time = std::to_string(system_time.wYear) + "_" +
+		std::to_string(system_time.wMonth) + "_" +
+		std::to_string(system_time.wDay);
+#else
+	std::stringstream currentDateTime;
+	// current date/time based on current system
+	time_t ttNow = time(0);
+	struct tm * now = localtime(&ttNow);
+	cur_time = std::to_string(now->tm_year + 1900) + std::to_string(now->tm_mon + 1) + std::to_string(now->tm_mday);
+#endif
+	return cur_time;
+}
+
 int32_t QflReg::readChurchList(const char* churchname)
 {
 	int status;
@@ -293,7 +312,7 @@ int32_t QflReg::ageStatistics()
 	return 0;
 }
 
-void QflReg::printOut(const char*filename)
+void QflReg::printOutStatistics(const char*filename)
 {
 	int32_t i;
 	if (filename == NULL)
@@ -344,21 +363,32 @@ void QflReg::printOut(const char*filename)
 	return;
 }
 
-std::string QflReg::getCurTime()
+void QflReg::printOutForChildWorkers(const char*filename)
 {
-	std::string cur_time;
-#ifdef WIN32
-	SYSTEMTIME  system_time;
-	GetLocalTime(&system_time);
-	cur_time = std::to_string(system_time.wYear) + "_" +
-		std::to_string(system_time.wMonth) + "_" +
-		std::to_string(system_time.wDay);
-#else
-	std::stringstream currentDateTime;
-	// current date/time based on current system
-	time_t ttNow = time(0);
-	struct tm * now = localtime(&ttNow);
-	cur_time = std::to_string(now->tm_year + 1900) + std::to_string(now->tm_mon + 1) + std::to_string(now->tm_mday);
-#endif
-	return cur_time;
+	int32_t i, j;
+	if (filename == NULL)
+		return;
+	FILE *hf = fopen(filename, "w+");
+	if (hf == NULL)
+		return;
+
+	for (i = 0; i < m_child_leader_list.size(); i++) {
+		int32_t p = m_child_leader_list[i];
+
+		for (j = 0; j < m_registrants.size(); j++) {
+			if (p == m_registrants[j].person_id) {
+				Registrant person = m_registrants[j];
+				fprintf(hf, "%d, %s, %s, %s, %s, ", person.person_id, person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str(), person.services, person.church, person.city, person.state, person.functional_group, person.email);
+				fprintf(hf, "%s, %s, %s, %s, %s, %s\n", person.services.c_str(), person.church.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str());
+
+
+			}
+		}
+	}
+
+
+
+	fclose(hf);
+	return;
 }
+
