@@ -22,14 +22,14 @@
     <ClCompile Include="buildings.cpp" />
     <ClCompile Include="churches.cpp" />
     <ClCompile Include="liveRead.cpp" />
-    <ClCompile Include="qflRegLog.cpp" />
+    <ClCompile Include="qflReg.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="buildings.h" />
     <ClInclude Include="churches.h" />
     <ClInclude Include="liveRead.h" />
     <ClInclude Include="qflLib_defs.h" />
-    <ClInclude Include="qflRegLog.h" />
+    <ClInclude Include="qflReg.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGUID>{5678DE35-45C7-3D33-00D7-BAA98611C9E2}</ProjectGUID>
@@ -46,8 +46,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>MultiByte</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+    <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
@@ -143,7 +143,6 @@
       <AdditionalIncludeDirectories>$(cvpath)\include;$(zbarpath)\include;$(zbarpath)\include\zbar;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>Release/</AssemblerListingLocation>
       <CompileAs>CompileAsCpp</CompileAs>
-      <DisableLanguageExtensions>true</DisableLanguageExtensions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <Optimization>MaxSpeed</Optimization>
@@ -171,7 +170,7 @@
     <Link>
       <AdditionalOptions> /machine:x64 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;libzbar64-0.lib;opencv_core$(cv_ver).lib;opencv_features2d$(cv_ver).lib;opencv_flann$(cv_ver).lib;opencv_highgui$(cv_ver).lib;opencv_imgcodecs$(cv_ver).lib;opencv_imgproc$(cv_ver).lib;opencv_objdetect$(cv_ver).lib;opencv_video$(cv_ver).lib;opencv_videoio$(cv_ver).lib;opencv_videostab$(cv_ver).lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir);$(cvpath)\x64\vc12\lib;$(zbarpath)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);$(cvpath)\x64\vc12\lib;$(zbarpath)\lib</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <SubSystem>Console</SubSystem>
