@@ -475,3 +475,31 @@ void QflReg::printOutForYouth(const char*filename)
 	fclose(hf);
 	return;
 }
+
+void QflReg::printRCCCAttendees(const char*filename)
+{
+	int32_t i, j;
+	if (filename == NULL)
+		return;
+	FILE *hf = fopen(filename, "w+");
+	if (hf == NULL)
+		return;
+
+	const std::string RCCC = "Rutgers Community Christian Church";
+	for (j = 0; j < m_registrants.size(); j++) {
+		if (m_registrants[j].church.compare(RCCC) == 0) {
+			Registrant person = m_registrants[j];
+			fprintf(hf, "%d, %s, %s, %s, %s, %s, ", person.person_id, person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str());
+			fprintf(hf, "%s, %s, %s, %s, %s\n", person.services.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str());
+		}
+	}
+
+	fclose(hf);
+	return;
+}
+
+void QflReg::printDoubtfulRegistrants(const char*filename)
+{
+
+	return;
+}

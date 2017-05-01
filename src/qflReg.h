@@ -99,6 +99,14 @@ public:
 	void printOutForYouth(const char*filename);
 	void printOutForLogistics(const char*filename);
 
+	void printRCCCAttendees(const char*filename);
+	void printLivingStone(const char*filename);
+	void printCherryHill(const char*filename);
+	void printPhillyTrinity(const char*filename);
+	void printPhillyCCC(const char*filename);
+	void printSmallChurches();
+	void printDoubtfulRegistrants(const char*filename);
+
 	void upperCaseConvert(std::vector<int> entries);
 
 	inline 	ChurchList *getChurchHandle() { return &m_church_list; }
