@@ -52,6 +52,7 @@ public:
 		std::string party_type;
 		std::string first_name;
 		std::string last_name;
+		std::string chinese_name;
 		std::string age_group;
 		std::string gender;
 		std::string grade;
@@ -95,7 +96,8 @@ public:
 	int32_t ageStatistics();
 	void printOutStatistics(const char*filename);
 	void printOutForChildWorkers(const char*filename);
-
+	void printOutForYouth(const char*filename);
+	void printOutForLogistics(const char*filename);
 
 	void upperCaseConvert(std::vector<int> entries);
 
