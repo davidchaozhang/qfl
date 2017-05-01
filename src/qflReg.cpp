@@ -500,6 +500,36 @@ void QflReg::printRCCCAttendees(const char*filename)
 
 void QflReg::printDoubtfulRegistrants(const char*filename)
 {
+	int32_t i, j;
+	if (filename == NULL)
+		return;
+	FILE *hf = fopen(filename, "w+");
+	if (hf == NULL)
+		return;
 
+	for (j = 0; j < m_registrants.size(); j++) {
+		Registrant p = m_registrants[j];
+		std::string first = p.first_name;
+		std::string last = p.last_name;
+		std::string age = p.age_group;
+		std::string grade = p.grade;
+		std::string occupation = p.occupation;
+
+		for (i = j + 1; i < m_registrants.size(); i++) {
+			Registrant person = m_registrants[i];
+			if (person.first_name.compare(first) == 0 && person.last_name.compare(last) == 0) {
+				fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", p.person_id, p.party_type.c_str(), p.chinese_name.c_str(), p.first_name.c_str(), p.last_name.c_str(), p.gender.c_str(), p.age_group.c_str());
+				fprintf(hf, "%s, %s, %s, %s, %s, %s, %s\n", p.services.c_str(), p.contact_person.c_str(), p.church.c_str(), p.city.c_str(), p.state.c_str(), p.functional_group.c_str(), p.email.c_str());
+				fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", person.person_id, person.party_type.c_str(), person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str());
+				fprintf(hf, "%s, %s, %s, %s, %s, %s, %s\n", person.services.c_str(), person.contact_person.c_str(), person.church.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str());
+			}
+			if (occupation.compare("Minister") == 0) {
+				fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", p.person_id, p.party_type.c_str(), p.chinese_name.c_str(), p.first_name.c_str(), p.last_name.c_str(), p.gender.c_str(), p.age_group.c_str());
+				fprintf(hf, "%s, %s, %s, %s, %s, %s, %s\n", p.services.c_str(), p.contact_person.c_str(), p.church.c_str(), p.city.c_str(), p.state.c_str(), p.functional_group.c_str(), p.email.c_str());
+			}
+		}
+	}
+
+	fclose(hf);
 	return;
 }
