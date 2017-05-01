@@ -70,6 +70,8 @@ public:
 		std::string cell_group;
 		bool is_christian;
 		std::string occupation;
+		std::string need_ride;
+		std::string offer_ride;
 	} Registrant;
 
 
@@ -106,6 +108,7 @@ public:
 	void printPhillyCCC(const char*filename);
 	void printSmallChurches();
 	void printDoubtfulRegistrants(const char*filename);
+	void printRidesList(const char*filename);
 
 	void upperCaseConvert(std::vector<int> entries);
 
@@ -136,6 +139,9 @@ public:
 	std::vector<int32_t> m_logistics_list;
 	std::vector<int32_t> m_choir_list;
 	std::vector<int32_t> m_child_leader_list;
+
+	std::vector<int32_t> m_ride_list;
+	std::vector<int32_t> m_need_ride_list;
 
 	std::vector<int32_t> m_age_statistics;
 

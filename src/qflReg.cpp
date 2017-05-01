@@ -155,6 +155,8 @@ int32_t QflReg::parseAllFields()
 		a_regist.gender = person[12].substr(1, person[12].size() - 2);
 		a_regist.grade = person[13].substr(1, person[13].size() - 2);
 
+		a_regist.need_ride = person[20].substr(1, person[20].size() - 2);
+		a_regist.offer_ride = person[21].substr(1, person[21].size() - 2);
 		a_regist.is_christian = (person[22].substr(1, person[22].size() - 2).compare("Yes") == 0);
 		a_regist.occupation = person[23].substr(1, person[23].size() - 2);
 		a_regist.mobile_phone = person[24].substr(1, person[24].size() - 2);
@@ -523,9 +525,96 @@ void QflReg::printDoubtfulRegistrants(const char*filename)
 				fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", person.person_id, person.party_type.c_str(), person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str());
 				fprintf(hf, "%s, %s, %s, %s, %s, %s, %s\n", person.services.c_str(), person.contact_person.c_str(), person.church.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str());
 			}
-			if (occupation.compare("Minister") == 0) {
-				fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", p.person_id, p.party_type.c_str(), p.chinese_name.c_str(), p.first_name.c_str(), p.last_name.c_str(), p.gender.c_str(), p.age_group.c_str());
-				fprintf(hf, "%s, %s, %s, %s, %s, %s, %s\n", p.services.c_str(), p.contact_person.c_str(), p.church.c_str(), p.city.c_str(), p.state.c_str(), p.functional_group.c_str(), p.email.c_str());
+		}
+		if (occupation.compare("Minister") == 0) {
+			fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", p.person_id, p.party_type.c_str(), p.chinese_name.c_str(), p.first_name.c_str(), p.last_name.c_str(), p.gender.c_str(), p.age_group.c_str());
+			fprintf(hf, "%s, %s, %s, %s, %s, %s, %s, %s\n", p.services.c_str(), p.contact_person.c_str(), p.church.c_str(), p.city.c_str(), p.state.c_str(), p.functional_group.c_str(), p.email.c_str(), p.occupation.c_str());
+		}
+	}
+
+	fclose(hf);
+	return;
+}
+
+void QflReg::printRidesList(const char*filename)
+{
+	int32_t i, j;
+	std::string need;
+	std::string offer;
+	int32_t need_num, offer_num;
+
+	for (j = 0; j < m_registrants.size(); j++) {
+		Registrant p = m_registrants[j];
+		int32_t id = p.party;
+		std::string need_ride = p.need_ride;
+		std::string offer_ride = p.offer_ride;
+		need_num = 0;
+		offer_num = 0;
+
+		if (!need_ride.empty()) {
+			need = need_ride.substr(0, 1);
+			need_num = std::atoi(need.c_str());
+		}
+
+		if (!offer_ride.empty()) {
+			offer = offer_ride.substr(0, 1);
+			offer_num = std::atoi(offer.c_str());
+		}
+		if (offer_num > 0) {
+			bool matched = false;
+			for (i = 0; i < m_ride_list.size(); i++) {
+				if (m_ride_list[i] == id) {
+					matched = true;
+					break;
+				}
+			}
+			if (!matched)
+				m_ride_list.push_back(id);
+		}
+		else if (need_num > 0) {
+			bool matched = false;
+			for (i = 0; i < m_need_ride_list.size(); i++) {
+				if (m_need_ride_list[i] == id) {
+					matched = true;
+					break;
+				}
+			}
+			if (!matched)
+				m_need_ride_list.push_back(id);
+		}
+	}
+
+	if (filename == NULL)
+		return;
+	FILE *hf = fopen(filename, "w+");
+	if (hf == NULL)
+		return;
+
+	fprintf(hf, "Party ID, party Type, Chinese Name, First Name, Last Name, Gender, Age, ");
+	fprintf(hf, "Need Ride, Offer Ride, Contact Person, Church, City, State, Function Group, Email\n");
+
+	for (i = 0; i < m_ride_list.size(); i++) {
+		int32_t id = m_ride_list[i];
+		for (j = 0; j < m_registrants.size(); j++) {
+			Registrant p = m_registrants[j];
+			int32_t pid = p.party;
+			if (id == pid) {
+				fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", p.party, p.party_type.c_str(), p.chinese_name.c_str(), p.first_name.c_str(), p.last_name.c_str(), p.gender.c_str(), p.age_group.c_str());
+				fprintf(hf, ", %s, %s, %s, %s, %s, %s, %s\n", p.offer_ride.substr(0, 1).c_str(), p.contact_person.c_str(), p.church.c_str(), p.city.c_str(), p.state.c_str(), p.functional_group.c_str(), p.email.c_str());
+				break;
+			}
+		}
+	}
+
+	for (i = 0; i < m_need_ride_list.size(); i++) {
+		int32_t id = m_need_ride_list[i];
+		for (j = 0; j < m_registrants.size(); j++) {
+			Registrant p = m_registrants[j];
+			int32_t pid = p.party;
+			if (id == pid) {
+				fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", p.party, p.party_type.c_str(), p.chinese_name.c_str(), p.first_name.c_str(), p.last_name.c_str(), p.gender.c_str(), p.age_group.c_str());
+				fprintf(hf, "%s, , %s, %s, %s, %s, %s, %s\n", p.need_ride.substr(0, 1).c_str(), p.contact_person.c_str(), p.church.c_str(), p.city.c_str(), p.state.c_str(), p.functional_group.c_str(), p.email.c_str());
+				break;
 			}
 		}
 	}
