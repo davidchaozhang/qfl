@@ -140,10 +140,14 @@ int32_t QflReg::parseAllFields()
 	std::vector<std::string> person = m_data[0];
 	for (i = 1; i < m_data.size(); i++){
 		person = m_data[i];
-		a_regist.person_id = std::stoi(person[0].substr(1, person[0].size() - 2));
-		a_regist.party = std::stoi(person[1].substr(1, person[1].size() - 2));
-		a_regist.church = person[2].substr(1, person[2].size() - 2);
-		a_regist.contact_person = person[3].substr(1, person[3].size() - 2);
+		if (person[0].size() > 2)
+			a_regist.person_id = std::stoi(person[0].substr(1, person[0].size() - 2));
+		if (person[1].size() > 2)
+			a_regist.party = std::stoi(person[1].substr(1, person[1].size() - 2));
+		if (person[2].size() > 2)
+			a_regist.church = person[2].substr(1, person[2].size() - 2);
+		if (person[3].size() > 2)
+			a_regist.contact_person = person[3].substr(1, person[3].size() - 2);
 		a_regist.party_type = person[4].substr(1, person[4].size() - 2);
 		a_regist.first_name = person[5].substr(1, person[5].size() - 2);
 		a_regist.last_name = person[6].substr(1, person[6].size() - 2);
@@ -383,7 +387,7 @@ void QflReg::printOutForChildWorkers(const char*filename)
 	if (hf == NULL)
 		return;
 
-	fprintf(hf, "Person ID, Chinese Name, First Name, Last Name, Gender, Age, ");
+	fprintf(hf, "Person ID, Chinese Name, First Name, Last Name, Gender, Age, Contact, ");
 	fprintf(hf, "Service, Church, City, State, Function Group, Email\n");
 
 	for (i = 0; i < m_child_leader_list.size(); i++) {
@@ -392,7 +396,7 @@ void QflReg::printOutForChildWorkers(const char*filename)
 		for (j = 0; j < m_registrants.size(); j++) {
 			if (p == m_registrants[j].person_id) {
 				Registrant person = m_registrants[j];
-				fprintf(hf, "%d, %s, %s, %s, %s, %s, ", person.person_id, person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str());
+				fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", person.person_id, person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str(), person.contact_person.c_str());
 				fprintf(hf, "%s, %s, %s, %s, %s, %s\n", person.services.c_str(), person.church.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str());
 			}
 		}
@@ -487,11 +491,14 @@ void QflReg::printRCCCAttendees(const char*filename)
 	if (hf == NULL)
 		return;
 
+	fprintf(hf, "Person ID, Chinese Name, First Name, Last Name, Gender, Age, Contact, ");
+	fprintf(hf, "Service, City, State, Function Group, Email\n");
+
 	const std::string RCCC = "Rutgers Community Christian Church";
 	for (j = 0; j < m_registrants.size(); j++) {
 		if (m_registrants[j].church.compare(RCCC) == 0) {
 			Registrant person = m_registrants[j];
-			fprintf(hf, "%d, %s, %s, %s, %s, %s, ", person.person_id, person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str());
+			fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", person.person_id, person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str(), person.contact_person.c_str());
 			fprintf(hf, "%s, %s, %s, %s, %s\n", person.services.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str());
 		}
 	}
@@ -499,6 +506,109 @@ void QflReg::printRCCCAttendees(const char*filename)
 	fclose(hf);
 	return;
 }
+
+void QflReg::printLivingStone(const char*filename)
+{
+	int32_t i, j;
+	if (filename == NULL)
+		return;
+	FILE *hf = fopen(filename, "w+");
+	if (hf == NULL)
+		return;
+
+	fprintf(hf, "Person ID, Chinese Name, First Name, Last Name, Gender, Age, Contact, ");
+	fprintf(hf, "Service, City, State, Function Group, Email\n");
+
+	const std::string LSCC = "Living Stone Christian Church";
+	for (j = 0; j < m_registrants.size(); j++) {
+		if (m_registrants[j].church.compare(LSCC) == 0) {
+			Registrant person = m_registrants[j];
+			fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", person.person_id, person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str(), person.contact_person.c_str());
+			fprintf(hf, "%s, %s, %s, %s, %s\n", person.services.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str());
+		}
+	}
+
+	fclose(hf);
+	return;
+}
+
+void QflReg::printCherryHill(const char*filename)
+{
+	int32_t i, j;
+	if (filename == NULL)
+		return;
+	FILE *hf = fopen(filename, "w+");
+	if (hf == NULL)
+		return;
+
+	fprintf(hf, "Person ID, Chinese Name, First Name, Last Name, Gender, Age, Contact, ");
+	fprintf(hf, "Service, City, State, Function Group, Email\n");
+
+	const std::string CHCCC = "Cherry Hill Chinese Christian Church";
+	for (j = 0; j < m_registrants.size(); j++) {
+		if (m_registrants[j].church.compare(CHCCC) == 0) {
+			Registrant person = m_registrants[j];
+			fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", person.person_id, person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str(), person.contact_person.c_str());
+			fprintf(hf, "%s, %s, %s, %s, %s\n", person.services.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str());
+		}
+	}
+
+	fclose(hf);
+	return;
+}
+
+void QflReg::printPhillyTrinity(const char*filename)
+{
+	int32_t i, j;
+	if (filename == NULL)
+		return;
+	FILE *hf = fopen(filename, "w+");
+	if (hf == NULL)
+		return;
+
+	fprintf(hf, "Person ID, Chinese Name, First Name, Last Name, Gender, Age, Contact, ");
+	fprintf(hf, "Service, City, State, Function Group, Email\n");
+
+	const std::string TCCGP = "Trinity Christian Church of Greater Philadelphia";
+	for (j = 0; j < m_registrants.size(); j++) {
+		if (m_registrants[j].church.compare(TCCGP) == 0) {
+			Registrant person = m_registrants[j];
+			fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", person.person_id, person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str(), person.contact_person.c_str());
+			fprintf(hf, "%s, %s, %s, %s, %s\n", person.services.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str());
+		}
+	}
+
+	fclose(hf);
+	return;
+}
+
+void QflReg::printPhillyCCC(const char*filename)
+{
+	int32_t i, j;
+	if (filename == NULL)
+		return;
+	FILE *hf = fopen(filename, "w+");
+	if (hf == NULL)
+		return;
+
+	fprintf(hf, "Person ID, Chinese Name, First Name, Last Name, Gender, Age, Contact, ");
+	fprintf(hf, "Service, City, State, Function Group, Email\n");
+
+	const std::string CCCCNC = "Chinese Christian Church & Center";
+	for (j = 0; j < m_registrants.size(); j++) {
+		if (m_registrants[j].church.compare(CCCCNC) == 0) {
+			Registrant person = m_registrants[j];
+			fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", person.person_id, person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str(), person.contact_person.c_str());
+			fprintf(hf, "%s, %s, %s, %s, %s\n", person.services.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str());
+		}
+	}
+
+	fclose(hf);
+	return;
+
+}
+
+
 
 void QflReg::printDoubtfulRegistrants(const char*filename)
 {
