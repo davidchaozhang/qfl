@@ -102,6 +102,7 @@ public:
 	void printOutForLogistics(const char*filename);
 
 	void printRCCCAttendees(const char*filename);
+	void printRCCCFunctions(const char *dirname);
 	void printLivingStone(const char*filename);
 	void printCherryHill(const char*filename);
 	void printPhillyTrinity(const char*filename);
@@ -138,6 +139,8 @@ public:
 	std::vector<int32_t> m_youth_leader_list;
 	std::vector<int32_t> m_logistics_list;
 	std::vector<int32_t> m_choir_list;
+	std::vector<int32_t> m_rccc_xiangyin_list;
+	std::vector<int32_t> m_rccc_college_list;
 	std::vector<int32_t> m_child_leader_list;
 
 	std::vector<int32_t> m_ride_list;

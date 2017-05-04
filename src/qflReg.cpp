@@ -1,4 +1,4 @@
-#include <algorithm>
+﻿#include <algorithm>
 #include <fstream>
 #include <forward_list>
 #include <array>
@@ -7,6 +7,7 @@
 #include <iostream>
 #include <assert.h>
 #include "QflReg.h"
+#include <string>
 
 #ifdef WIN32
 #include <windows.h>
@@ -192,7 +193,7 @@ int32_t QflReg::classifications()
 			m_youth_camp_list.push_back(a_regist.person_id);
 		if (a_regist.grade.find("Stay with Parent") != std::string::npos)
 			m_youth_stays_with_parent_list.push_back(a_regist.person_id);
-		if (a_regist.services.find("Service Youth") != std::string::npos)
+		if (a_regist.services.find("Service Youth") != std::string::npos || a_regist.cell_group.find("Youth SGLeaders") != std::string::npos)
 			m_youth_leader_list.push_back(a_regist.person_id);
 		if (a_regist.services.find("Service Child") != std::string::npos)
 			m_child_leader_list.push_back(a_regist.person_id);
@@ -479,6 +480,82 @@ void QflReg::printOutForYouth(const char*filename)
 	}
 
 	fclose(hf);
+	return;
+}
+
+void QflReg::printRCCCFunctions(const char *dirname)
+{
+	int32_t i, j;
+	if (dirname == NULL)
+		return;
+
+	// xiang yin
+	std::string xiangyin_name = std::string(dirname) + "/" + "xiangyin.csv";
+	FILE *hf = fopen(xiangyin_name.c_str(), "w+");
+	if (hf == NULL)
+		return;
+
+	fprintf(hf, "Person ID, Chinese Name, First Name, Last Name, Gender, Age, Contact, ");
+	fprintf(hf, "Service, City, State, Function Group, Email\n");
+
+	const std::string RCCC = "Rutgers Community Christian Church";
+	// XiangYin
+	for (j = 0; j < m_registrants.size(); j++) {
+		if (m_registrants[j].church.compare(RCCC) == 0) {
+			Registrant person = m_registrants[j];
+			std::string fg = person.functional_group;
+
+			if (fg.find(std::string("æ„›ä¹‹å…‰")) != std::string::npos || fg.find("ä¹¡éŸ³") != std::string::npos || 
+				fg.find("é„‰éŸ³") != std::string::npos || fg.find("Xiang Yin") != std::string::npos ||
+				fg.find("ç¤¾é’") != std::string::npos)
+			{
+				fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", person.person_id, person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str(), person.contact_person.c_str());
+				fprintf(hf, "%s, %s, %s, %s, %s\n", person.services.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str());
+			}
+		}
+	}
+	fclose(hf);
+
+	// choir
+	std::string choir_name = std::string(dirname) + "/" + "choir.csv";
+	hf = fopen(choir_name.c_str(), "w+");
+	if (hf == NULL)
+		return;
+
+	for (j = 0; j < m_registrants.size(); j++) {
+		if (m_registrants[j].church.compare(RCCC) == 0) {
+			Registrant person = m_registrants[j];
+			std::string chor = person.functional_group;
+
+			if (chor.find(std::string("è¯—ç­")) != std::string::npos || chor.find("è©©ç") != std::string::npos || chor.find(std::string("Choir")) != std::string::npos)
+			{
+				fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", person.person_id, person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str(), person.contact_person.c_str());
+				fprintf(hf, "%s, %s, %s, %s, %s\n", person.services.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str());
+			}
+		}
+	}
+	fclose(hf);
+
+	// student fellowship
+	std::string sfellowship_name = std::string(dirname) + "/" + "student_fellowship.csv";
+	hf = fopen(sfellowship_name.c_str(), "w+");
+	if (hf == NULL)
+		return;
+
+	for (j = 0; j < m_registrants.size(); j++) {
+		if (m_registrants[j].church.compare(RCCC) == 0) {
+			Registrant person = m_registrants[j];
+			std::string sf = person.functional_group;
+
+			if (sf.find(std::string("­å­¦ç”Ÿåœ˜å¥‘")) != std::string::npos || sf.find("å­¦ç”Ÿå›¢å¥‘") != std::string::npos)
+			{
+				fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", person.person_id, person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str(), person.contact_person.c_str());
+				fprintf(hf, "%s, %s, %s, %s, %s\n", person.services.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str());
+			}
+		}
+	}
+	fclose(hf);
+
 	return;
 }
 
