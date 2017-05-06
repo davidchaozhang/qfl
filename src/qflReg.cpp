@@ -204,7 +204,8 @@ int32_t QflReg::classifications()
 
 		if (a_regist.services.find("Logistics") != std::string::npos || a_regist.services.find("Recording") != std::string::npos ||
 			a_regist.services.find("Traffic Control") != std::string::npos || a_regist.services.find("Usher") != std::string::npos ||
-			a_regist.services.find("Friday Snack Service") != std::string::npos || a_regist.services.find("Recording") != std::string::npos)
+			a_regist.services.find("Friday Snack Service") != std::string::npos || a_regist.services.find("Recording") != std::string::npos ||
+			a_regist.services.find("Any of the above services") != std::string::npos)
 			m_logistics_list.push_back(a_regist.person_id);
 
 		// family registrations
@@ -448,7 +449,7 @@ void QflReg::printOutForYouth(const char*filename)
 			if (p == m_registrants[j].person_id) {
 				Registrant person = m_registrants[j];
 				fprintf(hf, "%d, %s, %s, %s, %s, %s, ", person.person_id, person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str());
-				fprintf(hf, "%s, %s, %s, %s, %s, %s\n", person.services.c_str(), person.church.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str());
+				fprintf(hf, "%s, %s, %s, %s, %s, %s, %s\n", person.services.c_str(), person.church.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.cell_group.c_str(), person.email.c_str());
 			}
 		}
 	}
@@ -461,7 +462,7 @@ void QflReg::printOutForYouth(const char*filename)
 			if (p == m_registrants[j].person_id) {
 				Registrant person = m_registrants[j];
 				fprintf(hf, "%d, %s, %s, %s, %s, %s, ", person.person_id, person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str());
-				fprintf(hf, "%s, %s, %s, %s, %s, %s\n", person.services.c_str(), person.church.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str());
+				fprintf(hf, "%s, %s, %s, %s, %s, %s, %s\n", person.services.c_str(), person.church.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.cell_group.c_str(), person.email.c_str());
 			}
 		}
 	}
@@ -474,7 +475,7 @@ void QflReg::printOutForYouth(const char*filename)
 			if (p == m_registrants[j].person_id) {
 				Registrant person = m_registrants[j];
 				fprintf(hf, "%d, %s, %s, %s, %s, %s, ", person.person_id, person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str());
-				fprintf(hf, "%s, %s, %s, %s, %s, %s\n", person.services.c_str(), person.church.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str());
+				fprintf(hf, "%s, %s, %s, %s, %s, %s, %s\n", person.services.c_str(), person.church.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.cell_group.c_str(), person.email.c_str());
 			}
 		}
 	}
@@ -526,8 +527,10 @@ void QflReg::printRCCCFunctions(const char *dirname)
 		if (m_registrants[j].church.compare(RCCC) == 0) {
 			Registrant person = m_registrants[j];
 			std::string chor = person.functional_group;
+			std::string chor1 = person.services;
 
-			if (chor.find(std::string("è¯—ç­")) != std::string::npos || chor.find("è©©ç") != std::string::npos || chor.find(std::string("Choir")) != std::string::npos)
+			if (chor.find(std::string("è¯—ç­")) != std::string::npos || chor.find("è©©ç") != std::string::npos || 
+				chor.find(std::string("Choir")) != std::string::npos || chor1.compare("QFL Choir") == 0)
 			{
 				fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", person.person_id, person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str(), person.contact_person.c_str());
 				fprintf(hf, "%s, %s, %s, %s, %s\n", person.services.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str());
