@@ -130,7 +130,34 @@ int32_t QflReg::readRegistrants(const char *filename)
 	return 0;
 }
 
+/* The order of the parsing fields are:
+0: person id
+1: party id
+2: church
+3: contact person
+4: party type
+5: first name
+6: last name
+7: Chinese name
+8: room number
+9: cell group
+10: need room
+11: age group
+12: gender
+13: grade
 
+20: need ride
+21: offer ride
+22: is_christian
+23: occupation
+24: mobile phone
+25: email
+26: city
+27: state
+28: zip
+29: functional groups
+30: services
+*/
 int32_t QflReg::parseAllFields()
 {
 	int32_t i;
@@ -156,6 +183,8 @@ int32_t QflReg::parseAllFields()
 
 		a_regist.room = person[8].substr(1, person[8].size() - 2);
 		a_regist.cell_group = person[9].substr(1, person[9].size() - 2);
+		a_regist.need_room = (person[10].substr(1, person[10].size() - 2).compare(NeedRoom::RoomNeeded) == 0);
+
 		a_regist.age_group = person[11].substr(1, person[11].size() - 2);
 		a_regist.gender = person[12].substr(1, person[12].size() - 2);
 		a_regist.grade = person[13].substr(1, person[13].size() - 2);
@@ -171,7 +200,6 @@ int32_t QflReg::parseAllFields()
 		a_regist.zip = std::stoi(person[28].substr(1, person[28].size() - 2));
 		a_regist.functional_group = person[29].substr(1, person[29].size() - 2);
 		a_regist.services = person[30].substr(1, person[30].size() - 2);
-		a_regist.need_room = (person[10].substr(1, person[10].size() - 2).compare(NeedRoom::RoomNeeded) == 0);
 		m_registrants.push_back(a_regist);
 	}
 
