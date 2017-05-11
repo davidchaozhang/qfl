@@ -67,11 +67,14 @@ public:
 		std::string functional_group;
 		bool need_room;
 		std::string room;
+		std::string building;
 		std::string cell_group;
 		bool is_christian;
 		std::string occupation;
 		std::string need_ride;
 		std::string offer_ride;
+		std::string special_need;
+		std::string notes;
 	} Registrant;
 
 
@@ -111,6 +114,12 @@ public:
 	void printDoubtfulRegistrants(const char*filename);
 	void printRidesList(const char*filename);
 
+	void printAttendeesByAllChurch(const char* filedir);
+	void printAttendeesEU(const char* filename);
+	void printAttendeesCabrini(const char* filename);
+	void printAllChurchesForRoomAssign(const char* filedir);
+	void printSpecialNeeds(const char*filedir);
+
 	void upperCaseConvert(std::vector<int> entries);
 
 	inline 	ChurchList *getChurchHandle() { return &m_church_list; }
@@ -140,7 +149,7 @@ public:
 	std::vector<int32_t> m_logistics_list;
 	std::vector<int32_t> m_choir_list;
 	std::vector<int32_t> m_rccc_xiangyin_list;
-	std::vector<int32_t> m_rccc_college_list;
+	std::vector<int32_t> m_rccc_sheqin_list;
 	std::vector<int32_t> m_child_leader_list;
 
 	std::vector<int32_t> m_ride_list;
