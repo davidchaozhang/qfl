@@ -222,7 +222,7 @@ int32_t QflReg::classifications()
 	Family a_family;
 	for (i = 0; i < m_registrants.size(); i++){
 		a_regist = m_registrants[i];
-		if (a_regist.grade.find("Stay with Youth") != std::string::npos)
+		if (a_regist.grade.find("Stay with Youth") != std::string::npos || a_regist.grade.find("stay with Youth") != std::string::npos)
 			m_youth_camp_list.push_back(a_regist.person_id);
 		if (a_regist.grade.find("Stay with Parent") != std::string::npos)
 			m_youth_stays_with_parent_list.push_back(a_regist.person_id);
@@ -526,7 +526,41 @@ void QflReg::printOutForYouth(const char*filename)
 	fclose(hf);
 	return;
 }
+void QflReg::printOutEU_RoomNeededList(const char*filename)
+{
+	int32_t i, j;
+	if (filename == NULL)
+		return;
+	FILE *hf = fopen(filename, "w+");
+	if (hf == NULL)
+		return;
 
+	fprintf(hf, "Person ID, Party ID, Party Type, Chinese Name, First Name, Last Name, Gender, Age, Contact, ");
+	fprintf(hf, "Room Needed, Room Assigned, Service, Church, City, State, Function Group, Email, Notes\n");
+
+	for (j = 0; j < m_registrants.size(); j++) {
+		Registrant person = m_registrants[j];
+		bool need_room = person.need_room;
+		std::string room = person.room;
+
+		if (need_room && room.empty()) {
+			bool exclude_youth = (person.grade.find("Stay with Youth") != std::string::npos
+				|| person.grade.find("stay with Youth") != std::string::npos
+				|| person.services.find("Service Youth") != std::string::npos
+				|| person.cell_group.find("Youth SGLeaders") != std::string::npos
+				|| person.grade.find("Stay with Parent") != std::string::npos);
+
+			if (exclude_youth)
+				continue;
+
+			fprintf(hf, "%d, %d, %s, %s, %s, %s, %s, %s, %s, ", person.person_id, person.party, person.party_type.c_str(), person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str(), person.contact_person.c_str());
+			fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, %s, %s\n", person.need_room, person.room.c_str(), person.services.c_str(), person.church.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str(), (person.notes + " " + person.special_need).c_str());
+		}
+	}
+
+	fclose(hf);
+	return;
+}
 void QflReg::printRCCCFunctions(const char *dirname)
 {
 	int32_t i, j;
@@ -550,6 +584,7 @@ void QflReg::printRCCCFunctions(const char *dirname)
 			Registrant person = m_registrants[j];
 			std::string fg = person.functional_group;
 			bool exclude_youth = (person.grade.find("Stay with Youth") != std::string::npos
+				|| person.grade.find("stay with Youth") != std::string::npos
 				|| person.services.find("Service Youth") != std::string::npos
 				|| person.cell_group.find("Youth SGLeaders") != std::string::npos
 				|| person.grade.find("Stay with Parent") != std::string::npos);
@@ -581,12 +616,21 @@ void QflReg::printRCCCFunctions(const char *dirname)
 		if (m_registrants[j].church.compare(RCCC) == 0) {
 			Registrant person = m_registrants[j];
 			std::string fg = person.functional_group;
+			std::string age = person.age_group;
 			bool exclude_youth = (person.grade.find("Stay with Youth") != std::string::npos
+				|| person.grade.find("stay with Youth") != std::string::npos
 				|| person.services.find("Service Youth") != std::string::npos
 				|| person.cell_group.find("Youth SGLeaders") != std::string::npos
 				|| person.grade.find("Stay with Parent") != std::string::npos);
 
 			if (exclude_youth)
+				continue;
+
+			bool age_exclude = (age.compare(AgeGroup::A1) == 0 || age.compare(AgeGroup::A2) == 0 || age.compare(AgeGroup::A3) == 0
+				|| age.compare(AgeGroup::A4_5) == 0 || age.compare(AgeGroup::A6_11) == 0 || age.compare(AgeGroup::A12_14) == 0
+				|| age.compare(AgeGroup::A15_17) == 0);
+
+			if (age_exclude)
 				continue;
 
 			if (fg.find("She Qing") != std::string::npos || fg.find("ç¤¾é’") != std::string::npos)
@@ -612,6 +656,13 @@ void QflReg::printRCCCFunctions(const char *dirname)
 			Registrant person = m_registrants[j];
 			std::string chor = person.functional_group;
 			std::string chor1 = person.services;
+			std::string age = person.age_group;
+			bool age_exclude = (age.compare(AgeGroup::A1) == 0 || age.compare(AgeGroup::A2) == 0 || age.compare(AgeGroup::A3) == 0
+				|| age.compare(AgeGroup::A4_5) == 0 || age.compare(AgeGroup::A6_11) == 0 || age.compare(AgeGroup::A12_14) == 0
+				|| age.compare(AgeGroup::A15_17) == 0);
+
+			if (age_exclude)
+				continue;
 
 			if (chor.find(std::string("è¯—ç­")) != std::string::npos || chor.find("è©©ç") != std::string::npos || 
 				chor.find(std::string("Choir")) != std::string::npos || chor1.compare("QFL Choir") == 0)
@@ -635,13 +686,22 @@ void QflReg::printRCCCFunctions(const char *dirname)
 		if (m_registrants[j].church.compare(RCCC) == 0) {
 			Registrant person = m_registrants[j];
 			std::string sf = person.functional_group;
+			std::string age = person.age_group;
 
 			bool exclude_youth = (person.grade.find("Stay with Youth") != std::string::npos
+				|| person.grade.find("stay with Youth") != std::string::npos
 				|| person.services.find("Service Youth") != std::string::npos
 				|| person.cell_group.find("Youth SGLeaders") != std::string::npos
 				|| person.grade.find("Stay with Parent") != std::string::npos);
 
 			if (exclude_youth)
+				continue;
+
+			bool age_exclude = (age.compare(AgeGroup::A1) == 0 || age.compare(AgeGroup::A2) == 0 || age.compare(AgeGroup::A3) == 0
+				|| age.compare(AgeGroup::A4_5) == 0 || age.compare(AgeGroup::A6_11) == 0 || age.compare(AgeGroup::A12_14) == 0
+				|| age.compare(AgeGroup::A15_17) == 0);
+
+			if (age_exclude)
 				continue;
 
 			if (sf.find(std::string("­å­¦ç”Ÿåœ˜å¥‘")) != std::string::npos || sf.find(std::string("å­¸ç”Ÿå›¢å¥‘")) != std::string::npos ||
@@ -976,7 +1036,7 @@ void QflReg::printAttendeesByAllChurch(const char* filedir)
 						child2_5++;
 					else if (p.age_group.compare(AgeGroup::A6_11) == 0)
 						child6_11++;
-					else if (p.grade.find("Stay with Youth") != std::string::npos)
+					else if (p.grade.find("Stay with Youth") != std::string::npos || p.grade.find("stay with Youth") != std::string::npos)
 						youth_camp++;
 					else if (p.services.find("Service Youth") != std::string::npos || p.cell_group.find("Youth SGLeaders") != std::string::npos)
 						youth_camp++;
@@ -1111,7 +1171,7 @@ void QflReg::printAllChurchesForRoomAssign(const char* filedir)
 					if (!p.need_room)
 						exp_n++;
 
-					if (p.grade.find("Stay with Youth") != std::string::npos)
+					if (p.grade.find("Stay with Youth") != std::string::npos || p.grade.find("stay with Youth") != std::string::npos)
 						exp_n++;
 					else if (p.services.find("Service Youth") != std::string::npos || p.cell_group.find("Youth SGLeaders") != std::string::npos)
 						exp_n++;

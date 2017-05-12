@@ -103,6 +103,7 @@ public:
 	void printOutForChildWorkers(const char*filename);
 	void printOutForYouth(const char*filename);
 	void printOutForLogistics(const char*filename);
+	void printOutEU_RoomNeededList(const char*filename);
 
 	void printRCCCAttendees(const char*filename);
 	void printRCCCFunctions(const char *dirname);
@@ -156,6 +157,7 @@ public:
 	std::vector<int32_t> m_need_ride_list;
 
 	std::vector<int32_t> m_age_statistics;
+	std::vector<int32_t> m_EU_list;
 
 	ChurchList m_church_list;
 	BuildingRoomList m_br_list;
