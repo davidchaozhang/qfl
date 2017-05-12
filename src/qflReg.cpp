@@ -423,7 +423,7 @@ void QflReg::printOutStatistics(const char*filename)
 	return;
 }
 
-void QflReg::printOutForChildWorkers(const char*filename)
+void QflReg::printOutForChildWorkers_2_5yr(const char*filename)
 {
 	int32_t i, j;
 	if (filename == NULL)
@@ -431,21 +431,93 @@ void QflReg::printOutForChildWorkers(const char*filename)
 	FILE *hf = fopen(filename, "w+");
 	if (hf == NULL)
 		return;
+	fprintf(hf, "Time = %s\n", getCurTime().c_str());
+	fprintf(hf, "QFL 2017 2-5 year old Child Counselors\n");
+	fprintf(hf, "Person ID, Party ID, Party Type, Chinese Name, First Name, Last Name, Gender, Age, Contact, ");
+	fprintf(hf, "Service, Church, City, State, Function Group, Email, Phone\n");
 
-	fprintf(hf, "Person ID, Chinese Name, First Name, Last Name, Gender, Age, Contact, ");
-	fprintf(hf, "Service, Church, City, State, Function Group, Email\n");
+	for (j = 0; j < m_registrants.size(); j++) {
+		Registrant person = m_registrants[j];
+		for (i = 0; i < m_child_leader_list.size(); i++) {
+			int32_t p = m_child_leader_list[i];
 
-	for (i = 0; i < m_child_leader_list.size(); i++) {
-		int32_t p = m_child_leader_list[i];
-
-		for (j = 0; j < m_registrants.size(); j++) {
 			if (p == m_registrants[j].person_id) {
-				Registrant person = m_registrants[j];
-				fprintf(hf, "%d, %s, %s, %s, %s, %s, %s, ", person.person_id, person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str(), person.contact_person.c_str());
-				fprintf(hf, "%s, %s, %s, %s, %s, %s\n", person.services.c_str(), person.church.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str());
+				bool exclude_child = (person.age_group.compare(AgeGroup::A2) == 0) || (person.age_group.compare(AgeGroup::A3) == 0)
+					|| (person.age_group.compare(AgeGroup::A4_5) == 0);
+
+				if ((!exclude_child) && person.services.find("2-5Yr") != std::string::npos) {
+					fprintf(hf, "%d, %d, %s, %s, %s, %s, %s, %s, %s, ", person.person_id, person.party, person.party_type.c_str(), person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str(), person.contact_person.c_str());
+					fprintf(hf, "%s, %s, %s, %s, %s, %s\n", person.services.c_str(), person.church.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str(), person.mobile_phone.c_str());
+				}
+				break;
 			}
 		}
 	}
+
+	fprintf(hf, "\nQFL 2017 2-5 year old Children\n");
+	for (j = 0; j < m_registrants.size(); j++) {
+		Registrant person = m_registrants[j];
+		std::string age = person.age_group;
+		std::string grade = person.grade;
+
+		bool child_2_5 = (person.age_group.compare(AgeGroup::A2) == 0) || (person.age_group.compare(AgeGroup::A3) == 0)
+			|| (person.age_group.compare(AgeGroup::A4_5) == 0);
+
+		if (child_2_5) {
+			fprintf(hf, "%d, %d, %s, %s, %s, %s, %s, %s, %s, ", person.person_id, person.party, person.party_type.c_str(), person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str(), person.contact_person.c_str());
+			fprintf(hf, "%s, %s, %s, %s, %s, %s\n", person.services.c_str(), person.church.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str(), person.mobile_phone.c_str());
+		}
+	}
+
+	fclose(hf);
+	return;
+}
+
+void QflReg::printOutForChildWorkers_6_11yr(const char*filename)
+{
+	int32_t i, j;
+	if (filename == NULL)
+		return;
+	FILE *hf = fopen(filename, "w+");
+	if (hf == NULL)
+		return;
+	fprintf(hf, "Time = %s\n", getCurTime().c_str());
+	fprintf(hf, "QFL 2017 6-11 year old Child Counselors\n");
+	fprintf(hf, "Person ID, Party ID, Party Type, Chinese Name, First Name, Last Name, Gender, Age, Contact, ");
+	fprintf(hf, "Service, Church, City, State, Function Group, Email, Phone\n");
+
+	for (j = 0; j < m_registrants.size(); j++) {
+		Registrant person = m_registrants[j];
+		for (i = 0; i < m_child_leader_list.size(); i++) {
+			int32_t p = m_child_leader_list[i];
+			
+			if (p == m_registrants[j].person_id) {
+				if (person.services.find("6-11Yr") != std::string::npos &&person.age_group.compare(AgeGroup::A6_11) != 0) {
+					fprintf(hf, "%d, %d, %s, %s, %s, %s, %s, %s, %s, ", person.person_id, person.party, person.party_type.c_str(), person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str(), person.contact_person.c_str());
+					fprintf(hf, "%s, %s, %s, %s, %s, %s\n", person.services.c_str(), person.church.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str(), person.mobile_phone.c_str());
+				}
+				break;
+			}
+		}
+	}
+
+	fprintf(hf, "\nQFL 2017 6-11 year old Children\n");
+	for (j = 0; j < m_registrants.size(); j++) {
+		Registrant person = m_registrants[j];
+		std::string age = person.age_group;
+		std::string grade = person.grade;
+
+		bool exclude_youth = (person.grade.find("Stay with Youth") != std::string::npos
+			|| person.grade.find("stay with Youth") != std::string::npos);
+		if (exclude_youth)
+			continue;
+
+		if (age.compare(AgeGroup::A6_11) == 0) {
+			fprintf(hf, "%d, %d, %s, %s, %s, %s, %s, %s, %s, ", person.person_id, person.party, person.party_type.c_str(), person.chinese_name.c_str(), person.first_name.c_str(), person.last_name.c_str(), person.gender.c_str(), person.age_group.c_str(), person.contact_person.c_str());
+			fprintf(hf, "%s, %s, %s, %s, %s, %s\n", person.services.c_str(), person.church.c_str(), person.city.c_str(), person.state.c_str(), person.functional_group.c_str(), person.email.c_str(), person.mobile_phone.c_str());
+		}
+	}
+
 	fclose(hf);
 	return;
 }

@@ -100,7 +100,10 @@ public:
 	int32_t sortAttendeesByChurches();
 	int32_t ageStatistics();
 	void printOutStatistics(const char*filename);
-	void printOutForChildWorkers(const char*filename);
+
+	void printOutForChildWorkers_2_5yr(const char*filename);
+	void printOutForChildWorkers_6_11yr(const char*filename);
+
 	void printOutForYouth(const char*filename);
 	void printOutForLogistics(const char*filename);
 	void printOutEU_RoomNeededList(const char*filename);
