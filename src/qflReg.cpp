@@ -245,6 +245,9 @@ int32_t QflReg::classifications()
 			m_special_need_list.push_back(a_regist.person_id);
 		}
 
+		if (!a_regist.need_room)
+			m_commute_list.push_back(a_regist.person_id);
+
 		if (a_regist.services.find("Logistics") != std::string::npos || a_regist.services.find("Recording") != std::string::npos ||
 			a_regist.services.find("Traffic Control") != std::string::npos || a_regist.services.find("Usher") != std::string::npos ||
 			a_regist.services.find("Friday Snack Service") != std::string::npos || a_regist.services.find("Recording") != std::string::npos ||
@@ -385,6 +388,7 @@ void QflReg::printOutStatistics(const char*filename)
 	fprintf(hf, "Time = %s\n", getCurTime().c_str());
 	fprintf(hf, "Registrants: %d\n", m_registrants.size());
 	fprintf(hf, "Christians = %d, non-christian = %d\n", m_christian_list.size(), m_non_christian_list.size());
+	fprintf(hf, "Stay overnight = %d, Commute = %d\n", m_registrants.size() - m_commute_list.size(), m_commute_list.size());
 
 	// print top 15 church list
 	for (i = 0; i < 50; i++) {

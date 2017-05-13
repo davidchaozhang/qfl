@@ -158,6 +158,7 @@ public:
 
 	std::vector<int32_t> m_ride_list;
 	std::vector<int32_t> m_need_ride_list;
+	std::vector<int32_t> m_commute_list;
 
 	std::vector<int32_t> m_age_statistics;
 	std::vector<int32_t> m_EU_list;
