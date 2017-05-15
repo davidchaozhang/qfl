@@ -16,6 +16,12 @@
 
 using namespace std;
 
+#define Cell_group_size 14
+
+namespace Status {
+	const char* const Cancelled = "\"Cancelled\"";
+};
+
 namespace NeedRoom {
 	const char* const RoomNeeded = "Room Needed";
 	const char* const Commute = "Commute";
@@ -41,6 +47,7 @@ namespace PartyType {
 	const char* const qFamily = "Family";
 	const char* const qIndividual = "Individual";
 };
+
 
 class QFLLIB_EXPORT QflReg {
 
@@ -75,6 +82,7 @@ public:
 		std::string offer_ride;
 		std::string special_need;
 		std::string notes;
+		bool cancelled;
 	} Registrant;
 
 
@@ -90,6 +98,26 @@ public:
 		std::vector<int32_t> attendee_list;
 	} Family;
 
+	typedef enum {
+		qEU = 'e', // EU
+		qCabrini = 'c', // cabrini
+		qChild = 'b', // child
+		qSenior = 's', // senior
+	} Campus;
+
+	typedef struct {
+		std::string church_name;
+		std::map<Campus, std::vector<int32_t >> persons;
+	} QFL_Church;
+
+	typedef struct {
+		int32_t cell_group_id;
+		std::string church;
+		std::string functions;
+		std::vector<int32_t> christian_list;
+		std::vector<int32_t> non_christian_list;
+	} CellGroup;
+
 	QflReg();
 	~QflReg();
 
@@ -99,7 +127,12 @@ public:
 	int32_t classifications();
 	int32_t sortAttendeesByChurches();
 	int32_t ageStatistics();
+	int32_t exclude_rccc_List();
+	int32_t gen_rccc_functional_groups();
+	int32_t gen_rccc_zip_groups();
+
 	void printOutStatistics(const char*filename);
+	void printOutRCCC_statistics(const char*filename);
 
 	void printOutForChildWorkers_2_5yr(const char*filename);
 	void printOutForChildWorkers_6_11yr(const char*filename);
@@ -128,17 +161,18 @@ public:
 
 	inline 	ChurchList *getChurchHandle() { return &m_church_list; }
 	inline BuildingRoomList *getBuildingRoomHandle() { return &m_br_list; }
-
+	QFL_Church *getRCCCLilst();
 
 	std::string intToString(int i);
 	std::string getCurTime();
 
 	std::vector<std::vector<std::string>> m_data;
 	std::vector<Registrant> m_registrants;
+	std::map<int32_t, Registrant> m_person_info;
 	std::map<int32_t, Family> m_family_list;
 	std::vector<int32_t> m_male_list;
 	std::vector<int32_t> m_female_list;
-	std::vector<std::pair<std::string,  std::vector<int32_t>>> m_attendee_list_byChurch;
+	std::vector<std::pair<std::string, QFL_Church>> m_attendee_list_byChurch;
 	std::map<int32_t, std::vector<int32_t>> m_room_building_list;
 
 	std::vector<int32_t> m_christian_list;
@@ -162,9 +196,16 @@ public:
 
 	std::vector<int32_t> m_age_statistics;
 	std::vector<int32_t> m_EU_list;
+	std::map<std::string, std::vector<CellGroup>> m_cell_groups;
+	CellGroup m_temp_group;
 
 	ChurchList m_church_list;
 	BuildingRoomList m_br_list;
+	float m_christian_ratio;
+	int32_t m_cellid;
+	int32_t m_cancelled;
+	int32_t m_adult_christians;
+	int32_t m_adult_non_christians;
 };
 #endif
 // QFLREG_H
