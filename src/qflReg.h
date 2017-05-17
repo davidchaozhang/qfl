@@ -118,10 +118,21 @@ public:
 		std::vector<int32_t> non_christian_list;
 	} CellGroup;
 
+	typedef struct {
+		int32_t adult_christians;
+		int32_t adult_non_christians;
+		int32_t youth_christians;
+		int32_t youth_non_christians;
+		int32_t children;
+		float adult_christian_ratio;
+		float youth_christian_ratio;
+		float christian_ratio;
+	} ChristianStats;
+
 	QflReg();
 	~QflReg();
 
-	int32_t readChurchList(const char* churchname);
+	int32_t readChurchList(const char* churchname, int32_t year);
 	int32_t readRegistrants(const char *filename);
 	int32_t parseAllFields();
 	int32_t classifications();
@@ -139,22 +150,15 @@ public:
 
 	void printOutForYouth(const char*filename);
 	void printOutForLogistics(const char*filename);
-	void printOutEU_RoomNeededList(const char*filename);
 
-	void printRCCCAttendees(const char*filename);
 	void printRCCCFunctions(const char *dirname);
-	void printLivingStone(const char*filename);
-	void printCherryHill(const char*filename);
-	void printPhillyTrinity(const char*filename);
-	void printPhillyCCC(const char*filename);
-	void printSmallChurches();
 	void printDoubtfulRegistrants(const char*filename);
 	void printRidesList(const char*filename);
 
 	void printAttendeesByAllChurch(const char* filedir);
-	void printAttendeesEU(const char* filename);
+	void printOutEUListAllChurch_separated(const char*filedir);
+	void printOutEUListAllChurchInOne(const char*filedir);
 	void printAttendeesCabrini(const char* filename);
-	void printAllChurchesForRoomAssign(const char* filedir);
 	void printSpecialNeeds(const char*filedir);
 
 	void upperCaseConvert(std::vector<int> entries);
@@ -201,11 +205,11 @@ public:
 
 	ChurchList m_church_list;
 	BuildingRoomList m_br_list;
-	float m_christian_ratio;
 	int32_t m_cellid;
 	int32_t m_cancelled;
-	int32_t m_adult_christians;
-	int32_t m_adult_non_christians;
+	ChristianStats m_allchurch;
+	ChristianStats m_rccc;
+	int32_t m_year;
 };
 #endif
 // QFLREG_H
