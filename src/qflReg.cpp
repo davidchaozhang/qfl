@@ -1152,7 +1152,7 @@ void QflReg::printOutEUListAllChurchInOne(const char*filedir)
 	int32_t adults;
 	int32_t seniors;
 	int32_t stay, commute;
-	std::string name = "QFL_AllChurch_list";
+	std::string name = "QFL_AllChurch_list_withkids";
 
 	if (filedir == NULL)
 		return;
@@ -1189,11 +1189,12 @@ void QflReg::printOutEUListAllChurchInOne(const char*filedir)
 
 		pid_list[0] = ch.second.persons[qEU];
 		pid_list[1] = ch.second.persons[qSenior];
+		pid_list[2] = ch.second.persons[qChild];
 
 		if (pid_list[0].size() + pid_list[1].size() == 0)
 			continue;
 
-		for (n = 0; n < 2; n++) {
+		for (n = 0; n < 3; n++) {
 			for (k = 0; k < pid_list[n].size(); k++) {
 				int32_t id = pid_list[n][k];
 				for (j = 0; j < m_registrants.size(); j++) {
