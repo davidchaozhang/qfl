@@ -16,6 +16,7 @@ public:
 		std::string church_id;
 		int32_t church_code;
 		std::string church_name;
+		std::string church_in_chinese;
 		std::string church_ini;
 		std::string church_city;
 		int32_t church_zip;

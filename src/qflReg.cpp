@@ -209,6 +209,8 @@ int32_t QflReg::parseAllFields()
 		a_regist.age_group = person[11].substr(1, person[11].size() - 2);
 		a_regist.gender = person[12].substr(1, person[12].size() - 2);
 		a_regist.grade = person[13].substr(1, person[13].size() - 2);
+		a_regist.registrtion_fee = std::stoi(person[14].substr(1, person[14].size() - 2));
+		a_regist.key_deposit = std::stoi(person[15].substr(1, person[15].size() - 2));
 		a_regist.notes = person[17].substr(1, person[17].size() - 2);
 		a_regist.special_need = person[18].substr(1, person[18].size() - 2);
 
@@ -323,12 +325,22 @@ int32_t QflReg::sortAttendeesByChurches()
 	int32_t youth_non_christians = 0;
 	int32_t children = 0;
 
+	int32_t eu_stay_overnight = 0;
+	int32_t cabrini_stay_overnight = 0;
+	int32_t eu_commute = 0;
+	int32_t cabrini_commute = 0;
+
+
 	int32_t rccc_adult_christians = 0;
 	int32_t rccc_adult_non_christians = 0;
 	int32_t rccc_youth_christians = 0;
 	int32_t rccc_youth_non_christians = 0;
 	int32_t rccc_children = 0;
 
+	int32_t rccc_eu_stay_overnight = 0;
+	int32_t rccc_cabrini_stay_overnight = 0;
+	int32_t rccc_eu_commute = 0;
+	int32_t rccc_cabrini_commute = 0;
 
 	QFL_Church attendee_list;
 	if (m_registrants.size() == 0)
@@ -367,6 +379,8 @@ int32_t QflReg::sortAttendeesByChurches()
 
 				bool little_coworker = a_regist.functional_group.compare("Childcare Coworker") == 0;
 
+				bool stay_overnight = a_regist.need_room;
+
 				m_attendee_list_byChurch[j].second.church_name = church_name;
 				cnt++;
 				if (youth) {
@@ -376,25 +390,53 @@ int32_t QflReg::sortAttendeesByChurches()
 					else
 						youth_non_christians++;
 
+					if (stay_overnight)
+						cabrini_stay_overnight++;
+					else
+						cabrini_commute++;
+
 					if (a_regist.church.compare("Rutgers Community Christian Church") == 0) {
 						if (a_regist.is_christian)
 							rccc_youth_christians++;
 						else
 							rccc_youth_non_christians++;
+
+						if (stay_overnight)
+							rccc_cabrini_stay_overnight++;
+						else
+							rccc_cabrini_commute++;
 					}
 				}
 				else if (child) {
 					m_attendee_list_byChurch[j].second.persons[QflReg::qChild].push_back(a_regist.person_id);
 					children++;
+					if (stay_overnight)
+						eu_stay_overnight++;
+					else
+						eu_commute++;
+
 					if (a_regist.church.compare("Rutgers Community Christian Church") == 0) {
 						rccc_children++;
+						if (stay_overnight)
+							rccc_eu_stay_overnight++;
+						else
+							rccc_eu_commute++;
 					}
 				}
 				else if (a_regist.age_group.compare(AgeGroup::A12_14) == 0 && !little_coworker) {
 					m_attendee_list_byChurch[j].second.persons[QflReg::qChild].push_back(a_regist.person_id);
 					children++;
+					if (stay_overnight)
+						eu_stay_overnight++;
+					else
+						eu_commute++;
+
 					if (a_regist.church.compare("Rutgers Community Christian Church") == 0) {
 						rccc_children++;
+						if (stay_overnight)
+							rccc_eu_stay_overnight++;
+						else
+							rccc_eu_commute++;
 					}
 				}
 				else if (senior)
@@ -404,11 +446,22 @@ int32_t QflReg::sortAttendeesByChurches()
 						adult_christians++;
 					else
 						adult_non_christians++;
+
+					if (stay_overnight)
+						eu_stay_overnight++;
+					else
+						eu_commute++;
+
 					if (a_regist.church.compare("Rutgers Community Christian Church") == 0) {
 						if (a_regist.is_christian)
 							rccc_adult_christians++;
 						else
 							rccc_adult_non_christians++;
+
+						if (stay_overnight)
+							rccc_eu_stay_overnight++;
+						else
+							rccc_eu_commute++;
 					}
 				}
 				else {
@@ -417,11 +470,22 @@ int32_t QflReg::sortAttendeesByChurches()
 						adult_christians++;
 					else
 						adult_non_christians++;
+
+					if (stay_overnight)
+						eu_stay_overnight++;
+					else
+						eu_commute++;
+
 					if (a_regist.church.compare("Rutgers Community Christian Church") == 0) {
 						if (a_regist.is_christian)
 							rccc_adult_christians++;
 						else
 							rccc_adult_non_christians++;
+
+						if (stay_overnight)
+							rccc_eu_stay_overnight++;
+						else
+							rccc_eu_commute++;
 					}
 				}
 				break;
@@ -444,6 +508,11 @@ int32_t QflReg::sortAttendeesByChurches()
 		+ youth_christians + youth_non_christians);
 	m_allchurch.children = children;
 
+	m_allchurch.eu_overnight = eu_stay_overnight;
+	m_allchurch.eu_commute = eu_commute;
+	m_allchurch.cabrini_novernight = cabrini_stay_overnight;
+	m_allchurch.cabrini_commute = cabrini_commute;
+
 	// rcc only
 	m_rccc.adult_christian_ratio = rccc_adult_christians / (rccc_adult_christians + rccc_adult_non_christians);
 	m_rccc.adult_christians = rccc_adult_christians;
@@ -456,6 +525,12 @@ int32_t QflReg::sortAttendeesByChurches()
 	m_rccc.christian_ratio = (rccc_adult_christians + rccc_youth_christians) / (rccc_adult_christians + rccc_adult_non_christians
 		+ rccc_youth_christians + rccc_youth_non_christians);
 	m_rccc.children = rccc_children;
+
+	m_rccc.eu_overnight = eu_stay_overnight;
+	m_rccc.eu_commute = eu_commute;
+	m_rccc.cabrini_novernight = cabrini_stay_overnight;
+	m_rccc.cabrini_commute = cabrini_commute;
+
 	return 0;
 }
 
@@ -723,8 +798,19 @@ void QflReg::printOutStatistics(const char*filename)
 	fprintf(hf, "Registrants: %d, Cancelled: %d\n", m_registrants.size(), m_cancelled);
 	fprintf(hf, "Christians = %d, non-christian = %d\n", m_christian_list.size(), m_non_christian_list.size());
 	fprintf(hf, "Stay overnight = %d, Commute = %d\n", m_registrants.size() - m_commute_list.size(), m_commute_list.size());
-	fprintf(hf, "EU: Adult Christians = %d, Adult Non - Christians = %d, ratio = %f \n", m_allchurch.adult_christians, m_allchurch.adult_non_christians,
+	fprintf(hf, "EU Stay overnight = %d, Commute = %d\n", m_allchurch.eu_overnight, m_allchurch.eu_commute);
+	fprintf(hf, "Youth camp stay overnight = %d, Commute = %d\n", m_allchurch.cabrini_novernight, m_allchurch.cabrini_commute);
+	fprintf(hf, "EU: Adult Christians = %d, Adult Non - Christians = %d, ratio = %f \n\n", m_allchurch.adult_christians, m_allchurch.adult_non_christians,
 		(float)m_allchurch.adult_christians / (float)m_allchurch.adult_non_christians);
+
+	fprintf(hf, "Church, Adult Christians, Youth Christians\n");
+	fprintf(hf, "RCCC, %d, %d\n", m_rccc.adult_christians, m_rccc.youth_christians);
+	fprintf(hf, "Others, %d, %d\n", m_allchurch.adult_christians - m_rccc.adult_christians, m_allchurch.youth_christians - m_rccc.youth_christians);
+
+	fprintf(hf, "Church, Adult Non-Christians, Youth Non-Christians, Children\n");
+	fprintf(hf, "RCCC, %d, %d, %d\n", m_rccc.adult_non_christians, m_rccc.youth_non_christians, m_rccc.children);
+	fprintf(hf, "Others, %d, %d, %d\n\n", m_allchurch.adult_non_christians - m_rccc.adult_non_christians, m_allchurch.youth_non_christians - m_rccc.youth_non_christians, m_allchurch.children - m_rccc.children);
+
 
 	// print family, male, female
 	fprintf(hf, "family: %d, male: %d, female: %d\n", m_family_list.size(), m_male_list.size(), m_female_list.size());
@@ -736,7 +822,7 @@ void QflReg::printOutStatistics(const char*filename)
 	// print youth leaders
 	fprintf(hf, "Youth leader: %d\n", m_youth_leader_list.size());
 	// print Child care
-	fprintf(hf, "Child care: %d\n", m_child_leader_list.size());
+	fprintf(hf, "Child care: %d\n\n", m_child_leader_list.size());
 
 	// print age distribution
 	fprintf(hf, "_%s, %d\n", AgeGroup::A1, m_age_statistics[0]);
@@ -752,14 +838,6 @@ void QflReg::printOutStatistics(const char*filename)
 	fprintf(hf, "_%s, %d\n", AgeGroup::A56_65, m_age_statistics[10]);
 	fprintf(hf, "_%s, %d\n", AgeGroup::A66_69, m_age_statistics[11]);
 	fprintf(hf, "_%s, %d\n", AgeGroup::A70, m_age_statistics[12]);
-
-	fprintf(hf, "Church, Adult Christians, Youth Christians\n");
-	fprintf(hf, "RCCC, %d, %d\n", m_rccc.adult_christians, m_rccc.youth_christians);
-	fprintf(hf, "Others, %d, %d\n", m_allchurch.adult_christians - m_rccc.adult_christians, m_allchurch.youth_christians - m_rccc.youth_christians);
-
-	fprintf(hf, "Church, Adult Non-Christians, Youth Non-Christians, Children\n");
-	fprintf(hf, "RCCC, %d, %d, %d\n", m_rccc.adult_non_christians, m_rccc.youth_non_christians, m_rccc.children);
-	fprintf(hf, "Others, %d, %d, %d\n", m_allchurch.adult_non_christians - m_rccc.adult_non_christians, m_allchurch.youth_non_christians - m_rccc.youth_non_christians, m_allchurch.children);
 
 	// print top 15 church list
 	for (i = 0; i < m_attendee_list_byChurch.size(); i++) {
@@ -815,6 +893,228 @@ void QflReg::printOutRCCC_statistics(const char*filename)
 	}
 
 	fprintf(hf, "Overall:, RCCC Christians = %d, Non-christians = %d, ratio = %f\n", rccc_christians, rccc_non_christians, (float)rccc_christians / (float)rccc_non_christians);
+	fclose(hf);
+
+	return;
+}
+
+void QflReg::printOutEU_statistics(const char*filename)
+{
+	int32_t i, j, k;
+	int32_t total = 0;
+	int32_t overnight = 0;
+	int32_t commute = 0;
+	int32_t eu_christians = 0;
+	int32_t eu_non_christians = 0;
+	int32_t eu_male = 0;
+	int32_t eu_female = 0;
+	int32_t eu_0_1 = 0;
+	int32_t eu_2_5 = 0;
+	int32_t eu_6_11 = 0;
+	int32_t eu_12_17 = 0;
+	int32_t eu_18_65 = 0;
+	int32_t eu_66_69 = 0;
+	int32_t eu_70_ = 0;
+	int32_t sz = m_attendee_list_byChurch.size();
+	std::vector<int32_t > s[3];
+
+	for (i = 0; i < sz; i++) {
+		std::pair<std::string, QFL_Church> ls = m_attendee_list_byChurch[i];
+		QFL_Church ch = ls.second;
+
+		std::string church = ch.church_name;
+		s[0] = ch.persons[qEU];
+		s[1] = ch.persons[qSenior];
+		s[2] = ch.persons[qChild];
+		for (j = 0; j < 3; j++) {
+			for (k = 0; k < s[j].size(); k++) {
+				Registrant person = m_person_info[s[j][k]];
+				if (person.gender.compare("Female") == 0)
+					eu_female++;
+				else
+					eu_male++;
+
+				if (person.need_room)
+					overnight++;
+				else
+					commute++;
+
+				if (person.is_christian)
+					eu_christians++;
+				else
+					eu_non_christians++;
+
+				if (person.age_group.compare(AgeGroup::A1) == 0)
+					eu_0_1++;
+				else if (person.age_group.compare(AgeGroup::A2) == 0 || person.age_group.compare(AgeGroup::A3) == 0
+					|| person.age_group.compare(AgeGroup::A4_5) == 0)
+					eu_2_5++;
+				else if (person.age_group.compare(AgeGroup::A6_11) == 0)
+					eu_6_11++;
+				else if (person.age_group.compare(AgeGroup::A12_14) == 0 || person.age_group.compare(AgeGroup::A15_17) == 0)
+					eu_12_17++;
+				else if (person.age_group.compare(AgeGroup::A66_69) == 0)
+					eu_66_69++;
+				else if (person.age_group.compare(AgeGroup::A70) == 0)
+					eu_70_++;
+				else
+					eu_18_65++;
+
+				total++;
+
+			}
+		}
+	}
+
+	if (filename == NULL)
+		return;
+	FILE *hf = fopen(filename, "w+");
+	if (hf == NULL)
+		return;
+
+	fprintf(hf, "Time = %s\n", getCurTime().c_str());
+	fprintf(hf, "EU Total, %d\n", total);
+	fprintf(hf, "EU Christians = %d, non-Christians = %d\n", eu_christians, eu_non_christians);
+	fprintf(hf, "EU Stay overnight = %d, commute = %d\n", overnight, commute);
+	fprintf(hf, "EU Males = %d, Females = %d\n", eu_male, eu_female);
+	fprintf(hf, "EU Adults, (18-65)= %d\n", eu_18_65);
+	fprintf(hf, "EU Seniors, (66-69) = %d, (70+) = %d\n", eu_66_69, eu_70_);
+
+	fprintf(hf, "EU 0-1 yr Children, %d\n", eu_0_1);
+	fprintf(hf, "EU 2-5 yr Children, %d\n", eu_2_5);
+	fprintf(hf, "EU 6-11 yr Children, %d\n", eu_6_11);
+	fprintf(hf, "EU 12-17 yr Children, %d\n", eu_12_17);
+	fprintf(hf, "EU 18-65 yr Adults, %d\n", eu_18_65);
+	fprintf(hf, "\n\n");
+
+	fprintf(hf, "Church, Person ID, Party ID, First Name, Last Name, Chinese Name, Age, Christian, room, function, cell group#\n");
+
+	for (i = 0; i < sz; i++) {
+		std::pair<std::string, QFL_Church> ls = m_attendee_list_byChurch[i];
+		QFL_Church ch = ls.second;
+
+		std::string church = ch.church_name;
+		s[0] = ch.persons[qEU];
+		s[1] = ch.persons[qSenior];
+		s[2] = ch.persons[qChild];
+		for (j = 0; j < 3; j++) {
+			for (k = 0; k < s[j].size(); k++) {
+				Registrant person = m_person_info[s[j][k]];
+				std::string church = person.church;
+	
+				fprintf(hf, "%s, %d, %d, %s, %s, %s, %s, %d, %s, %s, %s\n", person.church.c_str(), person.person_id, person.party, person.first_name.c_str(), 
+					person.last_name.c_str(), person.chinese_name.c_str(), person.age_group.c_str(), person.is_christian, person.room.c_str(), person.functional_group.c_str(), person.cell_group);
+			}
+		}
+	}
+
+	fclose(hf);
+
+	return;
+}
+
+void QflReg::printOutCabrini_statistics(const char*filename)
+{
+	int32_t i, j, k;
+	int32_t total = 0;
+	int32_t overnight = 0;
+	int32_t commute = 0;
+	int32_t cabrini_christians = 0;
+	int32_t cabrini_non_christians = 0;
+	int32_t cabrini_male = 0;
+	int32_t cabrini_female = 0;
+	int32_t cabrini_0_1 = 0;
+	int32_t cabrini_2_5 = 0;
+	int32_t cabrini_6_11 = 0;
+	int32_t cabrini_12_17 = 0;
+	int32_t cabrini_18_65 = 0;
+	int32_t cabrini_66_69 = 0;
+	int32_t cabrini_70_ = 0;
+	int32_t sz = m_attendee_list_byChurch.size();
+	std::vector<int32_t > s;
+
+	for (i = 0; i < sz; i++) {
+		std::pair<std::string, QFL_Church> ls = m_attendee_list_byChurch[i];
+		QFL_Church ch = ls.second;
+
+		std::string church = ch.church_name;
+		s = ch.persons[qCabrini];
+		for (k = 0; k < s.size(); k++) {
+			Registrant person = m_person_info[s[k]];
+			if (person.gender.compare("Female") == 0)
+				cabrini_female++;
+			else
+				cabrini_male++;
+
+			if (person.need_room)
+				overnight++;
+			else
+				commute++;
+
+			if (person.is_christian)
+				cabrini_christians++;
+			else
+				cabrini_non_christians++;
+
+			if (person.age_group.compare(AgeGroup::A1) == 0)
+				cabrini_0_1++;
+			else if (person.age_group.compare(AgeGroup::A2) == 0 || person.age_group.compare(AgeGroup::A3) == 0
+				|| person.age_group.compare(AgeGroup::A4_5) == 0)
+				cabrini_2_5++;
+			else if (person.age_group.compare(AgeGroup::A6_11) == 0)
+				cabrini_6_11++;
+			else if (person.age_group.compare(AgeGroup::A12_14) == 0 || person.age_group.compare(AgeGroup::A15_17) == 0)
+				cabrini_12_17++;
+			else if (person.age_group.compare(AgeGroup::A66_69) == 0)
+				cabrini_66_69++;
+			else if (person.age_group.compare(AgeGroup::A70) == 0)
+				cabrini_70_++;
+			else
+				cabrini_18_65++;
+
+			total++;
+
+		}
+	}
+
+	if (filename == NULL)
+		return;
+	FILE *hf = fopen(filename, "w+");
+	if (hf == NULL)
+		return;
+
+	fprintf(hf, "Time = %s\n", getCurTime().c_str());
+	fprintf(hf, "Youth Camp Total, %d\n", total);
+	fprintf(hf, "Youth Camp Christians = %d, non-Christians = %d\n", cabrini_christians, cabrini_non_christians);
+	fprintf(hf, "Youth Camp Stay overnight = %d, commute = %d\n", overnight, commute);
+	fprintf(hf, "Youth Camp Males = %d, Females = %d\n", cabrini_male, cabrini_female);
+	fprintf(hf, "Youth Camp Adults, (18-65)= %d\n", cabrini_18_65);
+	fprintf(hf, "Youth Camp Seniors, (66-69) = %d, (70+) = %d\n", cabrini_66_69, cabrini_70_);
+
+	fprintf(hf, "Youth Camp 0-1 yr Children, %d\n", cabrini_0_1);
+	fprintf(hf, "Youth Camp 2-5 yr Children, %d\n", cabrini_2_5);
+	fprintf(hf, "Youth Camp 6-11 yr Children, %d\n", cabrini_6_11);
+	fprintf(hf, "Youth Camp 12-17 yr Children, %d\n", cabrini_12_17);
+	fprintf(hf, "Youth Camp 18-65 yr Adults, %d\n", cabrini_18_65);
+	fprintf(hf, "\n\n");
+
+	fprintf(hf, "Church, Person ID, Party ID, First Name, Last Name, Chinese Name, Age, Christian, room, function, cell group#\n");
+
+	for (i = 0; i < sz; i++) {
+		std::pair<std::string, QFL_Church> ls = m_attendee_list_byChurch[i];
+		QFL_Church ch = ls.second;
+
+		std::string church = ch.church_name;
+		s = ch.persons[qCabrini];
+		for (k = 0; k < s.size(); k++) {
+			Registrant person = m_person_info[s[k]];
+			std::string church = person.church;
+
+			fprintf(hf, "%s, %d, %d, %s, %s, %s, %s, %d, %s, %s, %s\n", person.church.c_str(), person.person_id, person.party, person.first_name.c_str(),
+				person.last_name.c_str(), person.chinese_name.c_str(), person.age_group.c_str(), person.is_christian, person.room.c_str(), person.functional_group.c_str(), person.cell_group);
+		}
+	}
+
 	fclose(hf);
 
 	return;
@@ -958,6 +1258,7 @@ void QflReg::printOutForYouth(const char*filename)
 	int32_t rccc_youth_christians = 0;
 	int32_t rccc_youth_non_christians = 0;
 
+	fprintf(hf, "Time = %s\n", getCurTime().c_str());
 	fprintf(hf, "Youth Campers, total = %d\n", m_youth_camp_list.size());
 	for (i = 0; i < m_youth_camp_list.size(); i++) {
 		int32_t p = m_youth_camp_list[i];
@@ -1686,9 +1987,40 @@ void QflReg::printSpecialNeeds(const char*filedir)
 	return;
 }
 
-
-void QflReg::printAttendeesCabrini(const char* filename)
+void QflReg::printFinancialReport(const char *filename)
 {
+	int32_t i, j, k;
+	int32_t sz = m_attendee_list_byChurch.size();
+	std::vector<int32_t > s[4];
+	if (filename == NULL)
+		return;
+	FILE *hf = fopen(filename, "w+");
+	if (hf == NULL)
+		return;
 
+	fprintf(hf, "Church, Person ID, Party ID, Party Type, First Name, Last Name, Chinese Name, Age, Christian, Fee, Key\n");
+
+	for (i = 0; i < sz; i++) {
+		std::pair<std::string, QFL_Church> ls = m_attendee_list_byChurch[i];
+		QFL_Church ch = ls.second;
+
+		std::string church = ch.church_name;
+		s[0] = ch.persons[qEU];
+		s[1] = ch.persons[qChild];
+		s[2] = ch.persons[qSenior];
+		s[3] = ch.persons[qCabrini];
+		for (j = 0; j < 4; j++) {
+			for (k = 0; k < s[j].size(); k++) {
+				Registrant person = m_person_info[s[j][k]];
+				fprintf(hf, "%s, %d, %d, %s, %s, %s, %s, %s, %d, %d, %d\n", person.church.c_str(), person.person_id, person.party, person.party_type.c_str(),
+					person.first_name.c_str(), person.last_name.c_str(), person.chinese_name.c_str(), person.age_group, person.is_christian, person.registrtion_fee, person.key_deposit);
+
+			}
+		}
+	}
+
+	fclose(hf);
+
+	return;
 }
 

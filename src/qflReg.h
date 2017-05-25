@@ -83,6 +83,8 @@ public:
 		std::string special_need;
 		std::string notes;
 		bool cancelled;
+		int32_t registrtion_fee;
+		int32_t key_deposit;
 	} Registrant;
 
 
@@ -127,6 +129,10 @@ public:
 		float adult_christian_ratio;
 		float youth_christian_ratio;
 		float christian_ratio;
+		int32_t eu_overnight;
+		int32_t eu_commute;
+		int32_t cabrini_novernight;
+		int32_t cabrini_commute;
 	} ChristianStats;
 
 	QflReg();
@@ -144,6 +150,8 @@ public:
 
 	void printOutStatistics(const char*filename);
 	void printOutRCCC_statistics(const char*filename);
+	void printOutEU_statistics(const char*filename);
+	void printOutCabrini_statistics(const char*filename);
 
 	void printOutForChildWorkers_2_5yr(const char*filename);
 	void printOutForChildWorkers_6_11yr(const char*filename);
@@ -158,8 +166,8 @@ public:
 	void printAttendeesByAllChurch(const char* filedir);
 	void printOutEUListAllChurch_separated(const char*filedir);
 	void printOutEUListAllChurchInOne(const char*filedir);
-	void printAttendeesCabrini(const char* filename);
 	void printSpecialNeeds(const char*filedir);
+	void printFinancialReport(const char *filename);
 
 	void upperCaseConvert(std::vector<int> entries);
 

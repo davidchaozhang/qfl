@@ -19,13 +19,14 @@ int main()
 
 static int process_qfl_registrants()
 {
-	const std::string filename = "D:/users/dzhang/church/rccc/QFL2017/data/registration_reports/report1494870746033_registration_0515.csv";
-	std::string churchname = "D:/users/dzhang/church/rccc/QFL2017/data/churchlist/churchlist_20170514.csv";
+	const std::string filename = "D:/users/dzhang/church/rccc/QFL2017/data/registration_reports/report1495684923079_registration_0524.csv";
+	std::string churchname = "D:/users/dzhang/church/rccc/QFL2017/data/churchlist/churchlist_20170523.csv";
 	std::string allchurch_dir = "D:/users/dzhang/church/rccc/QFL2017/data/all_church";
 	std::string allchurch_EU_dir = "D:/users/dzhang/church/rccc/QFL2017/data/EU";
 	std::string allchurch_room_assign_dir = "D:/users/dzhang/church/rccc/QFL2017/data/room_assigns";
 	std::string statistics_file = "D:/users/dzhang/church/rccc/QFL2017/data/qfl_statistics.csv";
-
+	std::string eu_report = "D:/users/dzhang/church/rccc/QFL2017/data/EU/eu_report.csv";
+	std::string cabrini_report = "D:/users/dzhang/church/rccc/QFL2017/data/Cabrini/cabrini_report.csv";
 	std::string childcare_2_5yr_name = "D:/users/dzhang/church/rccc/QFL2017/data/childcare_coworkers_2_5yr.csv";
 	std::string childcare_6_11yr_name = "D:/users/dzhang/church/rccc/QFL2017/data/childcare_coworkers_6_11yr.csv";
 	std::string logistics_name = "D:/users/dzhang/church/rccc/QFL2017/data/logistics.csv";
@@ -35,19 +36,22 @@ static int process_qfl_registrants()
 
 	std::string rcccname = "D:/users/dzhang/church/rccc/QFL2017/data/rccc.csv";
 	std::string rccc_functions = "D:/users/dzhang/church/rccc/QFL2017/data";
-
+	std::string financial_report = "D:/users/dzhang/church/rccc/QFL2017/data/financial/financial.csv";
 	QflReg qfl_reg;
 	qfl_reg.readChurchList(churchname.c_str(), year);
 	qfl_reg.readRegistrants(filename.c_str());
 	qfl_reg.parseAllFields();
 	qfl_reg.classifications();
 	qfl_reg.sortAttendeesByChurches();
+	qfl_reg.printFinancialReport(financial_report.c_str());
+	qfl_reg.printOutEU_statistics(eu_report.c_str());
+	qfl_reg.printOutCabrini_statistics(cabrini_report.c_str());
 	qfl_reg.ageStatistics();
 
 	qfl_reg.printOutStatistics(statistics_file.c_str());
 	qfl_reg.printSpecialNeeds(allchurch_room_assign_dir.c_str());
 	qfl_reg.printAttendeesByAllChurch(allchurch_dir.c_str());
-	qfl_reg.printOutEUListAllChurch_separated(allchurch_EU_dir.c_str());
+//	qfl_reg.printOutEUListAllChurch_separated(allchurch_EU_dir.c_str());
 	qfl_reg.printOutEUListAllChurchInOne(allchurch_EU_dir.c_str());
 
 	qfl_reg.printOutForChildWorkers_2_5yr(childcare_2_5yr_name.c_str());
@@ -59,6 +63,7 @@ static int process_qfl_registrants()
 	qfl_reg.printRidesList(rides_list.c_str());
 
 	qfl_reg.printRCCCFunctions(rccc_functions.c_str());
+
 
 	return 0;
 }

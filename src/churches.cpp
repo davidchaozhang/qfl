@@ -83,7 +83,7 @@ int ChurchList::readInChurchList(const char* churches)
 		qflc.church_code = std::stoi(achurch[1].substr(1, achurch[1].size()- 2));
 		qflc.church_name = achurch[2].substr(1, achurch[2].size() - 2);
 		qflc.church_ini = achurch[3].substr(1, achurch[3].size() - 2);
-
+		qflc.church_in_chinese = achurch[4].substr(1, achurch[4].size() - 2);
 		if (achurch[6].size() > 2)
 			qflc.church_city = achurch[6].substr(1, achurch[6].size() - 2);
 
