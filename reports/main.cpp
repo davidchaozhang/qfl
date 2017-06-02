@@ -19,7 +19,7 @@ int main()
 
 static int process_qfl_registrants()
 {
-	const std::string filename = "D:/users/dzhang/church/rccc/QFL2017/data/registration_reports/report1495684923079_registration_0524.csv";
+	const std::string filename = "D:/users/dzhang/church/rccc/QFL2017/data/registration_reports/report1495915678238_checkin_0527.csv";
 	std::string churchname = "D:/users/dzhang/church/rccc/QFL2017/data/churchlist/churchlist_20170523.csv";
 	std::string allchurch_dir = "D:/users/dzhang/church/rccc/QFL2017/data/all_church";
 	std::string allchurch_EU_dir = "D:/users/dzhang/church/rccc/QFL2017/data/EU";

@@ -225,6 +225,13 @@ int32_t QflReg::parseAllFields()
 		a_regist.zip = std::stoi(person[28].substr(1, person[28].size() - 2));
 		a_regist.functional_group = person[29].substr(1, person[29].size() - 2);
 		a_regist.services = person[30].substr(1, person[30].size() - 2);
+		a_regist.checkin = std::stoi(person[32].substr(1, person[32].size() - 2));
+
+		if (person[34].substr(1, person[34].size() - 2).size() > 0)
+			a_regist.paid = std::stoi(person[34].substr(1, person[34].size() - 2));
+		else
+			a_regist.paid = 0;
+
 		m_registrants.push_back(a_regist);
 		m_person_info[a_regist.person_id] = a_regist;
 	}
@@ -324,23 +331,34 @@ int32_t QflReg::sortAttendeesByChurches()
 	int32_t youth_christians = 0;
 	int32_t youth_non_christians = 0;
 	int32_t children = 0;
+	int32_t paid = 0;
+	int32_t checkins = 0;
+	int32_t youth_paid = 0;
+	int32_t youth_checkins = 0;
 
 	int32_t eu_stay_overnight = 0;
 	int32_t cabrini_stay_overnight = 0;
 	int32_t eu_commute = 0;
 	int32_t cabrini_commute = 0;
-
+	int32_t eu_paid = 0;
+	int32_t eu_checkins = 0;
 
 	int32_t rccc_adult_christians = 0;
 	int32_t rccc_adult_non_christians = 0;
 	int32_t rccc_youth_christians = 0;
 	int32_t rccc_youth_non_christians = 0;
+	int32_t rccc_youth_paid = 0;
+	int32_t rccc_youth_checkins = 0;
 	int32_t rccc_children = 0;
+	int32_t rccc_paid = 0;
+	int32_t rccc_checkins = 0;
 
 	int32_t rccc_eu_stay_overnight = 0;
 	int32_t rccc_cabrini_stay_overnight = 0;
 	int32_t rccc_eu_commute = 0;
 	int32_t rccc_cabrini_commute = 0;
+	int32_t rccc_eu_checkins = 0;
+	int32_t rccc_eu_paid = 0;
 
 	QFL_Church attendee_list;
 	if (m_registrants.size() == 0)
@@ -383,6 +401,10 @@ int32_t QflReg::sortAttendeesByChurches()
 
 				m_attendee_list_byChurch[j].second.church_name = church_name;
 				cnt++;
+
+				checkins += a_regist.checkin;
+				paid += a_regist.paid;
+
 				if (youth) {
 					m_attendee_list_byChurch[j].second.persons[QflReg::qCabrini].push_back(a_regist.person_id);
 					if (a_regist.is_christian)
@@ -395,6 +417,8 @@ int32_t QflReg::sortAttendeesByChurches()
 					else
 						cabrini_commute++;
 
+					youth_checkins += a_regist.checkin;
+					youth_paid += a_regist.paid;
 					if (a_regist.church.compare("Rutgers Community Christian Church") == 0) {
 						if (a_regist.is_christian)
 							rccc_youth_christians++;
@@ -405,6 +429,8 @@ int32_t QflReg::sortAttendeesByChurches()
 							rccc_cabrini_stay_overnight++;
 						else
 							rccc_cabrini_commute++;
+						rccc_youth_checkins += a_regist.checkin;
+						rccc_youth_paid += a_regist.paid;
 					}
 				}
 				else if (child) {
@@ -414,6 +440,8 @@ int32_t QflReg::sortAttendeesByChurches()
 						eu_stay_overnight++;
 					else
 						eu_commute++;
+					eu_checkins += a_regist.checkin;
+					eu_paid += a_regist.paid;
 
 					if (a_regist.church.compare("Rutgers Community Christian Church") == 0) {
 						rccc_children++;
@@ -422,6 +450,8 @@ int32_t QflReg::sortAttendeesByChurches()
 						else
 							rccc_eu_commute++;
 					}
+					rccc_eu_checkins += a_regist.checkin;
+					rccc_eu_paid += a_regist.paid;
 				}
 				else if (a_regist.age_group.compare(AgeGroup::A12_14) == 0 && !little_coworker) {
 					m_attendee_list_byChurch[j].second.persons[QflReg::qChild].push_back(a_regist.person_id);
@@ -431,12 +461,17 @@ int32_t QflReg::sortAttendeesByChurches()
 					else
 						eu_commute++;
 
+					eu_checkins += a_regist.checkin;
+					eu_paid += a_regist.paid;
+
 					if (a_regist.church.compare("Rutgers Community Christian Church") == 0) {
 						rccc_children++;
 						if (stay_overnight)
 							rccc_eu_stay_overnight++;
 						else
 							rccc_eu_commute++;
+						rccc_eu_checkins += a_regist.checkin;
+						rccc_eu_paid += a_regist.paid;
 					}
 				}
 				else if (senior)
@@ -451,7 +486,8 @@ int32_t QflReg::sortAttendeesByChurches()
 						eu_stay_overnight++;
 					else
 						eu_commute++;
-
+					eu_checkins += a_regist.checkin;
+					eu_paid += a_regist.paid;
 					if (a_regist.church.compare("Rutgers Community Christian Church") == 0) {
 						if (a_regist.is_christian)
 							rccc_adult_christians++;
@@ -462,6 +498,8 @@ int32_t QflReg::sortAttendeesByChurches()
 							rccc_eu_stay_overnight++;
 						else
 							rccc_eu_commute++;
+						rccc_eu_checkins += a_regist.checkin;
+						rccc_eu_paid += a_regist.paid;
 					}
 				}
 				else {
@@ -475,7 +513,8 @@ int32_t QflReg::sortAttendeesByChurches()
 						eu_stay_overnight++;
 					else
 						eu_commute++;
-
+					eu_checkins += a_regist.checkin;
+					eu_paid += a_regist.paid;
 					if (a_regist.church.compare("Rutgers Community Christian Church") == 0) {
 						if (a_regist.is_christian)
 							rccc_adult_christians++;
@@ -486,6 +525,8 @@ int32_t QflReg::sortAttendeesByChurches()
 							rccc_eu_stay_overnight++;
 						else
 							rccc_eu_commute++;
+						rccc_eu_checkins += a_regist.checkin;
+						rccc_eu_paid += a_regist.paid;
 					}
 				}
 				break;
@@ -499,6 +540,8 @@ int32_t QflReg::sortAttendeesByChurches()
 	m_allchurch.adult_christian_ratio  = adult_christians / (adult_christians + adult_non_christians);
 	m_allchurch.adult_christians = adult_christians;
 	m_allchurch.adult_non_christians = adult_non_christians;
+	m_allchurch.checkins = checkins;
+	m_allchurch.total_paid = paid;
 
 	m_allchurch.youth_christian_ratio = youth_christians / (youth_christians + youth_non_christians);
 	m_allchurch.youth_christians = youth_christians;
@@ -512,6 +555,11 @@ int32_t QflReg::sortAttendeesByChurches()
 	m_allchurch.eu_commute = eu_commute;
 	m_allchurch.cabrini_novernight = cabrini_stay_overnight;
 	m_allchurch.cabrini_commute = cabrini_commute;
+
+	m_allchurch.eu_checkins = eu_checkins;
+	m_allchurch.eu_paid = eu_paid;
+	m_allchurch.youth_checkins = youth_checkins;
+	m_allchurch.youth_paid = youth_paid;
 
 	// rcc only
 	m_rccc.adult_christian_ratio = rccc_adult_christians / (rccc_adult_christians + rccc_adult_non_christians);
@@ -530,6 +578,8 @@ int32_t QflReg::sortAttendeesByChurches()
 	m_rccc.eu_commute = eu_commute;
 	m_rccc.cabrini_novernight = cabrini_stay_overnight;
 	m_rccc.cabrini_commute = cabrini_commute;
+	m_rccc.checkins = rccc_checkins;
+	m_rccc.total_paid = rccc_paid;
 
 	return 0;
 }
@@ -811,6 +861,9 @@ void QflReg::printOutStatistics(const char*filename)
 	fprintf(hf, "RCCC, %d, %d, %d\n", m_rccc.adult_non_christians, m_rccc.youth_non_christians, m_rccc.children);
 	fprintf(hf, "Others, %d, %d, %d\n\n", m_allchurch.adult_non_christians - m_rccc.adult_non_christians, m_allchurch.youth_non_christians - m_rccc.youth_non_christians, m_allchurch.children - m_rccc.children);
 
+	fprintf(hf, "All checkins = %d, All paid = %d\n", m_allchurch.checkins, m_allchurch.total_paid);
+	fprintf(hf, "EU checkins = %d, EU paid = %d\n", m_allchurch.eu_checkins, m_allchurch.eu_paid);
+	fprintf(hf, "Youth checkins = %d, Youth paid = %d\n", m_allchurch.youth_checkins, m_allchurch.youth_paid);
 
 	// print family, male, female
 	fprintf(hf, "family: %d, male: %d, female: %d\n", m_family_list.size(), m_male_list.size(), m_female_list.size());
@@ -915,6 +968,9 @@ void QflReg::printOutEU_statistics(const char*filename)
 	int32_t eu_18_65 = 0;
 	int32_t eu_66_69 = 0;
 	int32_t eu_70_ = 0;
+	int32_t checkins = 0;
+	int32_t total_paid = 0;
+
 	int32_t sz = m_attendee_list_byChurch.size();
 	std::vector<int32_t > s[3];
 
@@ -943,6 +999,11 @@ void QflReg::printOutEU_statistics(const char*filename)
 					eu_christians++;
 				else
 					eu_non_christians++;
+
+				if (person.checkin)
+					checkins++;
+
+				total_paid += person.paid;
 
 				if (person.age_group.compare(AgeGroup::A1) == 0)
 					eu_0_1++;
@@ -976,6 +1037,7 @@ void QflReg::printOutEU_statistics(const char*filename)
 	fprintf(hf, "EU Total, %d\n", total);
 	fprintf(hf, "EU Christians = %d, non-Christians = %d\n", eu_christians, eu_non_christians);
 	fprintf(hf, "EU Stay overnight = %d, commute = %d\n", overnight, commute);
+	fprintf(hf, "EU checkins = %d, paid\n", checkins, total_paid);
 	fprintf(hf, "EU Males = %d, Females = %d\n", eu_male, eu_female);
 	fprintf(hf, "EU Adults, (18-65)= %d\n", eu_18_65);
 	fprintf(hf, "EU Seniors, (66-69) = %d, (70+) = %d\n", eu_66_69, eu_70_);

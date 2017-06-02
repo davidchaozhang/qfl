@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "QflReg.h"
+#include "churches.h"
+#include "buildings.h"
 
 static void qfl_checkin_help(int retval)
 {
@@ -13,7 +16,8 @@ static void qfl_checkin_help(int retval)
 	std::cout << "Press Esc to exit the program" << std::endl;
 }
 
-int32_t main(int32_t argc, char** argv) {
+static int32_t qfl_image_barcode_checkin(int32_t argc, char** argv)
+{
 	LiveRead lread;
 	std::string checkin_code;
 	std::string url;
@@ -57,5 +61,17 @@ int32_t main(int32_t argc, char** argv) {
 		_sleep(10);
 	}
 	std::cout << "Exiting..." << std::endl;
+	return 0;
+}
+
+static int32_t parseCheckInData(unsigned char* filename)
+{
+
+
+	return 0;
+}
+
+int32_t main(int32_t argc, char** argv) {
+
 	return 0;
 }

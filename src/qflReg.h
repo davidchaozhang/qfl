@@ -85,6 +85,8 @@ public:
 		bool cancelled;
 		int32_t registrtion_fee;
 		int32_t key_deposit;
+		bool checkin;
+		int32_t paid;
 	} Registrant;
 
 
@@ -125,14 +127,22 @@ public:
 		int32_t adult_non_christians;
 		int32_t youth_christians;
 		int32_t youth_non_christians;
+		int32_t youth_checkins;
+		int32_t youth_paid;
 		int32_t children;
 		float adult_christian_ratio;
 		float youth_christian_ratio;
 		float christian_ratio;
 		int32_t eu_overnight;
 		int32_t eu_commute;
+		int32_t eu_checkins;
+		int32_t eu_paid;
 		int32_t cabrini_novernight;
 		int32_t cabrini_commute;
+		int32_t cabrini_checkins;
+		int32_t charini_paid;
+		int32_t checkins;
+		int32_t total_paid;
 	} ChristianStats;
 
 	QflReg();
