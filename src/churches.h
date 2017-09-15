@@ -23,6 +23,7 @@ public:
 		std::string church_state;
 		std::string church_email;
 		std::string church_web;
+		int32_t rank; // order by church size in attendees
 	} QFLChurch;
 
 	ChurchList();
@@ -35,11 +36,12 @@ public:
 	void sortbyState();
 	void sortbyChurchId();
 	void sortbyChurchCode();
+	void sortbyRank();
 
-	std::vector<QFLChurch> matchbyName(std::string name);
-	std::vector<QFLChurch> matchbyZip(std::string name, int32_t range);
-	std::vector<QFLChurch> matchbyCity(std::string city);
-	std::vector<QFLChurch> matchbyState(std::string state);
+	std::vector<QFLChurch*> matchbyName(std::string name);
+	std::vector<QFLChurch*> matchbyZip(std::string name, int32_t range);
+	std::vector<QFLChurch*> matchbyCity(std::string city);
+	std::vector<QFLChurch*> matchbyState(std::string state);
 
 	inline std::vector<QFLChurch> * getChurchList() {
 		return &m_churches;

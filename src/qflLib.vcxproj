@@ -19,12 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="attendees.cpp" />
     <ClCompile Include="buildings.cpp" />
     <ClCompile Include="churches.cpp" />
     <ClCompile Include="liveRead.cpp" />
     <ClCompile Include="qflReg.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="attendees.h" />
     <ClInclude Include="buildings.h" />
     <ClInclude Include="churches.h" />
     <ClInclude Include="liveRead.h" />

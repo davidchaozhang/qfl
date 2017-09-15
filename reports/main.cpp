@@ -1,17 +1,21 @@
 #include "QflReg.h"
 #include "churches.h"
 #include "buildings.h"
+#include "attendees.h"
 
 static int32_t year = 2017;
 static int process_qfl_registrants();
-static int church_building_listTest();
-
+static int building_listTest();
+static int church_listTest();
+static int attendee_listTest();
 
 int main()
 {
 	int ret = 0;
-	//ret = church_building_listTest();
-	ret = process_qfl_registrants();
+	ret = attendee_listTest();
+	//ret = building_listTest();
+	//ret = church_listTest();
+	//ret = process_qfl_registrants();
 	system("PAUSE");
 	return ret;
 }
@@ -19,7 +23,7 @@ int main()
 
 static int process_qfl_registrants()
 {
-	const std::string filename = "D:/users/dzhang/church/rccc/QFL2017/data/registration_reports/report1495915678238_checkin_0527.csv";
+	const std::string filename = "D:/users/dzhang/church/rccc/QFL2017/data/registration_reports/report1496368471394_checkout_0601.csv";
 	std::string churchname = "D:/users/dzhang/church/rccc/QFL2017/data/churchlist/churchlist_20170523.csv";
 	std::string allchurch_dir = "D:/users/dzhang/church/rccc/QFL2017/data/all_church";
 	std::string allchurch_EU_dir = "D:/users/dzhang/church/rccc/QFL2017/data/EU";
@@ -68,18 +72,55 @@ static int process_qfl_registrants()
 	return 0;
 }
 
-int church_building_listTest()
+int church_listTest()
 {
+	int i;
 	ChurchList clst;
-	std::string churchname = "D:/users/dzhang/church/rccc/QFL2017/data/report1493313508803_churchlist.csv";
+	std::string churchname = "D:/users/dzhang/church/rccc/QFL2018/building_layout/churchlist_20170523.csv";
 	clst.readInChurchList(churchname.c_str());
 	clst.sortbyState();
+	return 0;
+}
+
+int building_listTest()
+{
+	int i;
 
 	BuildingRoomList bdlst;
-	std::string brname = "D:/users/dzhang/church/rccc/QFL2017/data/report1493313291455_room_building.csv";
-	bdlst.readInBuildingList(brname.c_str());
-	bdlst.updateAllSections();
-	bdlst.updateAllRooms();
+	std::string brname = "D:/users/dzhang/church/rccc/QFL2018/building_layout/buildingAndRoom-update.csv";
+	bdlst.readInBuildingLists(brname.c_str(), ',');
+	bdlst.accumulateRoomInfo();
+
+	BuildingRoomList::RoomState rs;
+
+	for (i = (int)BuildingRoomList::tFamily_Private; i < (int)BuildingRoomList::tExtra_beds; i++) {
+		std::vector<BuildingRoomList::EURoom*> eurlst = bdlst.queryRoomList(BuildingRoomList::RoomState(i));
+		std::vector<BuildingRoomList::EURoom*> eubrlst = bdlst.queryRoomList(BuildingNames::qEagleHall, BuildingRoomList::RoomState(i));
+	}
+
+	std::vector<BuildingRoomList::EURoom*> eub_shared = bdlst.queryBathSharedRooms();
+	std::vector<BuildingRoomList::EURoom*> eubr_shared = bdlst.queryBathSharedRooms(BuildingNames::qEagleHall);
+	std::vector<BuildingRoomList::EURoom*> eub_avail = bdlst.queryAvailableRooms();
+	std::vector<BuildingRoomList::EURoom*> eubr_avail = bdlst.queryAvailableRooms(BuildingNames::qEagleHall);
+	std::vector<BuildingRoomList::EURoom*> eub_assign = bdlst.queryAssignedRooms();
+	std::vector<BuildingRoomList::EURoom*> eubr_assign = bdlst.queryAssignedRooms(BuildingNames::qEagleHall);
+
+	std::vector<BuildingRoomList::EURoom*> eub_gerooms = bdlst.queryReservedGERooms();
+	std::vector<BuildingRoomList::EURoom*> eubr_gerooms = bdlst.queryReservedGERooms(BuildingNames::qEagleHall);
+
 	bdlst.printRoomStats();
+	return 0;
+}
+
+int attendee_listTest()
+{
+	const std::string filename = "D:/users/dzhang/church/rccc/QFL2018/attendeelist/report1496368471394_checkout_0601.csv";
+	Attendees qfl_attendees;
+	qfl_attendees.readRegistrants(filename.c_str());
+	qfl_attendees.parseAllFields();
+	qfl_attendees.classifications();
+	qfl_attendees.refinement();
+	//qfl_attendees.classifications();
+	//qfl_attendees.sortAttendeesByChurches();
 	return 0;
 }

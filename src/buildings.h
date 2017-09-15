@@ -9,6 +9,8 @@
 
 namespace RoomTypes {
 	const char* const qFamily_Private = "Family Private";
+	const char* const qFamily_Male = "Family Male";
+	const char* const qFamily_Female = "Family Female";
 	const char* const qMale = "Male";
 	const char* const qFemale = "Female";
 	const char* const qNo_Bath = "No Bath";
@@ -17,12 +19,14 @@ namespace RoomTypes {
 namespace RoomStatus {
 	const char* const qAvailable = "Available";
 	const char* const qInactive = "Inactive";
+	const char* const qSharedBathroom = "SharedBathroom";
 	const char* const qReservedGE = "Reserved-GE";
 	const char* const qReservedSK = "Reserved-SK";
 	const char* const qReservedSP = "Reserved-SP";
 	const char* const qReservedCH = "Reserved-CH";
 	const char* const qFullyAssigned = "Fully Assigned";
 	const char* const qPartiallyAssigned = "Partially Assigned";
+	const char* const qExtraBed = "Extra Bed";
 };
 
 // this is the order of the report
@@ -35,6 +39,7 @@ namespace BuildingReport {
 	const char* const qRoom = "Room";
 	const char* const qLevel = "Level";
 	const char* const qRoomType = "Room Type";
+	const char* const qBathroom = "Bathroom";
 	const char* const qRoomStatus = "Room Status";
 	const char* const qCapacity = "Capacity";
 	const char* const qBedAssigned = "Bed Assigned";
@@ -49,24 +54,38 @@ namespace BuildingReport {
 	const char* const qNote = "Note";
 };
 
+namespace BuildingNames {
+	const char* const qEagleHall = "Eagle Hall";
+	const char* const qGallup = "Gallup";
+	const char* const qGoughHall = "Gough Hall";
+	const char* const qGuffin = "Guffin";
+	const char* const qHainer = "Hainer";
+	const char* const qKea = "Kea";
+	const char* const qSparrowk = "Sparrowk";
+};
 
 class QFLLIB_EXPORT BuildingRoomList {
 public:
 
-	typedef struct {
+	static const std::string m_buildings[7];
+
+	typedef struct EURoom {
 		int32_t room_id;
 		std::string room;
 		std::string room_type;
+		std::string bathroom;
 		std::string room_status;
 		int32_t capacity;
-		int32_t bed_asigned;
+		int32_t bed_assigned;
 		int32_t extra;
 		int32_t bath_distance;
 		int32_t room_conditions;
 		int32_t score;
+		std::vector<EURoom*> neighbors;
 	} EURoom;
 
 	typedef struct {
+		std::string name;
 		std::string direction;
 		int32_t level;
 		std::vector<EURoom> rooms;
@@ -81,39 +100,151 @@ public:
 		bool ac;
 		bool fridge;
 		bool elevator;
-		int32_t total_rooms;
-		int32_t total_beds;
 		std::vector<EUSection> sects;
 		int32_t building_beds;
 		int32_t building_rooms;
 	} EUBuilding;
 
+	typedef enum {
+		tFamily_Private = 10,
+		tFamily_Male = 11,
+		tFamily_Female = 12,
+		tMale = 13,
+		tFemale = 14,
+		tAvailable = 15,
+		tReservedGE = 16,
+		tReservedSK = 17,
+		tReservedSP = 18,
+		tReservedCH = 19,
+		tFullyAssigned = 20,
+		tPartiallyAssigned = 21,
+		tShared_Bathroom = 22,
+		tNo_Bath = 23,
+		tExtra_beds = 24,
+		tError = -99
+	} RoomState;
+
+	typedef struct {
+		int32_t total_rooms; // total rooms are all rooms including inactive rooms
+		int32_t total_beds;  // total beds are all beds including beds in inactive rooms (extra bed is counted separately) 
+		int32_t total_family_rooms; // total family rooms excluding inactive rooms
+		int32_t total_family_beds;  // total family beds excluding inactive rooms
+		int32_t total_male_rooms; // total male rooms excluding inactive rooms
+		int32_t total_male_beds; // total male beds excluding inactive rooms
+		int32_t total_female_rooms; // total female rooms excluding inactive rooms
+		int32_t total_female_beds; // total female beds excluding inactive rooms
+		int32_t total_extra_beds; // total extra beds assigned 
+		int32_t total_available_rooms; // total available rooms excluding reserved rooms
+		int32_t total_available_beds; // total available beds excluding resrved rooms
+		int32_t total_reserved_rooms; // reserved rooms
+		int32_t total_reserved_beds; // reserved beds
+		int32_t total_assigned_rooms; // fully assigned rooms
+		int32_t total_assigned_beds; // beds in fully assigned rooms
+		int32_t total_partial_assigned_rooms; // partically assigned rooms
+		int32_t total_inactive_rooms; // inactive rooms
+		int32_t total_inactive_beds; // inactive beds
+		int32_t total_shared_family_beds; // rooms that shared beds
+	} RoomStats;
 
 	BuildingRoomList();
 	~BuildingRoomList();
 
-	int readInBuildingList(const char * building_rooms_list);
-
-	int updateAllSections();
-
-	int updateAllRooms();
+	int readInBuildingLists(const char * building_rooms_list, char dataformat=',');
+	int accumulateRoomInfo();
 
 	int printRoomStats();
 
 	int writeRoomStats(const char* filename);
 
-	inline std::vector<EUBuilding>* getBuilding_rooms_list() { return &m_eu_buildings; }
+	std::vector<EURoom*> queryRoomList(RoomState rs);
+	std::vector<EURoom*> queryRoomList(const std::string &building_name, RoomState rs);
+
+	std::vector<EURoom*> queryBathSharedRooms();
+	std::vector<EURoom*> queryBathSharedRooms(std::string building_name);
+
+	std::vector<EURoom*> query1personRooms(RoomState rs);
+	std::vector<EURoom*> query1personRooms(std::string &building_name, RoomState rs);
+	std::vector<EURoom*> query2personRooms(RoomState rs);
+	std::vector<EURoom*> query2personRooms(std::string &building_name, RoomState rs);
+	std::vector<EURoom*> query3personRooms(RoomState rs);
+	std::vector<EURoom*> query3personRooms(std::string &building_name, RoomState rs);
+	std::vector<EURoom*> query4personRooms(RoomState rs);
+	std::vector<EURoom*> query4personRooms(std::string &building_name, RoomState rs);
+	std::vector<EURoom*> queryExtraBedRooms(RoomState rs);
+	std::vector<EURoom*> queryExtraBedRooms(std::string &building_name, RoomState rs);
+
+	std::vector<EURoom*> queryAvailableRooms();
+	std::vector<EURoom*> queryAvailableRooms(std::string building_name);
+
+	std::vector<EURoom*> queryAssignedRooms();
+	std::vector<EURoom*> queryAssignedRooms(std::string building_name);
+
+	std::vector<EURoom*> queryReservedGERooms();
+	std::vector<EURoom*> queryReservedGERooms(std::string building_name);
+	std::vector<EURoom*> queryReservedSKRooms();
+	std::vector<EURoom*> queryReservedSKRooms(std::string building_name);
+	std::vector<EURoom*> queryReservedSPRooms();
+	std::vector<EURoom*> queryReservedSPRooms(std::string building_name);
+	std::vector<EURoom*> queryReservedCHRooms();
+	std::vector<EURoom*> queryReservedCHRooms(std::string building_name);
+
+	inline std::vector<EUBuilding>* getBuilding_list() { return &m_eu_buildings; }
+
+protected:
+
+	int readInBuildingList_quotes(const char * building_rooms_list);
+	int updateAllSections_quotes();
+	int updateAllRooms_quotes();
+
+	int readInBuildingList_commas(const char * building_rooms_list);
+	int updateAllSections(char dataformat=',');
+	int updateAllRooms_commas();
+	void resetStats(RoomStats &rs);
+	int checkRoomType(const std::string rt, const std::string art);
+	int checkRoomStatus(const std::string rt, const std::string art);
+	EURoom *checkRoomState(EURoom *eur, RoomState rs);
+
+	void findNeighbors();
+	void computeRoomStats();
+	void makeRoomListPerBuilding();
+	std::string getStringNames(RoomState rs);
 
 private:
 	int32_t m_total_rooms;
 	int32_t m_total_beds;
-	std::vector<EUBuilding> m_eu_buildings;
+	int32_t m_total_inactive_rooms;
 	std::vector<std::vector<std::string>> m_room_array;
-	std::vector<int32_t> family_rooms_array;
-	std::vector<int32_t> male_rooms_array;
-	std::vector<int32_t> female_rooms_array;
-	std::vector<int32_t> reserved_rooms_array;
+	std::vector<EUBuilding> m_eu_buildings;
 
+	std::map<std::string, RoomStats> m_room_stats;
+	std::map<int32_t, EURoom*> m_room_list_by_id;
+	std::map<std::string, EURoom*> m_room_list_by_roomname;
+
+	/*
+	 room_list= family rooms + male rooms + female rooms
+	          = available rooms + reserved rooms + fully assigned rooms + partially assigned rooms 
+			  = available rooms + reserved (GE, SK, SP, CH) rooms + fully assigned rooms + partially assigned rooms 
+	*/
+	std::map<std::string, std::vector<EURoom*>> m_room_list_per_building;
+	std::map<std::string, std::vector<EURoom*>> m_family_rooms_array;
+	std::map<std::string, std::vector<EURoom*>> m_male_rooms_array;
+	std::map<std::string, std::vector<EURoom*>> m_female_rooms_array;
+	std::map<std::string, std::vector<EURoom*>> m_reserved_rooms_array;
+	std::map<std::string, std::vector<EURoom*>> m_available_rooms_array;
+
+	std::map<std::string, std::vector<EURoom*>> m_ReservedGE_rooms;
+	std::map<std::string, std::vector<EURoom*>> m_ReservedSK_rooms;
+	std::map<std::string, std::vector<EURoom*>> m_ReservedSP_rooms;
+	std::map<std::string, std::vector<EURoom*>> m_ReservedCH_rooms;
+	std::map<std::string, std::vector<EURoom*>> m_FullyAssigned_rooms;
+	std::map<std::string, std::vector<EURoom*>> m_PartiallyAssigned;
+	std::map<std::string, std::vector<EURoom*>> m_ExtraBeds;
+
+	std::map<std::string, std::vector<EURoom*>> m_1person_rooms;
+	std::map<std::string, std::vector<EURoom*>> m_2person_rooms;
+	std::map<std::string, std::vector<EURoom*>> m_3person_rooms;
+	std::map<std::string, std::vector<EURoom*>> m_4person_rooms;
+	std::map<std::string, std::vector<EURoom*>> m_5person_rooms;
 };
 
 #endif //_BUILDINGS_H_

@@ -26,6 +26,11 @@ static bool UDbyChurchCode(const ChurchList::QFLChurch &a, const ChurchList::QFL
 	return (a.church_code < b.church_code);
 }
 
+static bool UDbyChurchRank(const ChurchList::QFLChurch &a, const ChurchList::QFLChurch &b)
+{
+	return (a.rank < b.rank);
+}
+
 ChurchList::ChurchList()
 {}
 
@@ -99,6 +104,9 @@ int ChurchList::readInChurchList(const char* churches)
 		if (achurch[11].size() > 2)
 			qflc.church_web = achurch[11].substr(1, achurch[11].size() - 2);
 
+		if (achurch[12].size() > 2)
+			qflc.rank = std::stoi(achurch[12].substr(1, achurch[12].size() - 2));
+
 		m_churches.push_back(qflc);
 	}
 
@@ -129,4 +137,9 @@ void ChurchList::sortbyChurchId()
 void ChurchList::sortbyChurchCode()
 {
 	std::sort(m_churches.begin(), m_churches.end(), UDbyChurchCode);
+}
+
+void ChurchList::sortbyRank()
+{
+	std::sort(m_churches.begin(), m_churches.end(), UDbyChurchRank);
 }
