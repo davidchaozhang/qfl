@@ -30,6 +30,7 @@ public:
 	~ChurchList();
 
 	int readInChurchList(const char * churches);
+	QFLChurch *getChurch(std::string church_name);
 
 	void sortbyName();
 	void sortbyZip();

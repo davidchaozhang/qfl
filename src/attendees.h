@@ -93,7 +93,7 @@ public:
 		bool key_returned;
 		int32_t paid;
 		std::vector<Registrant*> party_members;
-		std::vector<BuildingRoomList::EURoom*> assigned_rooms;
+		BuildingRoomList::EURoom* assigned_room;
 		ChurchList::QFLChurch* from_church;
 	} Registrant;
 
@@ -135,6 +135,20 @@ public:
 	} Church;
 
 	typedef struct {
+		BuildingRoomList brlist;
+		std::string building_name;
+		std::vector<Registrant* > persons;
+		std::vector<Registrant*> christian_list;
+		std::vector<Registrant*> non_christian_list;
+		std::vector<Registrant*> senior_list;
+		std::vector<Registrant*> baby_list;
+		std::vector<Registrant*> special_need_list;
+		std::map<int32_t, Party> family_list;
+		std::vector<Registrant*> male_list;
+		std::vector<Registrant*> female_list;
+	} Building;
+
+	typedef struct {
 		int32_t cell_group_id;
 		std::string church;
 		std::string functions;
@@ -165,15 +179,31 @@ public:
 		int32_t total_paid;
 	} ChristianStats;
 
+	typedef enum {
+		fByState = 0,
+		fByZip = 1,
+		fByName = 2,
+		fByChurchId = 3,
+		fByChurchCode = 4,
+		fByRank = 5,
+	}SortChurchList;
+
 	Attendees();
 	~Attendees();
 
-	int32_t readChurchList(const char* churchname, int32_t year);
+	int32_t readChurchList(const char* churchname, SortChurchList sortmethod, int32_t year);
 	int32_t readRegistrants(const char *filename);
+	int32_t readBuildingRooms(const char *filename);
 	int32_t parseAllFields();
 	int32_t classifications();
 	int32_t refinement();
 	int32_t sortAttendeesByChurches();
+	int32_t sortAttendeesPerBuilidng();
+
+
+	ChurchList::QFLChurch* getChurch(int32_t person_id);
+	BuildingRoomList::EURoom *getRoom(int32_t person_id);
+	Registrant *getRegistrant(int32_t person_id);
 
 	void upperCaseConvert(std::vector<int> entries);
 
@@ -183,6 +213,7 @@ public:
 	std::string intToString(int i);
 	std::string getCurTime();
 
+	protected:
 	std::vector<std::vector<std::string>> m_data;
 	std::vector<Registrant> m_registrants;
 	std::map<int32_t, Registrant*> m_person_info; // person id

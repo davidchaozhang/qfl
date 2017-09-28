@@ -82,6 +82,9 @@ public:
 		int32_t room_conditions;
 		int32_t score;
 		std::vector<EURoom*> neighbors;
+		void *section;
+		void *building;
+		void *persons;
 	} EURoom;
 
 	typedef struct {
@@ -91,6 +94,7 @@ public:
 		std::vector<EURoom> rooms;
 		int32_t sect_beds;
 		int32_t sect_rooms;
+		void *building;
 	} EUSection;
 
 	typedef struct {
@@ -190,6 +194,9 @@ public:
 
 	inline std::vector<EUBuilding>* getBuilding_list() { return &m_eu_buildings; }
 
+	EURoom* getRoom(int32_t room_id) { return m_room_list_by_id[room_id]; }
+	EURoom* getRoom(std::string room_name) { return m_room_list_by_roomname[room_name]; }
+
 protected:
 
 	int readInBuildingList_quotes(const char * building_rooms_list);
@@ -213,7 +220,7 @@ private:
 	int32_t m_total_rooms;
 	int32_t m_total_beds;
 	int32_t m_total_inactive_rooms;
-	std::vector<std::vector<std::string>> m_room_array;
+	std::vector<std::vector<std::string>> m_room_array; // based on room name
 	std::vector<EUBuilding> m_eu_buildings;
 
 	std::map<std::string, RoomStats> m_room_stats;

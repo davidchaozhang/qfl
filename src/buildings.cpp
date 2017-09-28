@@ -387,6 +387,7 @@ int BuildingRoomList::updateAllSections(char dataformat)
 			sect.name = m_room_array[i][2] + "_" + m_room_array[i][5];
 			sect.direction = m_room_array[i][2];
 			sect.level = std::atoi(m_room_array[i][5].c_str());
+			sect.building = (void *) (&m_eu_buildings[temp_num - 1]);
 			m_eu_buildings[temp_num - 1].sects.push_back(sect);
 		}
 		else {
@@ -401,6 +402,7 @@ int BuildingRoomList::updateAllSections(char dataformat)
 				sect.name = m_room_array[i][2] + "_" + m_room_array[i][5];
 				sect.direction = m_room_array[i][2];
 				sect.level = std::atoi(m_room_array[i][5].c_str());
+				sect.building = (void *)(&m_eu_buildings[temp_num - 1]);
 				m_eu_buildings[temp_num - 1].sects.push_back(sect);
 			}
 		}
@@ -447,6 +449,9 @@ int BuildingRoomList::updateAllRooms_quotes()
 				aroom.room_conditions = std::atoi(m_room_array[i][18].substr(1, m_room_array[i][18].size() - 2).c_str());
 				aroom.score = std::atoi(m_room_array[i][14].substr(1, m_room_array[i][14].size() - 2).c_str());
 				aroom.extra = std::atoi(m_room_array[i][11].substr(1, m_room_array[i][11].size() - 2).c_str());
+				aroom.section = (void*)(&m_eu_buildings[build_num - 1].sects[j]);
+				aroom.building = (void*)(&m_eu_buildings[build_num - 1]);
+				aroom.persons = NULL;
 				m_eu_buildings[build_num - 1].sects[j].rooms.push_back(aroom);
 				//if (aroom.room_status.compare(RoomStatus::qInactive) != 0) 
 				{
@@ -506,6 +511,8 @@ int BuildingRoomList::updateAllRooms_commas()
 				aroom.room_conditions = std::atoi(m_room_array[i][18].c_str());
 				aroom.score = std::atoi(m_room_array[i][14].c_str());
 				aroom.extra = std::atoi(m_room_array[i][11].c_str());
+				aroom.section = (void*)(&m_eu_buildings[build_num - 1].sects[j]);
+				aroom.building = (void*)(&m_eu_buildings[build_num - 1]);
 				m_eu_buildings[build_num - 1].sects[j].rooms.push_back(aroom);
 				//if (aroom.room_status.compare(RoomStatus::qInactive) != 0) 
 				{

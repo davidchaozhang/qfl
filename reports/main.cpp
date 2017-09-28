@@ -2,17 +2,20 @@
 #include "churches.h"
 #include "buildings.h"
 #include "attendees.h"
+#include "roomassign.h"
 
 static int32_t year = 2017;
 static int process_qfl_registrants();
 static int building_listTest();
 static int church_listTest();
 static int attendee_listTest();
+static int room_assignmentTest();
 
 int main()
 {
 	int ret = 0;
-	ret = attendee_listTest();
+	ret = room_assignmentTest();
+	//ret = attendee_listTest();
 	//ret = building_listTest();
 	//ret = church_listTest();
 	//ret = process_qfl_registrants();
@@ -114,13 +117,34 @@ int building_listTest()
 
 int attendee_listTest()
 {
+	std::string churchname = "D:/users/dzhang/church/rccc/QFL2018/churchlist/churchlist_20170523.csv";
+	std::string brname = "D:/users/dzhang/church/rccc/QFL2018/building_layout/buildingAndRoom-update.csv";
 	const std::string filename = "D:/users/dzhang/church/rccc/QFL2018/attendeelist/report1496368471394_checkout_0601.csv";
 	Attendees qfl_attendees;
+	qfl_attendees.readChurchList(churchname.c_str(), Attendees::fByRank, 2017);
+	qfl_attendees.readBuildingRooms(brname.c_str());
 	qfl_attendees.readRegistrants(filename.c_str());
 	qfl_attendees.parseAllFields();
 	qfl_attendees.classifications();
 	qfl_attendees.refinement();
+	qfl_attendees.sortAttendeesByChurches();
 	//qfl_attendees.classifications();
 	//qfl_attendees.sortAttendeesByChurches();
 	return 0;
+}
+
+int room_assignmentTest()
+{
+	std::string churchname = "D:/users/dzhang/church/rccc/QFL2018/churchlist/churchlist_20170523.csv";
+	std::string brname = "D:/users/dzhang/church/rccc/QFL2018/building_layout/buildingAndRoom-update.csv";
+	const std::string filename = "D:/users/dzhang/church/rccc/QFL2018/attendeelist/report1496368471394_checkout_0601.csv";
+
+	int32_t status = 0;
+	RoomAssign ra;
+
+	status = ra.readInputs(churchname.c_str(), brname.c_str(), filename.c_str(), 2017);
+	status = ra.preprocessData();
+	status = ra.assignRooms2Choir();
+
+	return status;
 }

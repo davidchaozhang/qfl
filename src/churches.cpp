@@ -91,28 +91,51 @@ int ChurchList::readInChurchList(const char* churches)
 		qflc.church_in_chinese = achurch[4].substr(1, achurch[4].size() - 2);
 		if (achurch[6].size() > 2)
 			qflc.church_city = achurch[6].substr(1, achurch[6].size() - 2);
+		else
+			qflc.church_city = "";
 
 		if (achurch[7].size() > 2)
 			qflc.church_zip = std::stoi(achurch[7].substr(1, achurch[7].size() - 2));
+		else
+			qflc.church_zip = 0;
 
 		if (achurch[8].size() > 2)
 			qflc.church_state = achurch[8].substr(1, achurch[8].size() - 2);
+		else
+			qflc.church_state = "";
 
 		if (achurch[12].size() > 2)
 			qflc.church_email = achurch[12].substr(1, achurch[12].size() - 2);
+		else
+			qflc.church_email = "";
 
 		if (achurch[11].size() > 2)
 			qflc.church_web = achurch[11].substr(1, achurch[11].size() - 2);
+		else
+			qflc.church_web = "";
 
-		if (achurch[12].size() > 2)
-			qflc.rank = std::stoi(achurch[12].substr(1, achurch[12].size() - 2));
-
+//		if (achurch[13].size() > 2)
+//			qflc.rank = std::stoi(achurch[13].substr(1, achurch[13].size() - 2));
+		qflc.rank = (int32_t)y; // change me when new data is available
 		m_churches.push_back(qflc);
 	}
 
 	return 0;
 }
 
+ChurchList::QFLChurch *ChurchList::getChurch(std::string church_name)
+{
+	std::vector<QFLChurch> *chlst = getChurchList();
+	ChurchList::QFLChurch * ch = NULL;
+	for (int i = 0; i < chlst->size(); i++) {
+		std::string name = (*chlst)[i].church_name;
+		if (name.compare(church_name) == 0) {
+			ch = &(*chlst)[i];
+			break;
+		}
+	}
+	return ch;
+}
 
 void ChurchList::sortbyName()
 {

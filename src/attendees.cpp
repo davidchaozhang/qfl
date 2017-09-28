@@ -65,14 +65,81 @@ std::string Attendees::getCurTime()
 	return cur_time;
 }
 
-int32_t Attendees::readChurchList(const char* churchname, int32_t year)
+ChurchList::QFLChurch* Attendees::getChurch(int32_t person_id)
+{
+	if (m_person_info.size() == 0)
+		return NULL;
+
+	Registrant *rt = m_person_info[person_id];
+	ChurchList::QFLChurch *ch = rt->from_church;
+
+	return ch;
+}
+
+BuildingRoomList::EURoom *Attendees::getRoom(int32_t person_id)
+{
+	if (m_person_info.size() == 0)
+		return NULL;
+
+	BuildingRoomList::EURoom *rm = NULL;
+	Registrant *rt = m_person_info[person_id];
+
+	if (rt->assigned_room != NULL)
+		rm = rt->assigned_room;
+	return rm;
+}
+
+Attendees::Registrant *Attendees::getRegistrant(int32_t person_id)
+{
+	if (m_person_info.size() == 0)
+		return NULL;
+
+	Registrant *rt = m_person_info[person_id];
+	return rt;
+}
+
+
+int32_t Attendees::readChurchList(const char* churchname, SortChurchList sortmethod, int32_t year)
 {
 	int status;
 	status = m_church_list.readInChurchList(churchname);
-	m_church_list.sortbyState();
+	if (status < 0)
+		return status;
+
+	switch (sortmethod) {
+	case fByState:
+	default:
+		m_church_list.sortbyState();
+		break;
+	case fByZip:
+		m_church_list.sortbyZip();
+		break;
+	case fByName:
+		m_church_list.sortbyName();
+		break;
+	case fByChurchId:
+		m_church_list.sortbyChurchId();
+		break;
+	case fByChurchCode:
+		m_church_list.sortbyChurchCode();
+		break;
+	case fByRank:
+		m_church_list.sortbyRank();
+		break;
+	}
+
 	return status;
 }
 
+int32_t Attendees::readBuildingRooms(const char* buildingrooms)
+{
+	int status;
+	status = m_br_list.readInBuildingLists(buildingrooms, ',');
+	if (status != 0)
+		return status;
+	status = m_br_list.accumulateRoomInfo();
+	return status;
+}
 
 int32_t Attendees::readRegistrants(const char *filename)
 {
@@ -160,15 +227,17 @@ int32_t Attendees::readRegistrants(const char *filename)
 */
 int32_t Attendees::parseAllFields()
 {
-	int32_t i, j;
+	int32_t i, j, datasz;
 	bool available;
-
+	
 	Registrant a_regist;
 	if (m_data.size() == 0)
 		return -1;
 
+	datasz = 100; // m_data.size();
+
 	std::vector<std::string> person = m_data[0];
-	for (i = 1; i < m_data.size(); i++){
+	for (i = 1; i < datasz; i++){
 		available = false;
 		person = m_data[i];
 		// cancelled persons are removed from the list
@@ -190,18 +259,32 @@ int32_t Attendees::parseAllFields()
 
 		if (person[0].size() > 2)
 			a_regist.person_id = std::stoi(person[0].substr(1, person[0].size() - 2));
+		else
+			a_regist.person_id = 0;
 		if (person[1].size() > 2)
 			a_regist.party = std::stoi(person[1].substr(1, person[1].size() - 2));
-		if (person[2].size() > 2)
+		else
+			a_regist.party = 0;
+		if (person[2].size() > 2) 
 			a_regist.church = person[2].substr(1, person[2].size() - 2);
+		else 
+			a_regist.church = "";
+		a_regist.from_church = NULL;
+		
 		if (person[3].size() > 2)
 			a_regist.contact_person = person[3].substr(1, person[3].size() - 2);
+		else
+			a_regist.contact_person = "";
 		a_regist.party_type = person[4].substr(1, person[4].size() - 2);
 		a_regist.first_name = person[5].substr(1, person[5].size() - 2);
 		a_regist.last_name = person[6].substr(1, person[6].size() - 2);
 		a_regist.chinese_name = person[7].substr(1, person[7].size() - 2);
 
-		a_regist.room = person[8].substr(1, person[8].size() - 2);
+		a_regist.room = ""; // person[8].substr(1, person[8].size() - 2);
+		if (a_regist.room.size() == 0)
+			a_regist.assigned_room = NULL;
+		else
+			printf("room = %s\n", a_regist.room.c_str());
 		a_regist.cell_group = person[9].substr(1, person[9].size() - 2);
 		a_regist.need_room = (person[10].substr(1, person[10].size() - 2).compare(NeedRoom::RoomNeeded) == 0);
 
@@ -253,12 +336,22 @@ int32_t Attendees::parseAllFields()
 	}
 
 	std::vector<Registrant>::iterator it = m_registrants.begin();
-	for (i = entries.size() - 1; i >= 0; i--) {
+	for (i = (int32_t)entries.size() - 1; i >= 0; i--) {
 		m_registrants.erase(it + entries[i]);
 	}
 
 	for (i = 0; i < m_registrants.size(); i++) {
+		std::string chnm = m_registrants[i].church;
+		if (chnm.size() > 0)
+			m_registrants[i].from_church = m_church_list.getChurch(chnm);
 		m_person_info[m_registrants[i].person_id] = &(m_registrants[i]);
+	}
+
+	for (i = 0; i < m_registrants.size(); i++) {
+		Registrant attdee_i = m_registrants[i];
+		if (attdee_i.room.size() > 0) {
+			m_registrants[i].assigned_room = m_br_list.getRoom(attdee_i.room);
+		}
 	}
 
 	printf("Total attendees = %d, Cancelled = %d, Attendee not counted = %d\n", m_registrants.size(), m_cancelled, m_uncertain);
@@ -490,6 +583,136 @@ int32_t Attendees::refinement()
 			}
 		}
 	}
+
+	return 0;
+}
+
+int32_t Attendees::sortAttendeesByChurches()
+{
+	int32_t i, j;
+	std::vector<ChurchList::QFLChurch> *churches = getChurchHandle()->getChurchList();
+	m_attendee_list_byChurch.clear();
+
+	for (i = 0; i < churches->size(); i++) {
+		ChurchList::QFLChurch achurch = (*churches)[i];
+		std::string name = achurch.church_name;
+		Church thechurch;
+		thechurch.church_name = name;
+		thechurch.from_church = &((*churches)[i]);
+		m_attendee_list_byChurch[name] = thechurch;
+	}
+
+	/// male list
+	std::map < int32_t, std::vector<Registrant*>>::iterator it_male;
+	for (it_male = m_male_list.begin(); it_male != m_male_list.end(); ++it_male) {
+		int32_t male_id = it_male->first;
+		std::vector<Registrant*> lst_male = it_male->second;
+		for (j = 0; j < lst_male.size(); j++) {
+			Registrant *rt = lst_male[j];
+			std::string chname = rt->church;
+			int32_t party_id = rt->party;
+			m_attendee_list_byChurch[chname].male_list.push_back(m_male_list[party_id][0]);
+		}
+
+	}
+
+	/// female list
+	std::map < int32_t, std::vector<Registrant*>>::iterator it_female;
+	for (it_female = m_female_list.begin(); it_female != m_female_list.end(); ++it_female) {
+		int32_t female_id = it_female->first;
+		std::vector<Registrant*> lst_female = it_female->second;
+		for (j = 0; j < lst_female.size(); j++) {
+			Registrant *rt = lst_female[j];
+			std::string chname = rt->church;
+			int32_t party_id = rt->party;
+			m_attendee_list_byChurch[chname].female_list.push_back(m_female_list[party_id][0]);
+		}
+	}
+
+	/// senior list
+	std::map < int32_t, std::vector<Registrant*>>::iterator it_senior;
+	for (it_senior = m_senior_list.begin(); it_senior != m_senior_list.end(); ++it_senior) {
+		int32_t senior_id = it_senior->first;
+		std::vector<Registrant*> lst_senior = it_senior->second;
+		for (j = 0; j < lst_senior.size(); j++) {
+			Registrant *rt = lst_senior[j];
+			std::string chname = rt->church;
+			int32_t party_id = rt->party;
+			m_attendee_list_byChurch[chname].senior_list.push_back(m_senior_list[party_id][0]);
+		}
+	}
+
+	/// baby list
+	std::map < int32_t, std::vector<Registrant*>>::iterator it_baby;
+	for (it_baby = m_baby_list.begin(); it_baby != m_baby_list.end(); ++it_baby) {
+		int32_t baby_id = it_baby->first;
+		std::vector<Registrant*> lst_baby = it_baby->second;
+		for (j = 0; j < lst_baby.size(); j++) {
+			Registrant *rt = lst_baby[j];
+			std::string chname = rt->church;
+			int32_t party_id = rt->party;
+			m_attendee_list_byChurch[chname].baby_list.push_back(m_baby_list[party_id][0]);
+		}
+	}
+
+	/// special need list
+	std::map < int32_t, std::vector<Registrant*>>::iterator it_special_need;
+	for (it_special_need = m_special_need_list.begin(); it_special_need != m_special_need_list.end(); ++it_special_need) {
+		int32_t special_need_id = it_special_need->first;
+		std::vector<Registrant*> lst_special_need = it_special_need->second;
+		for (j = 0; j < lst_special_need.size(); j++) {
+			Registrant *rt = lst_special_need[j];
+			std::string chname = rt->church;
+			int32_t party_id = rt->party;
+			m_attendee_list_byChurch[chname].special_need_list.push_back(m_special_need_list[party_id][0]);
+		}
+	}
+
+	/// family list
+	std::map < int32_t, std::vector<Registrant*>>::iterator it_family;
+	for (it_family = m_family_info.begin(); it_family != m_family_info.end(); ++it_family) {
+		int32_t family_id = it_family->first;
+		std::vector<Registrant*> lst_family = it_family->second;
+		Party pty;
+		pty.contact_person = lst_family[0]->contact_person;
+		pty.email = lst_family[0]->email;
+		pty.city = lst_family[0]->city;
+		pty.mobile_phone = lst_family[0]->mobile_phone;
+		pty.state = lst_family[0]->state;
+		pty.zip = lst_family[0]->zip;
+		pty.party = lst_family[0]->party;
+		pty.church = lst_family[0]->church;
+		pty.from_church = lst_family[0]->from_church;
+
+		for (j = 0; j < lst_family.size(); j++) {
+			bool matched = false;
+			BuildingRoomList::EURoom * eu_room = NULL;
+			Registrant *rt = lst_family[j];
+			std::string chname = rt->church;
+			int32_t party_id = rt->party;
+			int32_t person_id = rt->person_id;
+			pty.attendee_list_a.push_back(person_id);
+			pty.attendee_list_b.push_back(getRegistrant(person_id));
+			eu_room = getRoom(person_id);
+			if (eu_room != NULL) {
+				for (i = 0; i < pty.assigned_rooms.size(); i++) {
+					if (eu_room == pty.assigned_rooms[i]) {
+						matched = true;
+						break;
+					}
+				}
+				if (!matched)
+					pty.assigned_rooms.push_back(getRoom(person_id));
+			}
+		}
+		m_attendee_list_byChurch[pty.church].family_list[pty.party] = pty;
+	}
+
+	return 0;
+}
+
+int32_t Attendees::sortAttendeesPerBuilidng()
+{
 
 	return 0;
 }
