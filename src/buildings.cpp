@@ -10,10 +10,26 @@ static bool BDbyNumber(const BuildingRoomList::EUBuilding &a, const BuildingRoom
 const std::string BuildingRoomList::m_buildings[7] = { BuildingNames::qEagleHall, BuildingNames::qGallup, BuildingNames::qGoughHall, BuildingNames::qGuffin,
 BuildingNames::qHainer, BuildingNames::qKea, BuildingNames::qSparrowk };
 
+const int32_t BuildingRoomList::m_OpLevel[5] = {4, 0, 1, 2, 3};
+
 BuildingRoomList::BuildingRoomList()
 {
 	m_total_rooms = 0;
 	m_total_beds = 0;
+	m_room_measure.brBuilding = 10000;
+	m_room_measure.brSect = 1000;
+	m_room_measure.brLevel = 200;
+	m_room_measure.brRoom = 4;
+	m_room_measure.brAC = -5;
+	m_room_measure.brElevator = 0;
+
+	m_buildingCode[BuildingNames::qEagleHall] = BuildingCode::pEagleHall;
+	m_buildingCode[BuildingNames::qGallup] = BuildingCode::pGallup;
+	m_buildingCode[BuildingNames::qGoughHall] = BuildingCode::pGoughHall;
+	m_buildingCode[BuildingNames::qGuffin] = BuildingCode::pGuffin;
+	m_buildingCode[BuildingNames::qHainer] = BuildingCode::pHainer;
+	m_buildingCode[BuildingNames::qKea] = BuildingCode::pKea;
+	m_buildingCode[BuildingNames::qSparrowk] = BuildingCode::pSparrowk;
 }
 
 BuildingRoomList::~BuildingRoomList()
@@ -350,7 +366,7 @@ int BuildingRoomList::readInBuildingList_commas(const char * building_rooms_list
 
 int BuildingRoomList::updateAllSections(char dataformat)
 {
-	int32_t i, j;
+	int32_t i, j, k;
 	std::string temp;
 	int32_t temp_num, bed_num;
 	EUSection sect;
@@ -405,6 +421,37 @@ int BuildingRoomList::updateAllSections(char dataformat)
 				sect.building = (void *)(&m_eu_buildings[temp_num - 1]);
 				m_eu_buildings[temp_num - 1].sects.push_back(sect);
 			}
+		}
+	}
+
+	for (i = 0; i < m_eu_buildings.size(); i++) {
+		EUBuilding eub = m_eu_buildings[i];
+		std::vector<std::string> sect_list;
+		sect_list.empty();
+		for (j = 0; j < m_eu_buildings[i].sects.size(); j++) {
+			EUSection eus = eub.sects[j];
+			std::string sect_name = eus.direction;
+			if (sect_list.size() == 0)
+				sect_list.push_back(sect_name);
+			else {
+				bool matched = false;
+				for (k = 0; k < sect_list.size(); k++) {
+					if (sect_list[k].compare(sect_name) == 0) {
+						matched = true;
+						break;
+					}
+				}
+				if(!matched)
+					sect_list.push_back(sect_name);
+			}
+		}
+		std::sort(sect_list.begin(), sect_list.end());
+		std::map<std::string, int32_t> sect_codec;
+		for (j = 0; j < sect_list.size(); j++)
+			sect_codec[sect_list[j]] = j;
+		for (k = 0; k < m_eu_buildings[i].sects.size(); k++) {
+			EUSection eus = eub.sects[k];
+			m_eu_buildings[i].sects[k].sect_number = sect_codec[eus.direction];
 		}
 	}
 
@@ -543,7 +590,7 @@ int BuildingRoomList::accumulateRoomInfo()
 	findNeighbors();
 	computeRoomStats();
 	makeRoomListPerBuilding();
-
+	scoreRooms();
 	return 0;
 }
 
@@ -802,6 +849,55 @@ void BuildingRoomList::makeRoomListPerBuilding()
 }
 
 
+int BuildingRoomList::scoreRooms()
+{
+	int32_t score[3] = { 0,0,0 };
+	if (m_eu_buildings.size() == 0)
+		return -1;
+
+	for (int i = 0; i < m_eu_buildings.size(); i++) {
+		EUBuilding eub = m_eu_buildings[i];
+		score[0] = m_buildingCode[eub.building_name] * m_room_measure.brBuilding;
+		for (int j = 0; j < eub.sects.size(); j++) {
+			EUSection eus = eub.sects[j];
+			int32_t level = eus.level;
+			score[1]= eus.sect_number*m_room_measure.brSect + m_OpLevel[level] * m_room_measure.brLevel; // *(1 - (int32_t)eub.elevator);
+			for (int k = 0; k < eus.rooms.size(); k++) {
+				size_t pos = std::string::npos;
+				EURoom eur = eus.rooms[k];
+				pos = eur.room.find_first_of("-");
+				std::string room_num = eur.room.substr(pos + 1, -1);
+				int value;
+				char c;
+				std::stringstream ss(room_num);
+				if (eub.building_name.compare(BuildingNames::qGallup) == 0)
+					ss >> c >> value;
+				else
+					ss >> value >> c;
+				value = value % 100;
+				score[2]= m_room_measure.brRoom*value;
+				if (eur.neighbors.size() > 0) {
+					pos = eur.neighbors[0]->room.find_first_of("-");
+					room_num = eur.neighbors[0]->room.substr(pos + 1, -1);
+					std::stringstream ss_2(room_num);
+					if (eub.building_name.compare(BuildingNames::qGallup) == 0)
+						ss_2 >> c >> value;
+					else
+						ss_2 >> value >> c;
+					value = value % 100;
+					int32_t score_neighbor = m_room_measure.brRoom * value;
+					score[2] = (score[2] + score_neighbor) / 2 + 1;
+				}
+				int32_t final_score = score[0] + score[1] + score[2];
+				printf("%s %d\n", eur.room.c_str(), final_score);
+				m_eu_buildings[i].sects[j].rooms[k].score = final_score;
+				m_room_list_by_score[final_score].push_back(&m_eu_buildings[i].sects[j].rooms[k]);
+			}
+		}
+	}
+
+	return 0;
+}
 
 void BuildingRoomList::resetStats(RoomStats &rs)
 {

@@ -64,11 +64,21 @@ namespace BuildingNames {
 	const char* const qSparrowk = "Sparrowk";
 };
 
+namespace BuildingCode {
+	const int32_t const pEagleHall = 3;
+	const int32_t const pGallup = 1;
+	const int32_t const pGoughHall = 0;
+	const int32_t const pGuffin = 6;
+	const int32_t const pHainer = 4;
+	const int32_t const pKea = 5;
+	const int32_t const pSparrowk = 2;
+};
+
 class QFLLIB_EXPORT BuildingRoomList {
 public:
 
 	static const std::string m_buildings[7];
-
+	static const int32_t m_OpLevel[5];
 	typedef struct EURoom {
 		int32_t room_id;
 		std::string room;
@@ -91,6 +101,7 @@ public:
 		std::string name;
 		std::string direction;
 		int32_t level;
+		int32_t sect_number;
 		std::vector<EURoom> rooms;
 		int32_t sect_beds;
 		int32_t sect_rooms;
@@ -150,6 +161,17 @@ public:
 		int32_t total_shared_family_beds; // rooms that shared beds
 	} RoomStats;
 
+	// score = BuildingCode*brBuilding + brLevel*OpLevel + brSect + room_number + bath_dist
+	typedef struct RoomMeasure {
+		int32_t brBuilding;
+		int32_t brLevel;
+		int32_t brSect;
+		int32_t brRoom;
+		int32_t brAC;
+		int32_t brCondition;
+		int32_t brElevator;
+	} RoomMeasure;
+
 	BuildingRoomList();
 	~BuildingRoomList();
 
@@ -194,14 +216,16 @@ public:
 
 	inline std::vector<EUBuilding>* getBuilding_list() { return &m_eu_buildings; }
 
-	EURoom* getRoom(int32_t room_id) { return m_room_list_by_id[room_id]; }
-	EURoom* getRoom(std::string room_name) { return m_room_list_by_roomname[room_name]; }
+	EURoom* getRoomById(int32_t room_id) { return m_room_list_by_id[room_id]; }
+	EURoom* getRoomByName(std::string room_name) { return m_room_list_by_roomname[room_name]; }
+	std::vector<EURoom*> getRoomByScore(int32_t score) { return m_room_list_by_score[score]; }
 
 protected:
 
 	int readInBuildingList_quotes(const char * building_rooms_list);
 	int updateAllSections_quotes();
 	int updateAllRooms_quotes();
+	int scoreRooms();
 
 	int readInBuildingList_commas(const char * building_rooms_list);
 	int updateAllSections(char dataformat=',');
@@ -220,12 +244,15 @@ private:
 	int32_t m_total_rooms;
 	int32_t m_total_beds;
 	int32_t m_total_inactive_rooms;
+	std::map<std::string, int32_t> m_buildingCode;
 	std::vector<std::vector<std::string>> m_room_array; // based on room name
 	std::vector<EUBuilding> m_eu_buildings;
+	RoomMeasure m_room_measure;
 
 	std::map<std::string, RoomStats> m_room_stats;
 	std::map<int32_t, EURoom*> m_room_list_by_id;
 	std::map<std::string, EURoom*> m_room_list_by_roomname;
+	std::map<int32_t, std::vector<EURoom*>> m_room_list_by_score;
 
 	/*
 	 room_list= family rooms + male rooms + female rooms
