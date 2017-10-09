@@ -31,6 +31,7 @@ public:
 
 	int32_t assignRooms2Seniors();
 	int32_t assignRooms2Babies();
+	// family rooms from 1 bed to 4 beds
 	int32_t assignRooms2Families();
 	int32_t assignRooms2Males();
 	int32_t assignRooms2Females();
@@ -39,6 +40,7 @@ public:
 	int32_t assignRooms2Choir();
 	int32_t assignRooms2ChildcareWorkers();
 
+	std::vector<BuildingRoomList::EURoom*> queryRoomList(std::vector<BuildingRoomList::EURoom*> &myroomlist, int32_t num, bool enable_extrabed=false);
 private:
 
 };
