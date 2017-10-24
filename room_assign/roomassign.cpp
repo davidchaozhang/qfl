@@ -172,6 +172,21 @@ int32_t RoomAssign::assignRooms2ChildcareWorkers()
 	return 0;
 }
 
+int32_t RoomAssign::assignRooms2Speakers()
+{
+	int32_t i, j;
+	bool enable_extrabeds = false;
+	std::vector<BuildingRoomList::EURoom*> temp_roomlist;
+	std::vector<BuildingRoomList::EURoom*> roomlist = m_br_list.queryReservedSKRooms();
+	std::map<int32_t, std::vector<Registrant*>> spk_list = m_speaker_list;
+
+	// family assignment first
+	if (familyRoomAssign(spk_list, roomlist, enable_extrabeds != 0))
+		printf("assignRooms2Speakers(): Family room assignment failed\n");
+
+	return 0;
+}
+
 std::vector<BuildingRoomList::EURoom*> RoomAssign::queryRoomList(std::vector<BuildingRoomList::EURoom*> &myroomlist, int32_t num)
 {
 	int32_t i, j;
@@ -216,9 +231,9 @@ std::vector<BuildingRoomList::EURoom*> RoomAssign::queryRoomList(std::vector<Bui
 }
 
 
-std::vector<BuildingRoomList::EURoom*> RoomAssign::queryFamilyRoomList(std::vector<BuildingRoomList::EURoom*> &myroomlist, int32_t num, bool enable_extrabed)
+std::vector<BuildingRoomList::EURoom*> RoomAssign::queryFamilyRoomList(std::vector<BuildingRoomList::EURoom*> &myroomlist, int32_t num, Registrant* registrant, bool enable_extrabed)
 {
-	int32_t i, j;
+	int32_t i, j, k;
 	std::map<int32_t, std::vector<BuildingRoomList::EURoom*>> rms;
 	std::vector<BuildingRoomList::EURoom* > frl;
 	int32_t total=0, sz = (int32_t)myroomlist.size();
@@ -240,8 +255,49 @@ std::vector<BuildingRoomList::EURoom*> RoomAssign::queryFamilyRoomList(std::vect
 		}
 	}
 
-	total = 0;
+	BuildingRoomList::SexType stype;
+	// find the capacity of room matches the number of family size
 	std::map < int32_t, std::vector<BuildingRoomList::EURoom*>>::iterator it;
+	for (i = 0; i < 3; i++) {
+		for (it = rms.begin(); it != rms.end(); ++it) {
+			int32_t score = it->first;
+			std::vector<BuildingRoomList::EURoom*> roomlist = it->second;
+			for (j = 0; j < roomlist.size(); j++) {
+				total = roomlist[j]->capacity + (enable_extrabed ? 1 : 0);
+				if (total-i == num) {
+					if (registrant->party_type.find(PartyType::qIndividual) != std::string::npos) {
+						std::string gender0 = registrant->gender;
+						if(gender0.compare("Male") == 0)
+							stype = BuildingRoomList::eMale;
+						else if (gender0.compare("Female") == 0)
+							stype = BuildingRoomList::eFemale;
+						if (roomlist[j]->neighbors.size() > 0) {
+							for (k = 0; k < roomlist[j]->neighbors.size(); k++) {
+								BuildingRoomList::SexType st = roomlist[j]->neighbors[k]->stype;
+								if (stype == BuildingRoomList::eMale && st == BuildingRoomList::eMale) {
+									frl.push_back(roomlist[j]);
+									return frl;
+								}
+								else if (stype == BuildingRoomList::eFemale && st == BuildingRoomList::eFemale) {
+									frl.push_back(roomlist[j]);
+									return frl;
+								}
+								if (stype == BuildingRoomList::eMale && (st == BuildingRoomList::eFemale || st == BuildingRoomList::eMix))
+									continue;
+								else if (stype == BuildingRoomList::eFemale && (st == BuildingRoomList::eMale || st == BuildingRoomList::eMix))
+									continue;
+							}
+						}
+					}
+					frl.push_back(roomlist[j]);
+					return frl;
+				}
+			}
+		}
+	}
+
+	// find the least score room
+	total = 0;
 	for (it = rms.begin(); it != rms.end(); ++it) {
 		int32_t score = it->first;
 		std::vector<BuildingRoomList::EURoom*> roomlist = it->second;
@@ -278,7 +334,7 @@ int32_t RoomAssign::familyRoomAssign(std::map<int32_t, std::vector<Registrant*>>
 		std::vector<Registrant*> aregist = it->second;
 		int32_t fs = (int32_t)aregist.size();
 
-		temp_roomlist = queryFamilyRoomList(roomlist, fs, false);
+		temp_roomlist = queryFamilyRoomList(roomlist, fs, aregist[0], false);
 		int32_t left = fs;
 		int32_t accumu = 0;
 		int32_t start = 0;
@@ -303,7 +359,15 @@ int32_t RoomAssign::familyRoomAssign(std::map<int32_t, std::vector<Registrant*>>
 				aregist[j]->building = ((BuildingRoomList::EUBuilding*)temp_roomlist[i]->building)->building_name;
 				temp_roomlist[i]->persons.push_back(aregist[j]->person_id);
 			}
-			temp_roomlist[i]->stype = BuildingRoomList::eMix;
+			if (accumu == 1 && aregist[0]->party_type.find(PartyType::qIndividual) != std::string::npos) {
+				std::string gender0 = aregist[0]->gender;
+				if (gender0.compare("Male") == 0)
+					temp_roomlist[i]->stype = BuildingRoomList::eMale;
+				else if (gender0.compare("Female") == 0)
+					temp_roomlist[i]->stype = BuildingRoomList::eFemale;
+			}
+			else
+				temp_roomlist[i]->stype = BuildingRoomList::eMix;
 			start = accumu;
 			if (left == 0)
 				break;

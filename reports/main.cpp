@@ -145,10 +145,10 @@ int room_assignmentTest()
 	status = ra.readInputs(churchname.c_str(), brname.c_str(), filename.c_str(), 2017);
 	status = ra.preprocessData();
 	status = ra.assignRooms2Choir();
-
 	status = ra.assignRooms2ChildcareWorkers();
-#if 0
+
 	status = ra.assignRooms2Speakers();
+#if 0
 	status = ra.assignRooms2Logistics();
 	status = ra.assignRooms2Babies();
 	status = ra.assignRooms2Seniors();

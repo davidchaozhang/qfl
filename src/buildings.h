@@ -66,13 +66,13 @@ namespace BuildingNames {
 };
 
 namespace BuildingCode {
-	const int32_t const pEagleHall = 3;
-	const int32_t const pGallup = 1;
-	const int32_t const pGoughHall = 0;
-	const int32_t const pGuffin = 6;
-	const int32_t const pHainer = 4;
-	const int32_t const pKea = 5;
-	const int32_t const pSparrowk = 2;
+	const int32_t pEagleHall = 3;
+	const int32_t pGallup = 1;
+	const int32_t pGoughHall = 0;
+	const int32_t pGuffin = 6;
+	const int32_t pHainer = 4;
+	const int32_t pKea = 5;
+	const int32_t pSparrowk = 2;
 };
 
 class QFLLIB_EXPORT BuildingRoomList {
