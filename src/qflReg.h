@@ -51,7 +51,7 @@ public:
 		std::string special_need;
 		std::string notes;
 		bool cancelled;
-		int32_t registrtion_fee;
+		int32_t registration_fee;
 		int32_t key_deposit;
 		bool checkin;
 		bool youth_checkins;

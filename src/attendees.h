@@ -51,6 +51,13 @@ namespace PartyType {
 	const char* const qIndividual = "Individual";
 };
 
+namespace BondType {
+	const char* const shareRoom = "SRM";
+	const char* const shareBathRoom = "SBA";
+	const char* const stayLevel = "SLV";
+	const char* const staySect = "SST";
+	const char* const stayBuilding = "SBD";
+}
 
 class QFLLIB_EXPORT Attendees {
 
@@ -86,13 +93,18 @@ public:
 		std::string special_need;
 		std::string notes;
 		bool cancelled;
-		int32_t registrtion_fee;
+		int32_t registration_fee;
 		int32_t key_deposit;
 		bool checkin;
 		bool youth_checkins;
 		bool key_returned;
 		int32_t paid;
+		std::string bond_type;
+		std::vector<int32_t> bond_parties;
+
 		std::vector<Registrant*> party_members;
+		std::vector<Registrant*> room_shared;
+		std::vector<Registrant*> bathroom_shared;
 		BuildingRoomList::EURoom* assigned_room;
 		ChurchList::QFLChurch* from_church;
 	} Registrant;

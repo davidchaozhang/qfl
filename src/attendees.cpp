@@ -234,7 +234,7 @@ int32_t Attendees::parseAllFields()
 	if (m_data.size() == 0)
 		return -1;
 
-	datasz = 100; // m_data.size();
+	datasz = m_data.size(); //100
 
 	std::vector<std::string> person = m_data[0];
 	for (i = 1; i < datasz; i++){
@@ -291,7 +291,7 @@ int32_t Attendees::parseAllFields()
 		a_regist.age_group = person[11].substr(1, person[11].size() - 2);
 		a_regist.gender = person[12].substr(1, person[12].size() - 2);
 		a_regist.grade = person[13].substr(1, person[13].size() - 2);
-		a_regist.registrtion_fee = std::stoi(person[14].substr(1, person[14].size() - 2));
+		a_regist.registration_fee = std::stoi(person[14].substr(1, person[14].size() - 2));
 		a_regist.key_deposit = std::stoi(person[15].substr(1, person[15].size() - 2));
 		a_regist.notes = person[17].substr(1, person[17].size() - 2);
 		a_regist.special_need = person[18].substr(1, person[18].size() - 2);
@@ -321,6 +321,7 @@ int32_t Attendees::parseAllFields()
 		m_registrants.push_back(a_regist);
 	}
 
+#if 0 // takes time
 	// remove repeated entries
 	std::vector<int32_t> entries;
 	for (i = 0; i < m_registrants.size(); i++) {
@@ -335,10 +336,12 @@ int32_t Attendees::parseAllFields()
 		}
 	}
 
+
 	std::vector<Registrant>::iterator it = m_registrants.begin();
 	for (i = (int32_t)entries.size() - 1; i >= 0; i--) {
 		m_registrants.erase(it + entries[i]);
 	}
+#endif
 
 	for (i = 0; i < m_registrants.size(); i++) {
 		std::string chnm = m_registrants[i].church;
@@ -350,7 +353,7 @@ int32_t Attendees::parseAllFields()
 	for (i = 0; i < m_registrants.size(); i++) {
 		Registrant attdee_i = m_registrants[i];
 		if (attdee_i.room.size() > 0) {
-			m_registrants[i].assigned_room = m_br_list.getRoom(attdee_i.room);
+			m_registrants[i].assigned_room = m_br_list.getRoomByName(attdee_i.room);
 		}
 	}
 

@@ -169,6 +169,16 @@ std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryReservedCHRooms(st
 	RoomState rs = RoomState::tReservedCH;
 	return queryRoomList(building_name, rs);
 }
+std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryReservedCCRooms()
+{
+	RoomState rs = RoomState::tReservedCC;
+	return queryRoomList(rs);
+}
+std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryReservedCCRooms(std::string building_name)
+{
+	RoomState rs = RoomState::tReservedCC;
+	return queryRoomList(building_name, rs);
+}
 
 #if 0
 std::vector<BuildingRoomList::EURoom*> BuildingRoomList::query1personRooms(BuildingRoomList::RoomState rs)
@@ -498,7 +508,8 @@ int BuildingRoomList::updateAllRooms_quotes()
 				aroom.extra = std::atoi(m_room_array[i][11].substr(1, m_room_array[i][11].size() - 2).c_str());
 				aroom.section = (void*)(&m_eu_buildings[build_num - 1].sects[j]);
 				aroom.building = (void*)(&m_eu_buildings[build_num - 1]);
-				aroom.persons = NULL;
+				aroom.stype = SexType::eNull;
+				aroom.persons.clear();
 				m_eu_buildings[build_num - 1].sects[j].rooms.push_back(aroom);
 				//if (aroom.room_status.compare(RoomStatus::qInactive) != 0) 
 				{
@@ -560,6 +571,8 @@ int BuildingRoomList::updateAllRooms_commas()
 				aroom.extra = std::atoi(m_room_array[i][11].c_str());
 				aroom.section = (void*)(&m_eu_buildings[build_num - 1].sects[j]);
 				aroom.building = (void*)(&m_eu_buildings[build_num - 1]);
+				aroom.stype = SexType::eNull;
+				aroom.persons.clear();
 				m_eu_buildings[build_num - 1].sects[j].rooms.push_back(aroom);
 				//if (aroom.room_status.compare(RoomStatus::qInactive) != 0) 
 				{
@@ -985,6 +998,9 @@ std::string BuildingRoomList::getStringNames(BuildingRoomList::RoomState rs)
 		break;
 	case BuildingRoomList::tReservedCH:
 		str = RoomStatus::qReservedCH;
+		break;
+	case BuildingRoomList::tReservedCC:
+		str = RoomStatus::qReservedCC;
 		break;
 	case BuildingRoomList::tFullyAssigned:
 		str = RoomStatus::qFullyAssigned;

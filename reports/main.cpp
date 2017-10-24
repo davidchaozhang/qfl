@@ -135,9 +135,9 @@ int attendee_listTest()
 
 int room_assignmentTest()
 {
-	std::string churchname = "D:/users/dzhang/church/rccc/QFL2018/churchlist/churchlist_20170523.csv";
-	std::string brname = "D:/users/dzhang/church/rccc/QFL2018/building_layout/buildingAndRoom-update.csv";
-	const std::string filename = "D:/users/dzhang/church/rccc/QFL2018/attendeelist/report1496368471394_checkout_0601.csv";
+	std::string churchname = "E:/projects/qfl/doc/churchlist_20170523.csv";
+	std::string brname = "E:/projects/qfl/doc/buildingAndRoom-update.csv";
+	const std::string filename = "E:/projects/qfl/doc/report1496368471394_checkout_0601.csv";
 
 	int32_t status = 0;
 	RoomAssign ra;
@@ -146,5 +146,15 @@ int room_assignmentTest()
 	status = ra.preprocessData();
 	status = ra.assignRooms2Choir();
 
+	status = ra.assignRooms2ChildcareWorkers();
+#if 0
+	status = ra.assignRooms2Speakers();
+	status = ra.assignRooms2Logistics();
+	status = ra.assignRooms2Babies();
+	status = ra.assignRooms2Seniors();
+	status = ra.assignRooms2Families();
+	status = ra.assignRooms2Males();
+	status = ra.assignRooms2Females();
+#endif
 	return status;
 }

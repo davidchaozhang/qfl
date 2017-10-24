@@ -20,10 +20,11 @@ namespace RoomStatus {
 	const char* const qAvailable = "Available";
 	const char* const qInactive = "Inactive";
 	const char* const qSharedBathroom = "SharedBathroom";
-	const char* const qReservedGE = "Reserved-GE";
-	const char* const qReservedSK = "Reserved-SK";
-	const char* const qReservedSP = "Reserved-SP";
-	const char* const qReservedCH = "Reserved-CH";
+	const char* const qReservedGE = "Reserved-GE"; // general purpose
+	const char* const qReservedSK = "Reserved-SK"; // speakers
+	const char* const qReservedSP = "Reserved-SP"; // special need, (baby, senior, handicapped)
+	const char* const qReservedCH = "Reserved-CH"; // choir
+	const char* const qReservedCC = "Reserved-CC"; // teen coworker for childcare program
 	const char* const qFullyAssigned = "Fully Assigned";
 	const char* const qPartiallyAssigned = "Partially Assigned";
 	const char* const qExtraBed = "Extra Bed";
@@ -79,6 +80,14 @@ public:
 
 	static const std::string m_buildings[7];
 	static const int32_t m_OpLevel[5];
+
+	typedef enum SexType {
+		eMix = 0,
+		eMale = 1,
+		eFemale = 2,
+		eNull = -99
+	}SexType;
+
 	typedef struct EURoom {
 		int32_t room_id;
 		std::string room;
@@ -91,10 +100,12 @@ public:
 		int32_t bath_distance;
 		int32_t room_conditions;
 		int32_t score;
+		SexType stype;
 		std::vector<EURoom*> neighbors;
 		void *section;
 		void *building;
-		void *persons;
+		std::vector<int32_t> persons; // person id list 
+		bool considered;
 	} EURoom;
 
 	typedef struct {
@@ -127,15 +138,16 @@ public:
 		tMale = 13,
 		tFemale = 14,
 		tAvailable = 15,
-		tReservedGE = 16,
-		tReservedSK = 17,
-		tReservedSP = 18,
-		tReservedCH = 19,
-		tFullyAssigned = 20,
-		tPartiallyAssigned = 21,
-		tShared_Bathroom = 22,
-		tNo_Bath = 23,
-		tExtra_beds = 24,
+		tReservedGE = 16, // general purpose reservations
+		tReservedSK = 17, // reservation for speakers
+		tReservedSP = 18, // reservation for special needs (baby, senior, handicapped, etc)
+		tReservedCH = 19, // reservation for choir
+		tReservedCC = 20, // reserved for teen coworker for childcare program
+		tFullyAssigned = 21,
+		tPartiallyAssigned = 22,
+		tShared_Bathroom = 23,
+		tNo_Bath = 24,
+		tExtra_beds = 25,
 		tError = -99
 	} RoomState;
 
@@ -213,6 +225,8 @@ public:
 	std::vector<EURoom*> queryReservedSPRooms(std::string building_name);
 	std::vector<EURoom*> queryReservedCHRooms();
 	std::vector<EURoom*> queryReservedCHRooms(std::string building_name);
+	std::vector<EURoom*> queryReservedCCRooms();
+	std::vector<EURoom*> queryReservedCCRooms(std::string building_name);
 
 	inline std::vector<EUBuilding>* getBuilding_list() { return &m_eu_buildings; }
 
@@ -270,6 +284,7 @@ private:
 	std::map<std::string, std::vector<EURoom*>> m_ReservedSK_rooms;
 	std::map<std::string, std::vector<EURoom*>> m_ReservedSP_rooms;
 	std::map<std::string, std::vector<EURoom*>> m_ReservedCH_rooms;
+	std::map<std::string, std::vector<EURoom*>> m_ReservedCC_rooms;
 	std::map<std::string, std::vector<EURoom*>> m_FullyAssigned_rooms;
 	std::map<std::string, std::vector<EURoom*>> m_PartiallyAssigned;
 	std::map<std::string, std::vector<EURoom*>> m_ExtraBeds;

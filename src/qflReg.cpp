@@ -220,7 +220,7 @@ int32_t QflReg::parseAllFields()
 		a_regist.age_group = person[11].substr(1, person[11].size() - 2);
 		a_regist.gender = person[12].substr(1, person[12].size() - 2);
 		a_regist.grade = person[13].substr(1, person[13].size() - 2);
-		a_regist.registrtion_fee = std::stoi(person[14].substr(1, person[14].size() - 2));
+		a_regist.registration_fee = std::stoi(person[14].substr(1, person[14].size() - 2));
 		a_regist.key_deposit = std::stoi(person[15].substr(1, person[15].size() - 2));
 		a_regist.notes = person[17].substr(1, person[17].size() - 2);
 		a_regist.special_need = person[18].substr(1, person[18].size() - 2);
@@ -2239,7 +2239,7 @@ void QflReg::printFinancialReport(const char *filename)
 					continue;
 
 				fprintf(hf, "%s, %d, %d, %s, %s, %s, %s, %s, %d, %d, %d\n", person.church.c_str(), person.person_id, person.party, person.party_type.c_str(),
-					person.first_name.c_str(), person.last_name.c_str(), person.chinese_name.c_str(), person.age_group, person.is_christian, person.registrtion_fee, person.key_deposit);
+					person.first_name.c_str(), person.last_name.c_str(), person.chinese_name.c_str(), person.age_group, person.is_christian, person.registration_fee, person.key_deposit);
 
 			}
 		}
