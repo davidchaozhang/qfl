@@ -28,6 +28,7 @@ public:
 
 	int32_t readInputs(const char* church_name, const char *buildings_name, const char *registration_name, int32_t year);
 	int32_t preprocessData();
+	int32_t preprocessData1();
 
 	int32_t assignRooms2Seniors();
 	int32_t assignRooms2Babies();
@@ -36,7 +37,7 @@ public:
 	int32_t assignRooms2Males();
 	int32_t assignRooms2Females();
 	int32_t assignRooms2Speakers();
-	int32_t assignRooms2Logistics();
+	int32_t assignRooms2Recordings();
 	int32_t assignRooms2Choir();
 	int32_t assignRooms2ChildcareWorkers();
 

@@ -142,8 +142,8 @@ public:
 		std::vector<Registrant*> baby_list;
 		std::vector<Registrant*> special_need_list;
 		std::map<int32_t, Party> family_list;
-		std::vector<Registrant*> male_list;
-		std::vector<Registrant*> female_list;
+		std::map<int32_t, std::vector<Registrant*>> male_list;
+		std::map<int32_t, std::vector<Registrant*>> female_list;
 	} Church;
 
 	typedef struct {
@@ -156,8 +156,8 @@ public:
 		std::vector<Registrant*> baby_list;
 		std::vector<Registrant*> special_need_list;
 		std::map<int32_t, Party> family_list;
-		std::vector<Registrant*> male_list;
-		std::vector<Registrant*> female_list;
+		std::map<int32_t, std::vector<Registrant*>> male_list;
+		std::map<int32_t, std::vector<Registrant*>> female_list;
 	} Building;
 
 	typedef struct {
@@ -207,6 +207,9 @@ public:
 	int32_t readRegistrants(const char *filename);
 	int32_t readBuildingRooms(const char *filename);
 	int32_t parseAllFields();
+	int32_t separateEU_CabriniCampus();
+	int32_t classifications1();
+
 	int32_t classifications();
 	int32_t refinement();
 	int32_t sortAttendeesByChurches();
