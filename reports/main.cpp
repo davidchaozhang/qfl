@@ -150,10 +150,9 @@ int room_assignmentTest()
 	status = ra.assignRooms2Recordings();
 	status = ra.assignRooms2Babies();
 	status = ra.assignRooms2Seniors();
-#if 0
 	status = ra.assignRooms2Families();
 	status = ra.assignRooms2Males();
 	status = ra.assignRooms2Females();
-#endif
+
 	return status;
 }

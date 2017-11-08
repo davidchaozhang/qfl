@@ -129,6 +129,42 @@ std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryBathSharedRooms(st
 	return mylist;
 }
 
+std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryFamilyPrivateRooms()
+{
+	RoomState rs = RoomState::tFamily_Private;
+	return queryRoomList(rs);
+}
+
+std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryFamilyPrivateRooms(std::string building_name)
+{
+	RoomState rs = RoomState::tFamily_Private;
+	return queryRoomList(building_name, rs);
+}
+
+std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryMaleRooms()
+{
+	RoomState rs = RoomState::tMale;
+	return queryRoomList(rs);
+}
+
+std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryMaleRooms(std::string building_name)
+{
+	RoomState rs = RoomState::tMale;
+	return queryRoomList(building_name, rs);
+}
+
+std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryFemaleRooms()
+{
+	RoomState rs = RoomState::tFemale;
+	return queryRoomList(rs);
+}
+
+std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryFemaleRooms(std::string building_name)
+{
+	RoomState rs = RoomState::tFemale;
+	return queryRoomList(building_name, rs);
+}
+
 std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryReservedGERooms()
 {
 	RoomState rs = RoomState::tReservedGE;

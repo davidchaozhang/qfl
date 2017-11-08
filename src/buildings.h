@@ -211,6 +211,15 @@ public:
 	std::vector<EURoom*> queryExtraBedRooms(RoomState rs);
 	std::vector<EURoom*> queryExtraBedRooms(std::string &building_name, RoomState rs);
 
+	std::vector<EURoom*> queryFamilyPrivateRooms();
+	std::vector<EURoom*> queryFamilyPrivateRooms(std::string building_name);
+
+	std::vector<EURoom*> queryMaleRooms();
+	std::vector<EURoom*> queryMaleRooms(std::string building_name);
+
+	std::vector<EURoom*> queryFemaleRooms();
+	std::vector<EURoom*> queryFemaleRooms(std::string building_name);
+
 	std::vector<EURoom*> queryAvailableRooms();
 	std::vector<EURoom*> queryAvailableRooms(std::string building_name);
 

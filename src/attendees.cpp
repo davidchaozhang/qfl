@@ -877,8 +877,7 @@ int32_t Attendees::sortAttendeesByChurches()
 			std::string chname = rt->church;
 			int32_t party_id = rt->party;
 			int32_t person_id = rt->person_id;
-			pty.attendee_list_a.push_back(person_id);
-			pty.attendee_list_b.push_back(getRegistrant(person_id));
+			pty.attendee_list_b[family_id].push_back(getRegistrant(person_id));
 			eu_room = getRoom(person_id);
 			if (eu_room != NULL) {
 				for (i = 0; i < pty.assigned_rooms.size(); i++) {

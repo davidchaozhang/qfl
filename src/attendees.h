@@ -119,8 +119,7 @@ public:
 		std::string state;
 		int32_t zip;
 		std::string mobile_phone;
-		std::vector<int32_t> attendee_list_a;
-		std::vector<Registrant*> attendee_list_b;
+		std::map<int32_t, std::vector<Registrant*>> attendee_list_b;
 		std::vector<BuildingRoomList::EURoom*> assigned_rooms;
 		ChurchList::QFLChurch* from_church;
 	} Party;
@@ -141,9 +140,9 @@ public:
 		std::vector<Registrant*> senior_list;
 		std::vector<Registrant*> baby_list;
 		std::vector<Registrant*> special_need_list;
-		std::map<int32_t, Party> family_list;
-		std::map<int32_t, std::vector<Registrant*>> male_list;
-		std::map<int32_t, std::vector<Registrant*>> female_list;
+		std::map<int32_t, Party> family_list; // party id
+		std::map<int32_t, std::vector<Registrant*>> male_list; // party id
+		std::map<int32_t, std::vector<Registrant*>> female_list; // party id
 	} Church;
 
 	typedef struct {
