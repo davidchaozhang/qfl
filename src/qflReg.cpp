@@ -257,7 +257,7 @@ int32_t QflReg::parseAllFields()
 
 int32_t QflReg::classifications()
 {
-	int32_t i, j;
+	int32_t i;
 	if (m_registrants.size() == 0)
 		return -1;
 
@@ -1143,7 +1143,7 @@ void QflReg::printOutEU_statistics(const char*filename)
 
 void QflReg::printOutCabrini_statistics(const char*filename)
 {
-	int32_t i, j, k;
+	int32_t i, k;
 	int32_t total = 0;
 	int32_t overnight = 0;
 	int32_t commute = 0;
@@ -1707,7 +1707,7 @@ void QflReg::printOutEUListAllChurchInOne(const char*filedir)
 
 void QflReg::printRCCCFunctions(const char *dirname)
 {
-	int32_t i, j;
+	int32_t j;
 	if (dirname == NULL)
 		return;
 

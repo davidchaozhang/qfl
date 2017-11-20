@@ -63,6 +63,17 @@ class QFLLIB_EXPORT Attendees {
 
 public:
 
+	typedef struct EULodgePeople {
+		int32_t family_seniors;
+		int32_t family_babies;
+		int32_t family_speakers_recordings;
+		int32_t family_choir;
+		int32_t person_childcare_workers;
+		int32_t families;
+		int32_t single_males;
+		int32_t single_females;
+	} EULodgePeople;
+
 	typedef struct Registrant {
 		int32_t person_id;
 		int32_t party;
@@ -279,6 +290,8 @@ public:
 	int32_t m_cancelled;
 	int32_t m_uncertain;
 	ChristianStats m_allchurch;
+
+	EULodgePeople m_eu_lodge_people;
 };
 #endif
 // ATTENDEES_H

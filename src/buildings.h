@@ -214,6 +214,12 @@ public:
 	std::vector<EURoom*> queryFamilyPrivateRooms();
 	std::vector<EURoom*> queryFamilyPrivateRooms(std::string building_name);
 
+	std::vector<EURoom*> queryFamilyMaleRooms();
+	std::vector<EURoom*> queryFamilyMaleRooms(std::string building_name);
+
+	std::vector<EURoom*> queryFamilyFemaleRooms();
+	std::vector<EURoom*> queryFamilyFemaleRooms(std::string building_name);
+
 	std::vector<EURoom*> queryMaleRooms();
 	std::vector<EURoom*> queryMaleRooms(std::string building_name);
 
@@ -238,10 +244,12 @@ public:
 	std::vector<EURoom*> queryReservedCCRooms(std::string building_name);
 
 	inline std::vector<EUBuilding>* getBuilding_list() { return &m_eu_buildings; }
-
-	EURoom* getRoomById(int32_t room_id) { return m_room_list_by_id[room_id]; }
-	EURoom* getRoomByName(std::string room_name) { return m_room_list_by_roomname[room_name]; }
-	std::vector<EURoom*> getRoomByScore(int32_t score) { return m_room_list_by_score[score]; }
+	inline int32_t getTotalActiveRooms() { return m_total_rooms - m_total_inactive_rooms; }
+	inline int32_t getTotalBeds() { return m_total_beds; }
+	inline int32_t getInactiveRooms() { return m_total_inactive_rooms;  }
+	inline EURoom* getRoomById(int32_t room_id) { return m_room_list_by_id[room_id]; }
+	inline EURoom* getRoomByName(std::string room_name) { return m_room_list_by_roomname[room_name]; }
+	inline std::vector<EURoom*> getRoomByScore(int32_t score) { return m_room_list_by_score[score]; }
 
 protected:
 
@@ -264,18 +272,18 @@ protected:
 	std::string getStringNames(RoomState rs);
 
 private:
-	int32_t m_total_rooms;
-	int32_t m_total_beds;
-	int32_t m_total_inactive_rooms;
+	int32_t m_total_rooms; // total rooms including inactive rooms in EU
+	int32_t m_total_beds;  // total beds including those in inactive rooms in EU
+	int32_t m_total_inactive_rooms; // inactive rooms
 	std::map<std::string, int32_t> m_buildingCode;
 	std::vector<std::vector<std::string>> m_room_array; // based on room name
 	std::vector<EUBuilding> m_eu_buildings;
 	RoomMeasure m_room_measure;
 
 	std::map<std::string, RoomStats> m_room_stats;
-	std::map<int32_t, EURoom*> m_room_list_by_id;
-	std::map<std::string, EURoom*> m_room_list_by_roomname;
-	std::map<int32_t, std::vector<EURoom*>> m_room_list_by_score;
+	std::map<int32_t, EURoom*> m_room_list_by_id; // active rooms
+	std::map<std::string, EURoom*> m_room_list_by_roomname; // active rooms
+	std::map<int32_t, std::vector<EURoom*>> m_room_list_by_score; // active rooms
 
 	/*
 	 room_list= family rooms + male rooms + female rooms

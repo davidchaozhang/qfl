@@ -16,6 +16,7 @@ BuildingRoomList::BuildingRoomList()
 {
 	m_total_rooms = 0;
 	m_total_beds = 0;
+	m_total_inactive_rooms = 0;
 	m_room_measure.brBuilding = 10000;
 	m_room_measure.brSect = 1000;
 	m_room_measure.brLevel = 200;
@@ -140,6 +141,32 @@ std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryFamilyPrivateRooms
 	RoomState rs = RoomState::tFamily_Private;
 	return queryRoomList(building_name, rs);
 }
+
+std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryFamilyMaleRooms()
+{
+	RoomState rs = RoomState::tFamily_Male;
+	return queryRoomList(rs);
+}
+
+
+std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryFamilyMaleRooms(std::string building_name) 
+{
+	RoomState rs = RoomState::tFamily_Male;
+	return queryRoomList(building_name, rs);
+}
+
+std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryFamilyFemaleRooms()
+{
+	RoomState rs = RoomState::tFamily_Female;
+	return queryRoomList(rs);
+}
+
+std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryFamilyFemaleRooms(std::string building_name)
+{
+	RoomState rs = RoomState::tFamily_Female;
+	return queryRoomList(building_name, rs);
+}
+
 
 std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryMaleRooms()
 {
@@ -547,6 +574,9 @@ int BuildingRoomList::updateAllRooms_quotes()
 				aroom.stype = SexType::eNull;
 				aroom.persons.clear();
 				m_eu_buildings[build_num - 1].sects[j].rooms.push_back(aroom);
+				if (aroom.room_status.compare(RoomStatus::qInactive) == 0)
+					m_total_inactive_rooms++;
+
 				//if (aroom.room_status.compare(RoomStatus::qInactive) != 0) 
 				{
 					m_eu_buildings[build_num - 1].sects[j].sect_rooms++;
@@ -610,6 +640,8 @@ int BuildingRoomList::updateAllRooms_commas()
 				aroom.stype = SexType::eNull;
 				aroom.persons.clear();
 				m_eu_buildings[build_num - 1].sects[j].rooms.push_back(aroom);
+				if (aroom.room_status.compare(RoomStatus::qInactive) == 0)
+					m_total_inactive_rooms++;
 				//if (aroom.room_status.compare(RoomStatus::qInactive) != 0) 
 				{
 					m_eu_buildings[build_num - 1].sects[j].sect_rooms++;

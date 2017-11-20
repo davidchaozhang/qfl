@@ -144,13 +144,21 @@ int room_assignmentTest()
 
 	status = ra.readInputs(churchname.c_str(), brname.c_str(), filename.c_str(), 2017);
 	status = ra.preprocessData1();
+	status = ra.roomAllocationStats();
+
 	status = ra.assignRooms2Choir();
 	status = ra.assignRooms2ChildcareWorkers();
 	status = ra.assignRooms2Speakers();
 	status = ra.assignRooms2Recordings();
 	status = ra.assignRooms2Babies();
 	status = ra.assignRooms2Seniors();
+	ra.printRooms2Seniors();
+	// print out how many special rooms left, excluding speaker's rooms
+
+	// maybe use a flag to give reserved rooms to family
 	status = ra.assignRooms2Families();
+
+	// print out how many families have not assigned a room
 	status = ra.assignRooms2Males();
 	status = ra.assignRooms2Females();
 

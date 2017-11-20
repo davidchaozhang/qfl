@@ -22,6 +22,24 @@ using namespace std;
 class ROOMASSIGN_EXPORT RoomAssign : public Attendees {
 
 public:
+	/*
+	total_rooms = general_rooms + general_reserves + rooms_special_needs + rooms_speakers_recordings + rooms_choir + rooms_childcare_workers
+	            = rooms_family_private + rooms_family_male + rooms_family_female + rooms_males + rooms_females
+	*/
+	typedef struct AllocatedRooms {
+		int32_t total_rooms;
+		int32_t general_rooms;
+		int32_t general_reserves;
+		int32_t rooms_special_needs;
+		int32_t rooms_speakers_recordings;
+		int32_t rooms_choir;
+		int32_t rooms_childcare_workers;
+		int32_t rooms_family_private;
+		int32_t rooms_family_male;
+		int32_t rooms_family_female;
+		int32_t rooms_males;
+		int32_t rooms_females;
+	} AllocatedRooms;
 
 	RoomAssign();
 	~RoomAssign();
@@ -29,6 +47,8 @@ public:
 	int32_t readInputs(const char* church_name, const char *buildings_name, const char *registration_name, int32_t year);
 	int32_t preprocessData();
 	int32_t preprocessData1();
+
+	int32_t roomAllocationStats();
 
 	int32_t assignRooms2Seniors();
 	int32_t assignRooms2Babies();
@@ -44,10 +64,28 @@ public:
 	std::vector<BuildingRoomList::EURoom*> queryRoomList(std::vector<BuildingRoomList::EURoom*> &myroomlist, int32_t num);
 	std::vector<BuildingRoomList::EURoom*> queryFamilyRoomList(std::vector<BuildingRoomList::EURoom*> &myroomlist, int32_t num, Registrant* registrant, bool enable_extrabed=false);
 
+	bool printRoomAssignment(const char* filename);
+	int32_t printRooms2Seniors();
+	int32_t printRooms2Babies();
+	int32_t printRooms2Speakers();
+	int32_t printRooms2Recordings();
+	int32_t printRooms2Choir();
+	int32_t printRooms2ChildcareWorkers();
+	int32_t printRooms2Families();
+	int32_t printRooms2Males();
+	int32_t printRooms2Females();
+	int32_t printRooms2SpecialNeeds();
+
 protected:
 	int32_t familyRoomAssign(std::map<int32_t, std::vector<Registrant*>> &family_lst, std::vector<BuildingRoomList::EURoom*> &roomlist, bool enable_extrabeds=false);
 	int32_t IndividualRoomAssign(std::map<int32_t, std::vector<Registrant*>> &individual_lst, BuildingRoomList::SexType stype, std::vector<BuildingRoomList::EURoom*> &roomlist);
 
+	int32_t familyMaleRoomAssign(std::vector<Registrant*> &family_lst, std::vector<BuildingRoomList::EURoom*> &roomlist, bool enable_extrabeds = false);
+	int32_t familyFemaleRoomAssign(std::vector<Registrant*> &family_lst, std::vector<BuildingRoomList::EURoom*> &roomlist, bool enable_extrabeds = false);
+
+private:
+
+	AllocatedRooms m_alloc_rooms;
 };
 #endif
 // ROOM_ASSIGN_H

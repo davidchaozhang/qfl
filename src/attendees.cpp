@@ -361,7 +361,7 @@ int32_t Attendees::parseAllFields()
 		}
 	}
 
-	printf("Total attendees = %d, Cancelled = %d, Attendee not counted = %d\n", m_registrants.size(), m_cancelled, m_uncertain);
+	printf("Total attendees = %zd, Cancelled = %d, Attendee not counted = %d\n", m_registrants.size(), m_cancelled, m_uncertain);
 
 	return 0;
 }
