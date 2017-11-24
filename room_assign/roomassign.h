@@ -49,6 +49,7 @@ public:
 	int32_t preprocessData1();
 
 	int32_t roomAllocationStats();
+	int32_t lodgePeopleStats();
 
 	int32_t assignRooms2Seniors();
 	int32_t assignRooms2Babies();
@@ -80,8 +81,14 @@ protected:
 	int32_t familyRoomAssign(std::map<int32_t, std::vector<Registrant*>> &family_lst, std::vector<BuildingRoomList::EURoom*> &roomlist, bool enable_extrabeds=false);
 	int32_t IndividualRoomAssign(std::map<int32_t, std::vector<Registrant*>> &individual_lst, BuildingRoomList::SexType stype, std::vector<BuildingRoomList::EURoom*> &roomlist);
 
+	int32_t IndividualRoomAssign2(std::map<int32_t, std::vector<Registrant*>> &individual_lst, BuildingRoomList::SexType stype, std::vector<BuildingRoomList::EURoom*> &roomlist);
+
 	int32_t familyMaleRoomAssign(std::vector<Registrant*> &family_lst, std::vector<BuildingRoomList::EURoom*> &roomlist, bool enable_extrabeds = false);
 	int32_t familyFemaleRoomAssign(std::vector<Registrant*> &family_lst, std::vector<BuildingRoomList::EURoom*> &roomlist, bool enable_extrabeds = false);
+
+	std::vector<BuildingRoomList::EURoom* > RoomCapacityMatch(std::map<int32_t, std::vector<BuildingRoomList::EURoom*>> &rms, int32_t num, Registrant* registrant, bool enable_extrabed);
+	std::vector<BuildingRoomList::EURoom* > RoomSpecialMatch(std::map<int32_t, std::vector<BuildingRoomList::EURoom*>> &rms, int32_t num, Registrant* registrant, bool enable_extrabed);
+	std::vector<BuildingRoomList::EURoom* > RoomExtraMatch(std::map<int32_t, std::vector<BuildingRoomList::EURoom*>> &rms, int32_t num, bool enable_extrabed);
 
 private:
 

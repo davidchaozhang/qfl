@@ -126,12 +126,12 @@ int32_t RoomAssign::assignRooms2Choir()
 
 	// male room assignment - male do not share bathroom with females 
 	if (male_lst.size() > 0) {
-		if (IndividualRoomAssign(male_lst, BuildingRoomList::eMale, roomlist) <= 0)
+		if (IndividualRoomAssign2(male_lst, BuildingRoomList::eMale, roomlist) <= 0)
 			printf("assignRooms2Choir(): Male room assignment failed\n");
 	}
 	// female room assignment - male do not share bathroom with females 
 	if (female_lst.size() > 0) {
-		if (IndividualRoomAssign(female_lst, BuildingRoomList::eFemale, roomlist) <= 0)
+		if (IndividualRoomAssign2(female_lst, BuildingRoomList::eFemale, roomlist) <= 0)
 			printf("assignRooms2Choir(): Female room assignment failed\n");
 	}
 
@@ -141,7 +141,7 @@ int32_t RoomAssign::assignRooms2Choir()
 int32_t RoomAssign::assignRooms2ChildcareWorkers()
 {
 	int32_t i;
-	std::string contacts[2] = { "Hong Li", "Jing Pan" };
+	std::string contacts[3] = { "Hong Li", "Jing Pan", "Wentao Li" };
 	bool enable_extrabeds = false;
 
 	std::vector<BuildingRoomList::EURoom*> roomlist = m_br_list.queryReservedCCRooms();
@@ -151,19 +151,22 @@ int32_t RoomAssign::assignRooms2ChildcareWorkers()
 	std::map<int32_t, Registrant*> childleadlist;
 	std::map<int32_t, std::vector<Registrant*>> female_lst;
 	std::map<int32_t, std::vector<Registrant*>> male_lst;
+	std::map<int32_t, std::vector<Registrant*>> family_lst;
+	std::map<int32_t, std::vector<Registrant*>> family_adult_male_lst;
+	std::map<int32_t, std::vector<Registrant*>> family_adult_female_lst;
 
 	// generate child counselor list (age range: 14-25)
 	std::map<int32_t, std::vector<Registrant*>>::iterator it;
 	for (it = m_child_leader_list.begin(); it != m_child_leader_list.end(); it++) {
 		int32_t party_id = it->first;
+		bool contact_flag = false;
+		bool age_flag = false;
 		std::vector<Registrant*> party = it->second;
 		for (i = 0; i < party.size(); i++) {
-			bool contact_flag = false;
-			bool age_flag = false;
 			int32_t person_id = party[i]->person_id;
 			bool isMale = (party[i]->gender.compare("Male") == 0);
 			std::string contact = party[i]->contact_person;
-			if (contact.compare(contacts[0]) == 0 || contact.compare(contacts[1]) == 0)
+			if (contact.compare(contacts[0]) == 0 || contact.compare(contacts[1]) == 0 || contact.compare(contacts[2]) == 0)
 				contact_flag = true;
 			std::string age = party[i]->age_group;
 			if (age.compare(AgeGroup::A12_14) == 0 || age.compare(AgeGroup::A15_17) == 0 || age.compare(AgeGroup::A18_25) == 0)
@@ -175,6 +178,16 @@ int32_t RoomAssign::assignRooms2ChildcareWorkers()
 					male_lst[person_id].push_back(m_person_info[person_id]);
 				else
 					female_lst[person_id].push_back(m_person_info[person_id]);
+			}
+		}
+		if ((!contact_flag) || (!age_flag)) {
+			if (party.size() > 1)
+				family_lst[party_id] = party;
+			else {
+				if (party[0]->gender.compare("Male") == 0)
+					family_adult_male_lst[party_id] = party;
+				else if (party[0]->gender.compare("Female") == 0)
+					family_adult_female_lst[party_id] = party;
 			}
 		}
 	}
@@ -190,15 +203,57 @@ int32_t RoomAssign::assignRooms2ChildcareWorkers()
 
 	// male room assignment - male do not share bathroom with females 
 	if (male_lst.size() > 0) {
-		if (IndividualRoomAssign(male_lst, BuildingRoomList::eMale, male_roomlist) <= 0)
+		if (IndividualRoomAssign2(male_lst, BuildingRoomList::eMale, male_roomlist) <= 0)
 			printf("assignRooms2ChildcareWorkers(): room assignment failed\n");
 	}
 
 	// female room assignment - male do not share bathroom with females 
 	if (female_lst.size() > 0) {
-		if (IndividualRoomAssign(female_lst, BuildingRoomList::eFemale, female_roomlist) <= 0)
+		if (IndividualRoomAssign2(female_lst, BuildingRoomList::eFemale, female_roomlist) <= 0)
 			printf("assignRooms2ChildcareWorkers(): female room assignment failed\n");
 	}
+
+	std::vector<BuildingRoomList::EURoom*> family_roomlist;
+	std::vector<BuildingRoomList::EURoom*> adult_male_roomlist;
+	std::vector<BuildingRoomList::EURoom*> adult_female_roomlist;
+
+	for (i = 0; i < m_br_list.queryFamilyPrivateRooms().size(); i++) {
+		std::string status = m_br_list.queryFamilyPrivateRooms()[i]->room_status;
+		std::string room = m_br_list.queryFamilyPrivateRooms()[i]->room;
+		if (status.compare("Available") == 0) {
+			family_roomlist.push_back(m_br_list.queryFamilyPrivateRooms()[i]);
+		}
+	}
+	for (i = 0; i < m_br_list.queryMaleRooms().size(); i++) {
+		std::string status = m_br_list.queryMaleRooms()[i]->room_status;
+		std::string room = m_br_list.queryMaleRooms()[i]->room;
+		if (status.compare("Available") == 0) {
+			adult_male_roomlist.push_back(m_br_list.queryMaleRooms()[i]);
+		}
+	}
+	for (i = 0; i < m_br_list.queryFemaleRooms().size(); i++) {
+		std::string status = m_br_list.queryFemaleRooms()[i]->room_status;
+		std::string room = m_br_list.queryFemaleRooms()[i]->room;
+		if (status.compare("Available") == 0) {
+			adult_female_roomlist.push_back(m_br_list.queryFemaleRooms()[i]);
+		}
+	}
+
+	if (family_lst.size() > 0) {
+		if (familyRoomAssign(family_lst, family_roomlist, enable_extrabeds) <= 0)
+			printf("assignRooms2ChildcareWorkers(): Family room assignment failed\n");
+	}
+
+	if (family_adult_male_lst.size() > 0) {
+		if (IndividualRoomAssign2(family_adult_male_lst, BuildingRoomList::eMale, adult_male_roomlist) <= 0)
+			printf("assignRooms2ChildcareWorkers(): Male room assignment failed\n");
+	}
+
+	if (family_adult_female_lst.size() > 0) {
+		if (IndividualRoomAssign2(family_adult_female_lst, BuildingRoomList::eFemale, adult_female_roomlist) <= 0)
+			printf("assignRooms2ChildcareWorkers(): Female room assignment failed\n");
+	}
+
 	return 0;
 }
 
@@ -564,8 +619,39 @@ std::vector<BuildingRoomList::EURoom*> RoomAssign::queryRoomList(std::vector<Bui
 		}
 	}
 
+	// find room that matches its capacity to num
 	total_capacity = 0;
 	std::map < int32_t, std::vector<BuildingRoomList::EURoom*>>::iterator it;
+	for (it = rms.begin(); it != rms.end(); ++it) {
+		int32_t score = it->first;
+		std::vector<BuildingRoomList::EURoom*> roomlist = it->second;
+		for (j = 0; j < roomlist.size(); j++) {
+			total_capacity = roomlist[j]->capacity;
+			if (total_capacity == num) {
+				frl.push_back(roomlist[j]);
+				return frl;
+			}
+		}
+	}
+	// find shared rooms that matches their capacity to num
+	for (it = rms.begin(); it != rms.end(); ++it) {
+		total_capacity = 0;
+		int32_t score = it->first;
+		std::vector<BuildingRoomList::EURoom*> roomlist = it->second;
+
+		// add shared room capacity
+		for (j = 0; j < roomlist.size(); j++)
+			total_capacity += roomlist[j]->capacity;
+
+		if (total_capacity == num) {
+			frl.push_back(roomlist[0]);
+			frl.push_back(roomlist[1]);
+			return frl;
+		}
+	}
+
+	// otherwise, accumulate room capacity to match up to the people size
+	total_capacity = 0;
 	for (it = rms.begin(); it != rms.end(); ++it) {
 		int32_t score = it->first;
 		std::vector<BuildingRoomList::EURoom*> roomlist = it->second;
@@ -587,9 +673,9 @@ std::vector<BuildingRoomList::EURoom*> RoomAssign::queryRoomList(std::vector<Bui
 
 std::vector<BuildingRoomList::EURoom*> RoomAssign::queryFamilyRoomList(std::vector<BuildingRoomList::EURoom*> &myroomlist, int32_t num, Registrant* registrant, bool enable_extrabed)
 {
-	int32_t i, j, k;
+	int32_t i;
 	std::map<int32_t, std::vector<BuildingRoomList::EURoom*>> rms;
-	std::vector<BuildingRoomList::EURoom* > frl;
+	std::vector<BuildingRoomList::EURoom* > frl; frl.clear();
 	int32_t total_capacity = 0, sz = (int32_t)myroomlist.size();
 	if (sz == 0)
 		return frl;
@@ -609,77 +695,25 @@ std::vector<BuildingRoomList::EURoom*> RoomAssign::queryFamilyRoomList(std::vect
 		}
 	}
 
-	BuildingRoomList::SexType stype;
-	// find the capacity of room matches the number of family size
 	std::map < int32_t, std::vector<BuildingRoomList::EURoom*>>::iterator it;
-	for (i = 0; i < 3; i++) {
-		for (it = rms.begin(); it != rms.end(); ++it) {
-			int32_t score = it->first;
-			std::vector<BuildingRoomList::EURoom*> roomlist = it->second;
 
-			for (j = 0; j < roomlist.size(); j++) {
-				total_capacity = roomlist[j]->capacity + (enable_extrabed ? 1 : 0);
-				if (total_capacity < num) {
-					if (roomlist.size() > 1 && (!roomlist[1]->considered)) {
-						// at most two rooms have shared bathrooms
-						total_capacity = roomlist[0]->capacity + roomlist[1]->capacity + (enable_extrabed ? 1 : 0);
-						if (total_capacity == num || total_capacity == num + 1) {
-							frl.push_back(roomlist[0]); // return the first room
-							frl.push_back(roomlist[1]); // return the first room
-							return frl;
-						}
-					}
-				}
-				else {
-					if (total_capacity - i == num) {
-						if (registrant->party_type.find(PartyType::qIndividual) != std::string::npos) {
-							std::string gender0 = registrant->gender;
-							if (gender0.compare("Male") == 0)
-								stype = BuildingRoomList::eMale;
-							else if (gender0.compare("Female") == 0)
-								stype = BuildingRoomList::eFemale;
-							if (roomlist[j]->neighbors.size() > 0) {
-								for (k = 0; k < roomlist[j]->neighbors.size(); k++) {
-									BuildingRoomList::SexType st = roomlist[j]->neighbors[k]->stype;
-									if (stype == BuildingRoomList::eMale && st == BuildingRoomList::eMale) {
-										frl.push_back(roomlist[j]);
-										return frl;
-									}
-									else if (stype == BuildingRoomList::eFemale && st == BuildingRoomList::eFemale) {
-										frl.push_back(roomlist[j]);
-										return frl;
-									}
-									if (stype == BuildingRoomList::eMale && (st == BuildingRoomList::eFemale || st == BuildingRoomList::eMix))
-										continue;
-									else if (stype == BuildingRoomList::eFemale && (st == BuildingRoomList::eMale || st == BuildingRoomList::eMix))
-										continue;
-								}
-							}
-						}
-						frl.push_back(roomlist[j]);
-						return frl;
-					}
-				}
-			}
-		}
-	}
+	// match party number to the # of beds per room or per shared rooms 
+	frl = RoomCapacityMatch(rms, num, registrant, enable_extrabed);
+	if (!frl.empty())
+		return frl;
 
-	// find the least score room
-	total_capacity = 0;
-	for (it = rms.begin(); it != rms.end(); ++it) {
-		int32_t score = it->first;
-		std::vector<BuildingRoomList::EURoom*> roomlist = it->second;
-		for (j = 0; j < roomlist.size(); j++) {
-			total_capacity += roomlist[j]->capacity + (enable_extrabed ? 1 : 0);
-			if (total_capacity < num) {
-				frl.push_back(roomlist[j]);
-			}
-			else {
-				frl.push_back(roomlist[j]);
-				return frl;
-			}
-		}
-	}
+	// find the capacity of room matches the number of family size
+	frl = RoomSpecialMatch(rms, num, registrant, enable_extrabed);
+	if (!frl.empty())
+		return frl;
+
+	// if capacityMatch() and SpecialMatch() both fail, then find the least score room(s)
+	// until the sum of capacity of all rooms are >= family size
+	// return the list of the rooms
+	frl = RoomExtraMatch(rms, num, enable_extrabed);
+	if (!frl.empty())
+		return frl;
+
 	return frl;
 }
 
@@ -749,6 +783,358 @@ int32_t RoomAssign::familyRoomAssign(std::map<int32_t, std::vector<Registrant*>>
 	}
 
 	return cnt;
+}
+
+std::vector<BuildingRoomList::EURoom* > RoomAssign::RoomCapacityMatch(std::map<int32_t, std::vector<BuildingRoomList::EURoom*>> &rms, int32_t num, Registrant* registrant, bool enable_extrabed)
+{
+	int32_t i, j, k;
+	int32_t total_capacity = 0;
+	std::vector<BuildingRoomList::EURoom* > frl;
+	std::vector<BuildingRoomList::EURoom* > frl_has_neighbor;
+	std::vector<BuildingRoomList::EURoom* > frl_has_no_neighbor;
+	BuildingRoomList::SexType stype;
+	std::map < int32_t, std::vector<BuildingRoomList::EURoom*>>::iterator it;
+
+	// match party number to the # of beds per room or per shared rooms 
+	// collect all candidates that satisfies the criteria
+	for (it = rms.begin(); it != rms.end(); ++it) {
+		int32_t score = it->first;
+		std::vector<BuildingRoomList::EURoom*> roomlist = it->second;
+		for (j = 0; j < roomlist.size(); j++) {
+			total_capacity = roomlist[j]->capacity + (enable_extrabed ? 1 : 0);
+			if (total_capacity == num) {
+				if (registrant->party_type.find(PartyType::qIndividual) != std::string::npos) {
+					std::string gender0 = registrant->gender;
+					if (gender0.compare("Male") == 0)
+						stype = BuildingRoomList::eMale;
+					else if (gender0.compare("Female") == 0)
+						stype = BuildingRoomList::eFemale;
+					if (roomlist[j]->neighbors.size() > 0 && roomlist[j]->neighbors[0]->considered) {
+						for (k = 0; k < roomlist[j]->neighbors.size(); k++) {
+							BuildingRoomList::SexType st = roomlist[j]->neighbors[k]->stype;
+							if (stype == BuildingRoomList::eMale && st == BuildingRoomList::eMale) {
+								frl_has_neighbor.push_back(roomlist[j]);
+							}
+							else if (stype == BuildingRoomList::eFemale && st == BuildingRoomList::eFemale) {
+								frl_has_neighbor.push_back(roomlist[j]);
+							}
+							if (stype == BuildingRoomList::eMale && (st == BuildingRoomList::eFemale || st == BuildingRoomList::eMix))
+								continue;
+							else if (stype == BuildingRoomList::eFemale && (st == BuildingRoomList::eMale || st == BuildingRoomList::eMix))
+								continue;
+						}
+					}
+					else
+						frl_has_no_neighbor.push_back(roomlist[j]);
+				}
+				else {// family type
+					if (roomlist[j]->neighbors.size() > 0 && roomlist[j]->neighbors[0]->room_status == RoomStatus::qFullyAssigned) {
+						for (k = 0; k < roomlist[j]->neighbors.size(); k++) {
+							BuildingRoomList::SexType st = roomlist[j]->neighbors[k]->stype;
+							if (st == BuildingRoomList::eMix)
+								frl_has_neighbor.push_back(roomlist[j]);
+							else
+								continue;
+						}
+					}
+					else
+						frl_has_no_neighbor.push_back(roomlist[j]);
+				}
+			}
+		}
+	}
+
+	// first pick the room that its neighbor has been occupied and they have the same family type
+	for (i = 0; i < (int32_t)frl_has_neighbor.size(); i++) {
+		frl.push_back(frl_has_neighbor[0]);
+		return frl;
+	}
+	// second pick the room that its neighbor room is not occupied
+	for (i = 0; i < (int32_t)frl_has_no_neighbor.size(); i++) {
+		frl.push_back(frl_has_no_neighbor[0]);
+		return frl;
+	}
+
+	// now check if shared rooms are available to hold the number of people greater than a single room can hold
+	for (it = rms.begin(); it != rms.end(); ++it) {
+		int32_t score = it->first;
+		std::vector<BuildingRoomList::EURoom*> roomlist = it->second;
+		for (int32_t j = 0; j < roomlist.size(); j++) {
+			total_capacity = roomlist[j]->capacity + (enable_extrabed ? 1 : 0);
+			if (total_capacity < num) {
+				if (roomlist.size() > 1 && (roomlist[j]->neighbors.size() > 0) && (!(roomlist[j]->neighbors[0]->room_status != RoomStatus::qFullyAssigned))) {
+					// at most two rooms have shared bathrooms
+					int32_t total_beds = roomlist[j]->capacity + roomlist[j]->neighbors[0]->capacity + (enable_extrabed ? 1 : 0);
+					if (total_beds == num) {
+						frl.push_back(roomlist[j]); // return the first room
+						frl.push_back(roomlist[j]->neighbors[0]); // return the second room
+						return frl;
+					}
+				}
+			}
+		}
+	}
+
+	frl.clear();
+	return frl;
+}
+
+std::vector<BuildingRoomList::EURoom* > RoomAssign::RoomSpecialMatch(std::map<int32_t, std::vector<BuildingRoomList::EURoom*>> &rms, int32_t num, Registrant* registrant, bool enable_extrabed)
+{
+	int32_t i, j, k;
+	int32_t total_capacity = 0;
+	std::vector<BuildingRoomList::EURoom* > frl;
+	std::vector<BuildingRoomList::EURoom* > frl_has_neighbor;
+	std::vector<BuildingRoomList::EURoom* > frl_has_no_neighbor;
+	BuildingRoomList::SexType stype;
+	std::map < int32_t, std::vector<BuildingRoomList::EURoom*>>::iterator it;
+
+	// case 1: capacity of room <= the number of family size
+	for (it = rms.begin(); it != rms.end(); ++it) {
+		int32_t score = it->first;
+		std::vector<BuildingRoomList::EURoom*> roomlist = it->second;
+
+		// return 2 rooms that share the bathroom
+		for (j = 0; j < roomlist.size(); j++) {
+			total_capacity = roomlist[j]->capacity + (enable_extrabed ? 1 : 0);
+			if (total_capacity < num) {
+				if (roomlist.size() > 1 && (!(roomlist[j]->neighbors[0]->room_status != RoomStatus::qFullyAssigned))) {
+					// at most two rooms have shared bathrooms
+					total_capacity = roomlist[j]->capacity + roomlist[j]->neighbors[0]->capacity + (enable_extrabed ? 1 : 0);
+					if (total_capacity == num || total_capacity == num + 1) {
+						frl.push_back(roomlist[j]); // return the first room
+						frl.push_back(roomlist[j]->neighbors[0]); // return the first room
+						return frl;
+					}
+				}
+			} // total_capacity
+		} // j
+	} // it
+
+	  // case 1: capacity of room >= the number of family size
+	for (i = 0; i < 3; i++) {
+		for (it = rms.begin(); it != rms.end(); ++it) {
+			int32_t score = it->first;
+			std::vector<BuildingRoomList::EURoom*> roomlist = it->second;
+
+			for (j = 0; j < roomlist.size(); j++) {
+				total_capacity = roomlist[j]->capacity + (enable_extrabed ? 1 : 0);
+				if (total_capacity >= num && total_capacity - i == num) {
+					if (registrant->party_type.find(PartyType::qIndividual) != std::string::npos) {
+						std::string gender0 = registrant->gender;
+						if (gender0.compare("Male") == 0)
+							stype = BuildingRoomList::eMale;
+						else if (gender0.compare("Female") == 0)
+							stype = BuildingRoomList::eFemale;
+						if (roomlist[j]->neighbors.size() > 0) {
+							for (k = 0; k < roomlist[j]->neighbors.size(); k++) {
+								BuildingRoomList::SexType st = roomlist[j]->neighbors[k]->stype;
+								if (stype == BuildingRoomList::eMale && st == BuildingRoomList::eMale) {
+									frl_has_neighbor.push_back(roomlist[j]);
+								}
+								else if (stype == BuildingRoomList::eFemale && st == BuildingRoomList::eFemale) {
+									frl_has_neighbor.push_back(roomlist[j]);
+								}
+								if (stype == BuildingRoomList::eMale && (st == BuildingRoomList::eFemale || st == BuildingRoomList::eMix))
+									continue;
+								else if (stype == BuildingRoomList::eFemale && (st == BuildingRoomList::eMale || st == BuildingRoomList::eMix))
+									continue;
+							}
+						}
+						else
+							frl_has_no_neighbor.push_back(roomlist[j]);
+					}
+					else {// family type
+						if (roomlist[j]->neighbors.size() > 0 && roomlist[j]->neighbors[0]->room_status == RoomStatus::qFullyAssigned) {
+							for (k = 0; k < roomlist[j]->neighbors.size(); k++) {
+								BuildingRoomList::SexType st = roomlist[j]->neighbors[k]->stype;
+								if (st == BuildingRoomList::eMix)
+									frl_has_neighbor.push_back(roomlist[j]);
+								else
+									continue;
+							}
+						}
+						else
+							frl_has_no_neighbor.push_back(roomlist[j]);
+					}
+				}
+			}// for room
+		}// for it
+
+		 // first pick the room that its neighbor has been occupied and they have the same family type
+		for (k = 0; k < (int32_t)frl_has_neighbor.size(); k++) {
+			frl.push_back(frl_has_neighbor[0]);
+			return frl;
+		}
+		// second pick the room that its neighbor room is not occupied
+		for (k = 0; k < (int32_t)frl_has_no_neighbor.size(); k++) {
+			frl.push_back(frl_has_no_neighbor[0]);
+			return frl;
+		}
+	}// for i
+
+	frl.clear();
+	return frl;
+}
+
+std::vector<BuildingRoomList::EURoom* > RoomAssign::RoomExtraMatch(std::map<int32_t, std::vector<BuildingRoomList::EURoom*>> &rms, int32_t num, bool enable_extrabed)
+{
+	int32_t total_capacity = 0;
+	std::vector<BuildingRoomList::EURoom* > frl;
+	std::map < int32_t, std::vector<BuildingRoomList::EURoom*>>::iterator it;
+	
+	frl.clear();
+	for (it = rms.begin(); it != rms.end(); ++it) {
+		int32_t score = it->first;
+		std::vector<BuildingRoomList::EURoom*> roomlist = it->second;
+		for (int32_t j = 0; j < (int32_t)roomlist.size(); j++) {
+			total_capacity += roomlist[j]->capacity + (enable_extrabed ? 1 : 0);
+			if (total_capacity < num) {
+				frl.push_back(roomlist[j]);
+			}
+			else {
+				frl.push_back(roomlist[j]);
+				return frl;
+			}
+		}
+	}
+	return frl;
+}
+
+int32_t RoomAssign::IndividualRoomAssign2(std::map<int32_t, std::vector<Registrant*>> &individual_lst, BuildingRoomList::SexType stype, std::vector<BuildingRoomList::EURoom*> &roomlist)
+{
+	int32_t i, j;
+	int32_t cnt = 0;
+	BuildingRoomList::SexType excludeType;
+	int32_t score = 0;
+	std::map<int32_t, std::vector<BuildingRoomList::EURoom*>> valid_roomlist;
+
+	if (individual_lst.size() == 0 || roomlist.size() == 0)
+		return -1;
+
+	std::map < int32_t, std::vector<Registrant*>>::iterator it;
+	std::vector<BuildingRoomList::EURoom*> temp_roomlist;
+
+	if (stype == BuildingRoomList::eMale)
+		excludeType = BuildingRoomList::eFemale;
+	else if (stype == BuildingRoomList::eFemale)
+		excludeType = BuildingRoomList::eMale;
+
+	// filter rooms to have the same genders in the shared rooms
+	for (i = 0; i < roomlist.size(); i++) {
+		BuildingRoomList::EURoom* eur = roomlist[i];
+		if (eur->room_status != RoomStatus::qFullyAssigned) {
+			if (eur->neighbors.size() > 0) {
+				if (eur->neighbors[0]->stype != excludeType && eur->neighbors[0]->stype != BuildingRoomList::eMix) {
+					eur->considered = false;
+					valid_roomlist[score].push_back(eur);
+				}
+			}
+			else {
+				eur->considered = false;
+				valid_roomlist[score].push_back(eur);
+			}
+		}
+	}
+
+	// find a room for the list of individuals
+	int32_t total_indiv_num = 0;
+	bool enable_extrabed = false;
+	std::vector<Registrant*> registrants;
+	for (it = individual_lst.begin(); it != individual_lst.end(); ++it) {
+		int32_t party_id = it->first;
+		std::vector<Registrant*> aregist = it->second;
+		int32_t fs = (int32_t)aregist.size();
+		total_indiv_num += fs;
+		for (i = 0; i < fs; i++)
+			registrants.push_back(aregist[i]);
+	}
+	std::vector<BuildingRoomList::EURoom* > frl = RoomCapacityMatch(valid_roomlist, total_indiv_num, registrants[0], enable_extrabed);
+	if (frl.size() > 0) {
+		int32_t k = 0;
+		for (i = 0; i < (int32_t)frl.size(); i++) {
+			for (j = 0; j < frl[i]->capacity; j++) {
+				frl[i]->bed_assigned++;
+				frl[i]->stype = stype;
+				registrants[k]->assigned_room = frl[i];
+				registrants[k]->room = frl[i]->room;
+				registrants[k]->building = ((BuildingRoomList::EUBuilding*)frl[i]->building)->building_name;
+				frl[i]->persons.push_back(registrants[k]->person_id);
+				k++;
+			}
+		}
+		for (i = 0; i < (int32_t)frl.size(); i++) {
+			if (frl[i]->bed_assigned == frl[i]->capacity)
+				frl[i]->room_status = RoomStatus::qFullyAssigned;
+			else
+				frl[i]->room_status = RoomStatus::qPartiallyAssigned;
+		}
+		return (int32_t)frl.size();
+	}
+
+	// do not mix female and male in room assignment - do not share bathrooms bewteen male room and female room 
+	for (it = individual_lst.begin(); it != individual_lst.end(); ++it) {
+		int32_t party_id = it->first;
+		std::vector<Registrant*> aregist = it->second;
+		int32_t fs = (int32_t)aregist.size();
+
+		temp_roomlist = queryRoomList(valid_roomlist[score], fs);
+		if (temp_roomlist.size() == 0)
+			return -2;
+
+		int32_t left = fs;
+		int32_t accumu = 0;
+		int32_t start = 0;
+		for (i = 0; i < temp_roomlist.size(); i++) {
+			BuildingRoomList::EURoom* eu_room = temp_roomlist[i];
+			assert(eu_room->room_status != RoomStatus::qInactive);
+			assert(eu_room->room_status != RoomStatus::qFullyAssigned);
+			if (eu_room->stype == excludeType || eu_room->stype == BuildingRoomList::eMix) {
+				eu_room->considered = true;
+				continue;
+			}
+			std::vector<BuildingRoomList::EURoom*> eu_next_room = eu_room->neighbors;
+			if (eu_next_room.size() > 0) {
+				if (eu_next_room[0]->stype == excludeType || eu_next_room[0]->stype == BuildingRoomList::eMix) {
+					eu_room->considered = true;
+					continue;
+				}
+			}
+
+			int32_t taken = min((temp_roomlist[i]->capacity), (temp_roomlist[i]->bed_assigned + left));
+			if (temp_roomlist[i]->bed_assigned + left > temp_roomlist[i]->capacity) {
+				left = temp_roomlist[i]->bed_assigned + left - temp_roomlist[i]->capacity;
+				accumu += temp_roomlist[i]->capacity - temp_roomlist[i]->bed_assigned;
+				temp_roomlist[i]->bed_assigned = temp_roomlist[i]->capacity;
+			}
+			else {
+				accumu += left;
+				temp_roomlist[i]->bed_assigned = temp_roomlist[i]->bed_assigned + left;
+				left = 0;
+			}
+
+			//temp_roomlist[i]->bed_assigned = min((temp_roomlist[i]->capacity), (temp_roomlist[i]->bed_assigned + left)); 
+			if (temp_roomlist[i]->bed_assigned == temp_roomlist[i]->capacity)
+				temp_roomlist[i]->room_status = RoomStatus::qFullyAssigned;
+			else
+				temp_roomlist[i]->room_status = RoomStatus::qPartiallyAssigned;
+
+			for (j = start; j < fs; j++) {
+				aregist[j]->assigned_room = temp_roomlist[i];
+				aregist[j]->room = temp_roomlist[i]->room;
+				aregist[j]->building = ((BuildingRoomList::EUBuilding*)temp_roomlist[i]->building)->building_name;
+				temp_roomlist[i]->persons.push_back(aregist[j]->person_id);
+			}
+			cnt++;
+			temp_roomlist[i]->stype = stype;
+			start = accumu;
+			if (left == 0)
+				break;
+		}
+	}
+
+	return cnt;
+
 }
 
 int32_t RoomAssign::IndividualRoomAssign(std::map<int32_t, std::vector<Registrant*>> &individual_lst, BuildingRoomList::SexType stype, std::vector<BuildingRoomList::EURoom*> &roomlist)
@@ -834,7 +1220,6 @@ int32_t RoomAssign::IndividualRoomAssign(std::map<int32_t, std::vector<Registran
 	}
 
 	return cnt;
-
 }
 
 int32_t RoomAssign::familyMaleRoomAssign(std::vector<Registrant*> &family_member_lst, std::vector<BuildingRoomList::EURoom*> &roomlist, bool enable_extrabeds)
@@ -1058,6 +1443,22 @@ int32_t RoomAssign::roomAllocationStats()
 	return 0;
 }
 
+int32_t RoomAssign::lodgePeopleStats()
+{
+	m_eu_lodge_people.single_males = (int32_t)m_male_list.size();// party id
+	m_eu_lodge_people.single_females = (int32_t)m_female_list.size();// party id
+	m_eu_lodge_people.person_childcare_workers = (int32_t)m_child_leader_list.size();// party id
+	m_eu_lodge_people.family_choir = (int32_t)m_choir_list.size();// party id
+	m_eu_lodge_people.family_speakers_recordings = (int32_t)m_recording_list.size() + (int32_t)m_speaker_list.size();// party id
+
+	m_eu_lodge_people.family_seniors = (int32_t)m_senior_list.size();// party id
+	m_eu_lodge_people.family_babies = (int32_t)m_baby_list.size();// party id
+	m_eu_lodge_people.special_needs = (int32_t)m_special_need_list.size();// party id
+	m_eu_lodge_people.families = (int32_t)m_family_info.size();// party id
+
+	return 0;
+}
+
 int32_t RoomAssign::printRooms2Seniors()
 {
 	int32_t i;
@@ -1094,7 +1495,7 @@ int32_t RoomAssign::printRooms2Seniors()
 	}
 
 	printf(" == Senior people room assignment:\n");
-	printf(" Out of %zd rooms, %d are assigned, %d are not assigned\n", roomlist.size(), assigned_room_cnt, unassigned_room_cnt);
+	//printf(" Out of %zd rooms, %d are assigned, %d are not assigned\n", roomlist.size(), assigned_room_cnt, unassigned_room_cnt);
 	printf(" Out of %zd senior families, %d families are assigned with a room, and %d families are not assigned with a room\n", senior_list.size(), assigned_family_cnt, unassigned_family_cnt);
 
 	return 0;

@@ -72,6 +72,7 @@ public:
 		int32_t families;
 		int32_t single_males;
 		int32_t single_females;
+		int32_t special_needs;
 	} EULodgePeople;
 
 	typedef struct Registrant {
@@ -258,7 +259,7 @@ public:
 	std::map<int32_t, std::vector<Registrant*>> m_note_pairup_list;// party id
 
 	std::map<int32_t, Party> m_assigned_family_list;
-	std::map<int32_t, Party> m_assigned_family_mail_list;
+	std::map<int32_t, Party> m_assigned_family_male_list;
 	std::map<int32_t, Party> m_assigned_family_female_list;
 	std::map<int32_t, Party> m_assigned_male_list;
 	std::map<int32_t, Party> m_assigned_female_list;
