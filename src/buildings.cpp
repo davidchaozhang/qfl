@@ -52,6 +52,15 @@ std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryRoomList(RoomState
 	return my_eurlist;
 }
 
+/*
+room_status:
+"Available", "Inactive", "Reserved-GE", "Reserved-SK", "Reserved-SP",
+"Reserved-CH","Reserved-CC",
+"Fully Assigned", "Partially Assigned"
+
+room_type:
+"Family Private", "Family Male", "Family Female", "Male", "Female"
+*/
 std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryRoomList(const std::string &building_name, RoomState rs)
 {
 	std::vector<BuildingRoomList::EURoom*> eurlist, my_eurlist;
@@ -94,6 +103,18 @@ std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryAssignedRooms()
 std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryAssignedRooms(std::string building_name)
 {
 	RoomState rs = RoomState::tFullyAssigned;
+	return queryRoomList(building_name, rs);
+}
+
+std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryPartialAssignedRooms()
+{
+	RoomState rs = RoomState::tPartiallyAssigned;
+	return queryRoomList(rs);
+}
+
+std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryPartialAssignedRooms(std::string building_name)
+{
+	RoomState rs = RoomState::tPartiallyAssigned;
 	return queryRoomList(building_name, rs);
 }
 
@@ -242,18 +263,6 @@ std::vector<BuildingRoomList::EURoom*> BuildingRoomList::queryReservedCCRooms(st
 	RoomState rs = RoomState::tReservedCC;
 	return queryRoomList(building_name, rs);
 }
-
-#if 0
-std::vector<BuildingRoomList::EURoom*> BuildingRoomList::query1personRooms(BuildingRoomList::RoomState rs)
-{
-
-}
-
-std::vector<BuildingRoomList::EURoom*> BuildingRoomList::query1personRooms(std::string &building_name, BuildingRoomList::RoomState rs)
-{
-
-}
-#endif
 
 int BuildingRoomList::readInBuildingLists(const char * building_rooms_list, char dataformat)
 {
@@ -1075,15 +1084,6 @@ std::string BuildingRoomList::getStringNames(BuildingRoomList::RoomState rs)
 		break;
 	case BuildingRoomList::tPartiallyAssigned:
 		str = RoomStatus::qPartiallyAssigned;
-		break;
-	case BuildingRoomList::tNo_Bath:
-		str = RoomTypes::qNo_Bath;
-		break;
-	case BuildingRoomList::tExtra_beds:
-		str = RoomStatus::qExtraBed;
-		break;
-	case BuildingRoomList::tShared_Bathroom:
-		str = RoomStatus::qSharedBathroom;
 		break;
 	}
 	return str;

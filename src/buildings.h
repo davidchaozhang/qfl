@@ -7,19 +7,39 @@
 #include <vector>
 #include <opencv2/opencv.hpp>
 
+/*!
+* Define Room types on EU campus
+*\param qFamily_Private family room that has a shared bathroom
+*\param qFamily_Male family rooms has a male-only public bathroom
+*\param qFamily_Female family rooms has a female-only public bathroom
+*\param qMale individual male only shared rooms, public bathrooms for males
+*\param qFemale individual female only shared rooms, public bathrooms for females
+*\param qNo_Bath is not defined
+*/
 namespace RoomTypes {
 	const char* const qFamily_Private = "Family Private";
 	const char* const qFamily_Male = "Family Male";
 	const char* const qFamily_Female = "Family Female";
 	const char* const qMale = "Male";
 	const char* const qFemale = "Female";
-	const char* const qNo_Bath = "No Bath";
+	//const char* const qNo_Bath = "No Bath";
 };
 
+/*!
+* Define Room assignment status on EU campus
+*\param qAvailable room is available 
+*\param qReservedGE room is reserved for general purpose. Once the room is assigned, room status change to fully or partially assigned.
+*\param qReservedSK room is reserved for speakers and recordings. Once the room is assigned, room status change to fully or partially assigned.
+*\param qReservedSP room is reserved for special needs (families of seniors, hadicapped, babies). Once the room is assigned, room status change to fully or partially assigned.
+*\param qReservedCH room is reserved for choir. Once the room is assigned, room status change to fully or partially assigned.
+*\param qReservedCC room is reserved for young child coworkers. Once the room is assigned, room status change to fully or partially assigned.
+*\param qFullyAssigned room is fully booked.
+*\param qPartiallyAssigned room is partially booked. For male or female only rooms, this means more people of the same sex type can add.
+*\note  qExtraBed and qShareBathRoom are yet to be defined 
+*/
 namespace RoomStatus {
 	const char* const qAvailable = "Available";
 	const char* const qInactive = "Inactive";
-	const char* const qSharedBathroom = "SharedBathroom";
 	const char* const qReservedGE = "Reserved-GE"; // general purpose
 	const char* const qReservedSK = "Reserved-SK"; // speakers
 	const char* const qReservedSP = "Reserved-SP"; // special need, (baby, senior, handicapped)
@@ -27,7 +47,8 @@ namespace RoomStatus {
 	const char* const qReservedCC = "Reserved-CC"; // teen coworker for childcare program
 	const char* const qFullyAssigned = "Fully Assigned";
 	const char* const qPartiallyAssigned = "Partially Assigned";
-	const char* const qExtraBed = "Extra Bed";
+	//const char* const qExtraBed = "Extra Bed";
+	//const char* const qSharedBathroom = "SharedBathroom";
 };
 
 // this is the order of the report
@@ -197,20 +218,6 @@ public:
 	std::vector<EURoom*> queryRoomList(RoomState rs);
 	std::vector<EURoom*> queryRoomList(const std::string &building_name, RoomState rs);
 
-	std::vector<EURoom*> queryBathSharedRooms();
-	std::vector<EURoom*> queryBathSharedRooms(std::string building_name);
-
-	std::vector<EURoom*> query1personRooms(RoomState rs);
-	std::vector<EURoom*> query1personRooms(std::string &building_name, RoomState rs);
-	std::vector<EURoom*> query2personRooms(RoomState rs);
-	std::vector<EURoom*> query2personRooms(std::string &building_name, RoomState rs);
-	std::vector<EURoom*> query3personRooms(RoomState rs);
-	std::vector<EURoom*> query3personRooms(std::string &building_name, RoomState rs);
-	std::vector<EURoom*> query4personRooms(RoomState rs);
-	std::vector<EURoom*> query4personRooms(std::string &building_name, RoomState rs);
-	std::vector<EURoom*> queryExtraBedRooms(RoomState rs);
-	std::vector<EURoom*> queryExtraBedRooms(std::string &building_name, RoomState rs);
-
 	std::vector<EURoom*> queryFamilyPrivateRooms();
 	std::vector<EURoom*> queryFamilyPrivateRooms(std::string building_name);
 
@@ -232,6 +239,12 @@ public:
 	std::vector<EURoom*> queryAssignedRooms();
 	std::vector<EURoom*> queryAssignedRooms(std::string building_name);
 
+	std::vector<EURoom*> queryPartialAssignedRooms();
+	std::vector<EURoom*> queryPartialAssignedRooms(std::string building_name);
+
+	std::vector<EURoom*> queryBathSharedRooms();
+	std::vector<EURoom*> queryBathSharedRooms(std::string building_name);
+
 	std::vector<EURoom*> queryReservedGERooms();
 	std::vector<EURoom*> queryReservedGERooms(std::string building_name);
 	std::vector<EURoom*> queryReservedSKRooms();
@@ -244,6 +257,7 @@ public:
 	std::vector<EURoom*> queryReservedCCRooms(std::string building_name);
 
 	inline std::vector<EUBuilding>* getBuilding_list() { return &m_eu_buildings; }
+	inline int32_t getTotalRooms() { return m_total_rooms; }
 	inline int32_t getTotalActiveRooms() { return m_total_rooms - m_total_inactive_rooms; }
 	inline int32_t getTotalBeds() { return m_total_beds; }
 	inline int32_t getInactiveRooms() { return m_total_inactive_rooms;  }

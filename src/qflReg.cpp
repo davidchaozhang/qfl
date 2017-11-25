@@ -24,8 +24,8 @@ static bool QDbyListSize(std::pair<std::string, QflReg::QFL_Church> const & a, s
 {
 	QflReg::QFL_Church church_a = a.second;
 	QflReg::QFL_Church church_b = b.second;
-	int32_t num_a = church_a.persons[QflReg::qEU].size() + church_a.persons[QflReg::qCabrini].size() + church_a.persons[QflReg::qChild].size() + church_a.persons[QflReg::qSenior].size();
-	int32_t num_b = church_b.persons[QflReg::qEU].size() + church_b.persons[QflReg::qCabrini].size() + church_b.persons[QflReg::qChild].size() + church_b.persons[QflReg::qSenior].size();
+	size_t num_a = church_a.persons[QflReg::qEU].size() + church_a.persons[QflReg::qCabrini].size() + church_a.persons[QflReg::qChild].size() + church_a.persons[QflReg::qSenior].size();
+	size_t num_b = church_b.persons[QflReg::qEU].size() + church_b.persons[QflReg::qCabrini].size() + church_b.persons[QflReg::qChild].size() + church_b.persons[QflReg::qSenior].size();
 	return (num_a > num_b);
 };
 
@@ -236,15 +236,15 @@ int32_t QflReg::parseAllFields()
 		a_regist.zip = std::stoi(person[28].substr(1, person[28].size() - 2));
 		a_regist.functional_group = person[29].substr(1, person[29].size() - 2);
 		a_regist.services = person[30].substr(1, person[30].size() - 2);
-		a_regist.checkin = std::stoi(person[32].substr(1, person[32].size() - 2));
+		a_regist.checkin = (std::stoi(person[32].substr(1, person[32].size() - 2)) > 0);
 
 		if (person[34].substr(1, person[34].size() - 2).size() > 0)
 			a_regist.paid = std::stoi(person[34].substr(1, person[34].size() - 2));
 		else
 			a_regist.paid = 0;
 
-		a_regist.key_returned = std::stoi(person[36].substr(1, person[36].size() - 2));
-		a_regist.youth_checkins = std::stoi(person[38].substr(1, person[38].size() - 2));
+		a_regist.key_returned = (std::stoi(person[36].substr(1, person[36].size() - 2)) > 0);
+		a_regist.youth_checkins = (std::stoi(person[38].substr(1, person[38].size() - 2)) > 0);
 
 		m_registrants.push_back(a_regist);
 		m_person_info[a_regist.person_id] = a_regist;
@@ -585,19 +585,19 @@ int32_t QflReg::sortAttendeesByChurches()
 	std::sort(m_attendee_list_byChurch.begin(), m_attendee_list_byChurch.end(), QDbyListSize);
 	assert(cnt == m_registrants.size());
 	// all church
-	m_allchurch.adult_christian_ratio  = adult_christians / (adult_christians + adult_non_christians);
+	m_allchurch.adult_christian_ratio  = (float)adult_christians / (float)(adult_christians + adult_non_christians);
 	m_allchurch.adult_christians = adult_christians;
 	m_allchurch.adult_non_christians = adult_non_christians;
 	m_allchurch.adult_christians_in_cell_group = adult_christians_in_cell_group;
 	m_allchurch.checkins = checkins;
 	m_allchurch.total_paid = paid;
 
-	m_allchurch.youth_christian_ratio = youth_christians / (youth_christians + youth_non_christians);
+	m_allchurch.youth_christian_ratio = (float)youth_christians / (float)(youth_christians + youth_non_christians);
 	m_allchurch.youth_christians = youth_christians;
 	m_allchurch.youth_non_christians = youth_non_christians;
 	m_allchurch.youth_christians_in_cell_group = youth_christians_in_cell_group;
 
-	m_allchurch.christian_ratio = (adult_christians + youth_christians) / (adult_christians + adult_non_christians
+	m_allchurch.christian_ratio = (float)(adult_christians + youth_christians) / (float)(adult_christians + adult_non_christians
 		+ youth_christians + youth_non_christians);
 	m_allchurch.children = children;
 
@@ -612,17 +612,17 @@ int32_t QflReg::sortAttendeesByChurches()
 	m_allchurch.youth_paid = youth_paid;
 
 	// rcc only
-	m_rccc.adult_christian_ratio = rccc_adult_christians / (rccc_adult_christians + rccc_adult_non_christians);
+	m_rccc.adult_christian_ratio = (float)rccc_adult_christians / (float)(rccc_adult_christians + rccc_adult_non_christians);
 	m_rccc.adult_christians = rccc_adult_christians;
 	m_rccc.adult_non_christians = rccc_adult_non_christians;
 	m_rccc.adult_christians_in_cell_group = rccc_adult_christians_in_cell_group;
 
-	m_rccc.youth_christian_ratio = rccc_youth_christians / (rccc_youth_christians + rccc_youth_non_christians);
+	m_rccc.youth_christian_ratio = (float)rccc_youth_christians / (float)(rccc_youth_christians + rccc_youth_non_christians);
 	m_rccc.youth_christians = rccc_youth_christians;
 	m_rccc.youth_non_christians = rccc_youth_non_christians;
 	m_rccc.youth_christians_in_cell_group = rccc_youth_christians_in_cell_group;
 
-	m_rccc.christian_ratio = (rccc_adult_christians + rccc_youth_christians) / (rccc_adult_christians + rccc_adult_non_christians
+	m_rccc.christian_ratio = (float)(rccc_adult_christians + rccc_youth_christians) / (float)(rccc_adult_christians + rccc_adult_non_christians
 		+ rccc_youth_christians + rccc_youth_non_christians);
 	m_rccc.children = rccc_children;
 
@@ -638,7 +638,7 @@ int32_t QflReg::sortAttendeesByChurches()
 
 int32_t QflReg::ageStatistics()
 {
-	int32_t i, j;
+	int32_t i;
 	std::vector<int32_t> attendee_list;
 	if (m_registrants.size() == 0)
 		return -1;
@@ -715,7 +715,7 @@ int32_t QflReg::exclude_rccc_List()
 
 int32_t QflReg::gen_rccc_functional_groups()
 {
-	int32_t i, j;
+	int32_t j;
 	QFL_Church *rccc = getRCCCLilst();
 	if (!rccc)
 		return -1;
@@ -839,7 +839,7 @@ int32_t QflReg::gen_rccc_functional_groups()
 int32_t QflReg::gen_rccc_zip_groups()
 {
 	int32_t i, j;
-	int32_t total = m_temp_group.christian_list.size() + m_temp_group.non_christian_list.size();
+	size_t total = m_temp_group.christian_list.size() + m_temp_group.non_christian_list.size();
 	if (total < 1)
 		return -1;
 
@@ -856,7 +856,7 @@ int32_t QflReg::gen_rccc_zip_groups()
 	temp_list = m_temp_group.christian_list;
 	temp_list.insert(temp_list.end(), m_temp_group.non_christian_list.begin(), m_temp_group.non_christian_list.end());
 
-	printf("total = %d\n", total);
+	printf("total = %zd\n", total);
 	for (i = 0; i < total; i++) {
 		bool matched = false;
 		Registrant person = m_person_info[temp_list[i]];
@@ -953,10 +953,10 @@ void QflReg::printOutStatistics(const char*filename)
 
 	// print top 15 church list
 	for (i = 0; i < m_attendee_list_byChurch.size(); i++) {
-		int32_t total = m_attendee_list_byChurch[i].second.persons[qEU].size() + m_attendee_list_byChurch[i].second.persons[qCabrini].size()
+		size_t total = m_attendee_list_byChurch[i].second.persons[qEU].size() + m_attendee_list_byChurch[i].second.persons[qCabrini].size()
 			+ m_attendee_list_byChurch[i].second.persons[qChild].size() + m_attendee_list_byChurch[i].second.persons[qSenior].size();
 		if (total > 0)
-			fprintf(hf, "%s, %d\n", m_attendee_list_byChurch[i].first.c_str(), total);
+			fprintf(hf, "%s, %zd\n", m_attendee_list_byChurch[i].first.c_str(), total);
 	}
 	fclose(hf);
 
@@ -972,7 +972,7 @@ void QflReg::printOutRCCC_statistics(const char*filename)
 	if (cell_groups.size() < 1)
 		return;
 
-	int32_t total = m_attendee_list_byChurch[0].second.persons[qEU].size() +
+	size_t total = m_attendee_list_byChurch[0].second.persons[qEU].size() +
 		m_attendee_list_byChurch[0].second.persons[qChild].size() +
 		m_attendee_list_byChurch[0].second.persons[qSenior].size() +
 		m_attendee_list_byChurch[0].second.persons[qCabrini].size();
@@ -984,7 +984,7 @@ void QflReg::printOutRCCC_statistics(const char*filename)
 		return;
 
 	fprintf(hf, "Time = %s\n", getCurTime().c_str());
-	fprintf(hf, "Church = %s, total attendees = %d\n", cell_groups[0].church.c_str(), total);
+	fprintf(hf, "Church = %s, total attendees = %zd\n", cell_groups[0].church.c_str(), total);
 
 	fprintf(hf, "EU Adults: %zd\n", m_attendee_list_byChurch[0].second.persons[qEU].size());
 	fprintf(hf, "EU 0-11 yr Children: %zd\n", m_attendee_list_byChurch[0].second.persons[qChild].size());
@@ -996,8 +996,8 @@ void QflReg::printOutRCCC_statistics(const char*filename)
 	for (int32_t i = 0; i < cell_groups.size(); i++) {
 		std::string church = cell_groups[i].church;
 		std::string function = cell_groups[i].functions;
-		int32_t christians = cell_groups[i].christian_list.size();
-		int32_t non_christians = cell_groups[i].non_christian_list.size();
+		int32_t christians = (int32_t)cell_groups[i].christian_list.size();
+		int32_t non_christians = (int32_t)cell_groups[i].non_christian_list.size();
 		rccc_christians += christians;
 		rccc_non_christians += non_christians;
 
@@ -1030,7 +1030,7 @@ void QflReg::printOutEU_statistics(const char*filename)
 	int32_t checkins = 0;
 	int32_t total_paid = 0;
 
-	int32_t sz = m_attendee_list_byChurch.size();
+	int32_t sz = (int32_t)m_attendee_list_byChurch.size();
 	std::vector<int32_t > s[3];
 
 	for (i = 0; i < sz; i++) {
@@ -1158,7 +1158,7 @@ void QflReg::printOutCabrini_statistics(const char*filename)
 	int32_t cabrini_18_65 = 0;
 	int32_t cabrini_66_69 = 0;
 	int32_t cabrini_70_ = 0;
-	int32_t sz = m_attendee_list_byChurch.size();
+	int32_t sz = (int32_t)m_attendee_list_byChurch.size();
 	std::vector<int32_t > s;
 
 	for (i = 0; i < sz; i++) {
