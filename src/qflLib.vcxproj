@@ -24,6 +24,7 @@
     <ClCompile Include="churches.cpp" />
     <ClCompile Include="liveRead.cpp" />
     <ClCompile Include="qflReg.cpp" />
+    <ClCompile Include="roomassign.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="attendees.h" />
@@ -32,6 +33,7 @@
     <ClInclude Include="liveRead.h" />
     <ClInclude Include="qflLib_defs.h" />
     <ClInclude Include="qflReg.h" />
+    <ClInclude Include="roomassign.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGUID>{5678DE35-45C7-3D33-00D7-BAA98611C9E2}</ProjectGUID>
