@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="checkinApp.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGUID>{1234DE25-35C7-3D22-88D7-CAA98611C9E2}</ProjectGUID>

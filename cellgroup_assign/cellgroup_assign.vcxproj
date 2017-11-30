@@ -19,13 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="reportsApp.cpp" />
+    <ClCompile Include="cellgroupAssignApp.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGUID>{9981DEE5-D5C7-3D22-33D7-CAA98622C2E2}</ProjectGUID>
+    <ProjectGUID>{5678DEE5-35C7-3D22-55D7-CAA98622C2E2}</ProjectGUID>
     <Keyword>Win32Proj</Keyword>
     <Platform>x64</Platform>
-    <ProjectName>reports</ProjectName>
+    <ProjectName>cellgroup_assign</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -85,7 +85,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(cvpath)\include;$(zbarpath)\include;$(zbarpath)\include\zbar;..\src;..\room_assign;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(cvpath)\include;$(zbarpath)\include;$(zbarpath)\include\zbar;..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>Debug/</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>CompileAsCpp</CompileAs>
@@ -132,7 +132,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(cvpath)\include;$(zbarpath)\include;$(zbarpath)\include\zbar;..\src;..\room_assign;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(cvpath)\include;$(zbarpath)\include;$(zbarpath)\include\zbar;..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>Release/</AssemblerListingLocation>
       <CompileAs>CompileAsCpp</CompileAs>
       <DisableLanguageExtensions>true</DisableLanguageExtensions>
