@@ -33,54 +33,56 @@ int room_assignmentTest()
 
 	// collect lodging people status
 	status = ra.lodgePeopleStats();
-	ra.trackStatus("Begin");
+	ra.trackStatus("0.Begin");
 
 	// take reserved special need rooms
 	status = ra.assignRooms2SpecialNeeds();
 	ra.printRooms2SpecialNeeds();
-	ra.trackStatus("SpecialNeeds");
+	ra.trackStatus("1.SpecialNeeds");
 
 	// take reserved choir rooms
 	status = ra.assignRooms2Choir();
 	ra.printRooms2Choir();
-	ra.trackStatus("Choir");
+	ra.trackStatus("2.Choir");
 
 	// take reserved young child coworkers
 	status = ra.assignRooms2ChildcareWorkers();
 	ra.printRooms2ChildcareWorkers();
-	ra.trackStatus("Childcare");
+	ra.trackStatus("3.Childcare");
 
 	// take reserved speaker rooms
 	status = ra.assignRooms2Speakers();
 	ra.printRooms2Speakers();
-	ra.trackStatus("Speakers");
+	ra.trackStatus("4.Speakers");
 
 	status = ra.assignRooms2Recordings();
 	ra.printRooms2Recordings();
-	ra.trackStatus("Recordings");
+	ra.trackStatus("5.Recordings");
 
 	// take reserved special need rooms 
 	status = ra.assignRooms2Babies();
 	ra.printRooms2Babies();
-	ra.trackStatus("Babies");
+	ra.trackStatus("6.Babies");
 	status = ra.assignRooms2Seniors();
 	ra.printRooms2Seniors();
-	ra.trackStatus("Seniors");
+	ra.trackStatus("7.Seniors");
 
 	// take reserved family rooms 
 	status = ra.assignRooms2Families();
 	ra.printRooms2Families();
-	ra.trackStatus("Families");
+	ra.trackStatus("8.Families");
 
 	// take reserved individual male rooms
 	status = ra.assignRooms2Males();
 	ra.printRooms2Males();
-	ra.trackStatus("Males");
+	ra.trackStatus("9.Males");
 
 	// take reserved individual female rooms
 	status = ra.assignRooms2Females();
 	ra.printRooms2Females();
-	ra.trackStatus("Females");
+	ra.trackStatus("10.Females");
+
+	// print an updated document with the latest room assignment
 
 	return status;
 }
