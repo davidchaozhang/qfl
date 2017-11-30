@@ -979,7 +979,9 @@ int BuildingRoomList::scoreRooms()
 					score[2] = (score[2] + score_neighbor) / 2 + 1;
 				}
 				int32_t final_score = score[0] + score[1] + score[2];
+#if 0
 				printf("%s %d\n", eur.room.c_str(), final_score);
+#endif
 				m_eu_buildings[i].sects[j].rooms[k].score = final_score;
 				m_room_list_by_score[final_score].push_back(&m_eu_buildings[i].sects[j].rooms[k]);
 			}
@@ -1101,6 +1103,57 @@ int BuildingRoomList::printRoomStats()
 		printf("%s rooms=%d beds=%d\n", m_eu_buildings[i].building_name.c_str(), m_eu_buildings[i].building_rooms, m_eu_buildings[i].building_beds);
 	}
 
-	printf("total rooms = %d, total beds = %d\n", m_total_rooms, m_total_beds);
+	printf("=== Total rooms = %d, Total beds = %d\n", m_total_rooms, m_total_beds);
+	return 0;
+}
+
+int BuildingRoomList::writeUpdatedBuildingRoomDoc(const char* filename)
+{
+	int32_t i, j, k;
+	if (filename == NULL)
+		return -1;
+
+	std::ofstream fout(filename);
+	if (!fout.is_open())
+		return -2;
+
+	fout << "Building No," << "Building Name," << "Direction," << "Room_ID," << "Room," << "Level,"
+		<< "Room Type," << "Bathroom," << "Room Status," << "Capacity," << "Bed Assigned," << "Extra,"
+		<< "Building Distance," << "Bath Distance," << "Score," << "AC," << "Fridge," << "Elevator,"
+		<< "Room Conditions," << "Note" << std::endl;
+
+	for (i = 0; i < m_eu_buildings.size(); i++) {
+		for (j = 0; j < m_eu_buildings[i].sects.size(); j++) {
+			for (k = 0; k < m_eu_buildings[i].sects[j].rooms.size(); k++) {
+				BuildingRoomList::EURoom room = m_eu_buildings[i].sects[j].rooms[k];
+				int32_t building_no = m_eu_buildings[i].build_no;
+				std::string building_name = m_eu_buildings[i].building_name;
+				std::string direction = m_eu_buildings[i].sects[j].direction;
+				int32_t id = m_eu_buildings[i].sects[j].rooms[k].room_id;
+				std::string rm = m_eu_buildings[i].sects[j].rooms[k].room;
+				int32_t level = m_eu_buildings[i].sects[j].level;
+				std::string rtype = m_eu_buildings[i].sects[j].rooms[k].room_type;
+				std::string bath = m_eu_buildings[i].sects[j].rooms[k].bathroom;
+				std::string status = m_eu_buildings[i].sects[j].rooms[k].room_status;
+				int32_t capacity = m_eu_buildings[i].sects[j].rooms[k].capacity;
+				int32_t num_assigned_beds = m_eu_buildings[i].sects[j].rooms[k].bed_assigned;
+				int32_t extra_bed = m_eu_buildings[i].sects[j].rooms[k].extra;
+				int32_t bath_distance = m_eu_buildings[i].sects[j].rooms[k].bath_distance;
+				int32_t building_distance = m_eu_buildings[i].building_distance;
+				int32_t score = m_eu_buildings[i].sects[j].rooms[k].score;
+				bool ac = m_eu_buildings[i].ac;
+				bool fridge = m_eu_buildings[i].fridge;
+				bool elevator = m_eu_buildings[i].elevator;
+				int32_t room_conditions = m_eu_buildings[i].sects[j].rooms[k].room_conditions;
+
+				fout << building_no <<"," << building_name <<"," << direction << "," << id << "," << rm <<"," 
+					<< level << "," << rtype << "," << bath << "," << status <<"," << capacity << "," << num_assigned_beds <<"," 
+					<< extra_bed <<"," << building_distance <<"," << bath_distance <<"," << score <<"," << ac <<"," << fridge <<"," 
+					<< elevator <<"," << room_conditions <<"," << std::endl;
+			}
+		}
+	}
+
+	fout.close();
 	return 0;
 }

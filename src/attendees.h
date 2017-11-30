@@ -224,7 +224,6 @@ public:
 	int32_t classifications();
 	int32_t refinement();
 	int32_t sortAttendeesByChurches();
-	int32_t sortAttendeesPerBuilidng();
 
 
 	ChurchList::QFLChurch* getChurch(int32_t person_id);
@@ -240,32 +239,32 @@ public:
 	std::string getCurTime();
 
 	protected:
+	//! raw input data
 	std::vector<std::vector<std::string>> m_data;
-	std::vector<Registrant> m_registrants;
+	//! parsed input data (EU + Cabrini, lodged and commute)
+	std::vector<Registrant> m_registrants; 
+	//! EU and Cabrini, excludes cancelled and uncertain
 	std::map<int32_t, Registrant*> m_person_info; // person id
-	std::map<int32_t, std::vector<Registrant*>> m_family_info; // party id
+	//! EU and Cabrini, excludes cancelled and uncertain
+	std::map<int32_t, std::vector<Registrant*>> m_party_info; // party id
 	std::map<std::string, Church> m_attendee_list_byChurch;
 
+	std::map<int32_t, Registrant*> m_EU_person_info; // person id
+	 //! EU and Cabrini, excludes cancelled and uncertain
+	std::map<int32_t, std::vector<Registrant*>> m_EU_party_info; // party id
+
+	// m_person_info or m_party_info is divided into the following lists filtered by EU:
+	std::map<int32_t, std::vector<Registrant*>> m_family_info; // party id
 	std::map<int32_t, std::vector<Registrant*>> m_male_list;// party id
 	std::map<int32_t, std::vector<Registrant*>> m_female_list;// party id
 	std::map<int32_t, std::vector<Registrant*>> m_child_leader_list;// party id
 	std::map<int32_t, std::vector<Registrant*>> m_choir_list;// party id
 	std::map<int32_t, std::vector<Registrant*>> m_recording_list;// party id
 	std::map<int32_t, std::vector<Registrant*>> m_speaker_list;// party id
-
 	std::map<int32_t, std::vector<Registrant*>> m_senior_list;// party id
 	std::map<int32_t, std::vector<Registrant*>> m_baby_list;// party id
 	std::map<int32_t, std::vector<Registrant*>> m_special_need_list;// party id
 	std::map<int32_t, std::vector<Registrant*>> m_note_pairup_list;// party id
-
-	std::map<int32_t, Party> m_assigned_family_list;
-	std::map<int32_t, Party> m_assigned_family_male_list;
-	std::map<int32_t, Party> m_assigned_family_female_list;
-	std::map<int32_t, Party> m_assigned_male_list;
-	std::map<int32_t, Party> m_assigned_female_list;
-	//std::map<std::string, Party> m_assigned_list_by_church; // church name, party
-	std::map<std::string, Church> m_assigned_list_by_church; // church name, church
-	std::map<std::string, Party> m_assigned_list_by_building; // building name, party
 
 	// statistics
 	std::vector<int32_t> m_christian_list;
@@ -282,7 +281,7 @@ public:
 	std::vector<int32_t> m_need_ride_list;
 	std::vector<int32_t> m_commute_list;
 
-	std::vector<int32_t> m_EU_list;
+	std::vector<Registrant*> m_Cabrini_list;
 	std::map<std::string, std::vector<CellGroup>> m_cell_groups;
 
 	ChurchList m_church_list;

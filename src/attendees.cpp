@@ -26,6 +26,7 @@ Attendees::Attendees()
 	m_data.clear();
 	m_registrants.clear();
 	m_person_info.clear();
+	m_party_info.clear();
 	m_attendee_list_byChurch.clear();
 	m_rccc_sheqin_list.clear();
 	m_cellid = 1;
@@ -234,7 +235,7 @@ int32_t Attendees::parseAllFields()
 	if (m_data.size() == 0)
 		return -1;
 
-	datasz = m_data.size(); //100
+	datasz = (int32_t)m_data.size(); //100
 
 	std::vector<std::string> person = m_data[0];
 	for (i = 1; i < datasz; i++){
@@ -242,7 +243,7 @@ int32_t Attendees::parseAllFields()
 		person = m_data[i];
 		// cancelled persons are removed from the list
 		if (person[17].compare(Status::Cancelled) == 0) {
-			printf("cancelled: %s %s, %s %s\n", person[0].c_str(), person[1].c_str(), person[2].c_str(), person[4].c_str());
+			//printf("cancelled: %s %s, %s %s\n", person[0].c_str(), person[1].c_str(), person[2].c_str(), person[4].c_str());
 			m_cancelled++;
 			continue;
 		}
@@ -281,11 +282,13 @@ int32_t Attendees::parseAllFields()
 		a_regist.last_name = person[6].substr(1, person[6].size() - 2);
 		a_regist.chinese_name = person[7].substr(1, person[7].size() - 2);
 
+		// change me when deal with real data
 		a_regist.room = ""; // person[8].substr(1, person[8].size() - 2);
 		if (a_regist.room.size() == 0)
 			a_regist.assigned_room = NULL;
 		else
 			printf("room = %s\n", a_regist.room.c_str());
+
 		a_regist.cell_group = person[9].substr(1, person[9].size() - 2);
 		a_regist.need_room = (person[10].substr(1, person[10].size() - 2).compare(NeedRoom::RoomNeeded) == 0);
 
@@ -322,7 +325,6 @@ int32_t Attendees::parseAllFields()
 		m_registrants.push_back(a_regist);
 	}
 
-#if 1 // do it carefully, may remove incorrectly
 	// remove repeated entries
 	std::vector<int32_t> entries;
 	for (i = 0; i < m_registrants.size(); i++) {
@@ -332,7 +334,7 @@ int32_t Attendees::parseAllFields()
 			if (attdee_j.person_id == attdee_i.person_id) {
 				if (attdee_i.first_name.compare(attdee_j.first_name) == 0 && attdee_i.last_name.compare(attdee_j.last_name) == 0
 					&& attdee_i.contact_person.compare(attdee_j.contact_person) == 0 && attdee_i.church.compare(attdee_j.church) == 0) {
-					printf("repeat i=%d:%d  j=%d:%d\n", i, attdee_i.person_id, j, attdee_j.person_id);
+					//printf("repeat i=%d:%d  j=%d:%d\n", i, attdee_i.person_id, j, attdee_j.person_id);
 					entries.push_back(i);
 				}
 			}
@@ -345,7 +347,6 @@ int32_t Attendees::parseAllFields()
 	for (i = (int32_t)entries.size() - 1; i >= 0; i--) {
 		m_registrants.erase(it + entries[i]);
 	}
-#endif
 
 	for (i = 0; i < m_registrants.size(); i++) {
 		std::string chnm = m_registrants[i].church;
@@ -356,13 +357,14 @@ int32_t Attendees::parseAllFields()
 
 	for (i = 0; i < m_registrants.size(); i++) {
 		Registrant attdee_i = m_registrants[i];
+		int32_t party_id = attdee_i.party;
 		if (attdee_i.room.size() > 0) {
 			m_registrants[i].assigned_room = m_br_list.getRoomByName(attdee_i.room);
 		}
+		m_party_info[party_id].push_back(&m_registrants[i]);
 	}
 
-	printf("Total attendees = %zd, Cancelled = %d, Attendee not counted = %d\n", m_registrants.size(), m_cancelled, m_uncertain);
-
+	printf("=== Total registered attendees (EU+Cabrini) = %zd, Cancelled = %d, Attendee uncertain = %d\n", m_registrants.size(), m_cancelled, m_uncertain);
 	return 0;
 }
 
@@ -383,6 +385,7 @@ int32_t Attendees::separateEU_CabriniCampus()
 	for (i = 0; i < m_registrants.size(); i++) {
 		Registrant rt = m_registrants[i];
 		int32_t family_id = rt.party;
+		int32_t person_id = rt.person_id;
 		std::string gender = rt.gender;
 		bool is_family = (rt.party_type.find(PartyType::qFamily) != std::string::npos);
 		bool youth_camp = false;
@@ -391,8 +394,10 @@ int32_t Attendees::separateEU_CabriniCampus()
 		if (rt.grade.find("Stay with Youth") != std::string::npos || rt.grade.find("stay with Youth") != std::string::npos ||
 			rt.services.find("Service Youth") != std::string::npos || rt.cell_group.find("Youth SGLeaders") != std::string::npos)
 			youth_camp = true;
-		if (youth_camp)
+		if (youth_camp) {
+			m_Cabrini_list.push_back(&m_registrants[i]);
 			continue;
+		}
 		if (!rt.need_room)
 			continue;
 
@@ -415,8 +420,14 @@ int32_t Attendees::separateEU_CabriniCampus()
 				m_female_list[family_id].push_back(&m_registrants[i]);
 			}
 		}
+		m_EU_person_info[person_id] = &m_registrants[i];
+		m_EU_party_info[family_id].push_back(&m_registrants[i]);
 	}
 
+
+	printf("=== Lodging in EU: parties = %zd, attendees = %zd\n", m_EU_party_info.size(), m_EU_person_info.size());
+	printf("=== Lodging in EU: families = %zd, individual males = %zd, individual females = %zd\n", m_family_info.size(), m_male_list.size(), m_female_list.size());
+	printf("=== Youth campers in Cabrini=%zd\n", m_Cabrini_list.size());
 	return 0;
 }
 
@@ -892,12 +903,6 @@ int32_t Attendees::sortAttendeesByChurches()
 		}
 		m_attendee_list_byChurch[pty.church].family_list[pty.party] = pty;
 	}
-
-	return 0;
-}
-
-int32_t Attendees::sortAttendeesPerBuilidng()
-{
 
 	return 0;
 }

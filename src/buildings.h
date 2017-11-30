@@ -205,15 +205,20 @@ public:
 		int32_t brElevator;
 	} RoomMeasure;
 
+	//! Constructor 
 	BuildingRoomList();
+	//! Destructor
 	~BuildingRoomList();
 
+	/*! Read in building csv file output from salesforce
+	*\param building_rooms_list csv file name
+	*\param dataformat delimiter from the csv file. By default each field is separated by ',' 
+	*/
 	int readInBuildingLists(const char * building_rooms_list, char dataformat=',');
 	int accumulateRoomInfo();
 
 	int printRoomStats();
-
-	int writeRoomStats(const char* filename);
+	int writeUpdatedBuildingRoomDoc(const char* filename);
 
 	std::vector<EURoom*> queryRoomList(RoomState rs);
 	std::vector<EURoom*> queryRoomList(const std::string &building_name, RoomState rs);
@@ -270,6 +275,10 @@ protected:
 	int readInBuildingList_quotes(const char * building_rooms_list);
 	int updateAllSections_quotes();
 	int updateAllRooms_quotes();
+	/*! generate scores of each room
+	 *\note score = BuildingCode*brBuilding + brLevel*OpLevel + brSect + room_number + bath_dist
+	 *\return 0 if successful
+	 */
 	int scoreRooms();
 
 	int readInBuildingList_commas(const char * building_rooms_list);
