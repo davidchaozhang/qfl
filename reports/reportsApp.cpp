@@ -14,9 +14,9 @@ static int room_assignmentTest();
 int main()
 {
 	int ret = 0;
-	ret = room_assignmentTest();
+	//ret = room_assignmentTest();
 	//ret = attendee_listTest();
-	//ret = building_listTest();
+	ret = building_listTest();
 	//ret = church_listTest();
 	//ret = process_qfl_registrants();
 	system("PAUSE");

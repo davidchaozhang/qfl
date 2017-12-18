@@ -1147,9 +1147,9 @@ int BuildingRoomList::writeUpdatedBuildingRoomDoc(const char* filename)
 				int32_t room_conditions = m_eu_buildings[i].sects[j].rooms[k].room_conditions;
 
 				fout << building_no <<"," << building_name <<"," << direction << "," << id << "," << rm <<"," 
-					<< level << "," << rtype << "," << bath << "," << status <<"," << capacity << "," << num_assigned_beds <<"," 
+					<< level << "," << rtype << "," << bath+" " << "," << status <<"," << capacity << "," << num_assigned_beds <<"," 
 					<< extra_bed <<"," << building_distance <<"," << bath_distance <<"," << score <<"," << ac <<"," << fridge <<"," 
-					<< elevator <<"," << room_conditions <<"," << std::endl;
+					<< elevator <<"," << room_conditions <<"," << " " << std::endl;
 			}
 		}
 	}
