@@ -82,6 +82,7 @@ public:
 	std::vector<BuildingRoomList::EURoom*> queryRoomList(std::vector<BuildingRoomList::EURoom*> &myroomlist, int32_t num);
 	std::vector<BuildingRoomList::EURoom*> queryFamilyRoomList(std::vector<BuildingRoomList::EURoom*> &myroomlist, int32_t num, Registrant* registrant, bool enable_extrabed=false);
 
+	/* only attendees lodge on EU campus is printed*/
 	bool printRoomAssignment(const char* filename);
 	int32_t printRooms2SpecialNeeds();
 	int32_t printRooms2Seniors();

@@ -146,14 +146,28 @@ public:
 	typedef struct {
 		std::string church_name;
 		ChurchList::QFLChurch* from_church;
+		// list of selected individual registrants in each church. 
 		std::vector<Registrant* > persons;
 		std::vector<Registrant*> christian_list;
 		std::vector<Registrant*> non_christian_list;
+/**** 
+		The following lists are exclusive. 
+		For example, if the person is in the senior list, then the person shall not be listed in any others.
+		senior list, baby list, special need list are family oriented. 
+		male and female lists are party id based. Each entry may contain more than 1 person.
+		The following church attendee lists do not contains youth leaders, speakers, recordings, choir, etc. 
+*****/
+		// list of seniors, including their family members (this is mainly used for room assignment)
 		std::vector<Registrant*> senior_list;
+		// list of babies, including their family members
 		std::vector<Registrant*> baby_list;
+		// list of special need people, including their family members
 		std::vector<Registrant*> special_need_list;
+		// family list based on party id
 		std::map<int32_t, Party> family_list; // party id
+		// male only list based on party id
 		std::map<int32_t, std::vector<Registrant*>> male_list; // party id
+		// female only list based on party id
 		std::map<int32_t, std::vector<Registrant*>> female_list; // party id
 	} Church;
 

@@ -1335,6 +1335,13 @@ int32_t RoomAssign::familyFemaleRoomAssign(std::vector<Registrant*> &family_memb
 12: gender
 13: grade
 
+14: reg fee
+15: key fee
+16: party fee
+17: status
+18: special_need
+19: friends
+
 20: need ride
 21: offer ride
 22: is_christian
@@ -1357,25 +1364,131 @@ bool RoomAssign::printRoomAssignment(const char* filename)
 	std::map<int32_t, std::vector<Registrant*>> all_family_list = m_family_info;
 	std::vector<ChurchList::QFLChurch> *churches = getChurchHandle()->getChurchList();
 
+	if (filename == NULL)
+		return false;
+
+	std::ofstream fout(filename);
+	if (!fout.is_open())
+		return false;
+
 	int32_t cnt = 0;
+	fout << "PersonId," << "PartyId," << "Church," << "ContactPerson," << "PartyType," << "FirstName,"
+		<< "LastName," << "ChineseName," << "RoomNumber," << "CellGroup," << "NeedRoom," << "Age,"
+		<< "Gender," << "Grade," << "NeedRide," << "OfferRide," << "is_Christian," << "Occupation,"
+		<< "MobilePhone," << "Email," << "City," << "State," << "Zip," << "FunctionalGroup," << "Services" << std::endl;
+
+	char zip_str[128];
+	int32_t total_parties = 0;
+	int32_t total_attendees = 0;
+	std::map<int32_t, std::vector<Registrant*>>::iterator it;
+	std::map<int32_t, std::vector<Registrant*>> *glists[4] = 
+	{ &m_child_leader_list, &m_choir_list, &m_recording_list, &m_speaker_list};
+	for (j = 0; j < 4; j++) {
+		for (it = glists[j]->begin(); it != glists[j]->end(); it++) {
+			int32_t party_id = it->first;
+			std::vector<Registrant*> attendees = it->second;
+			total_parties++;
+			for (i = 0; i < attendees.size(); i++) {
+				total_attendees++;
+				Registrant *attendee = attendees[i];
+				int32_t person_id = attendee->person_id;
+				int32_t party_id = attendee->party;
+				std::string church = attendee->church;
+				std::string contact_person = attendee->contact_person;
+				size_t j0 = contact_person.find_first_of(",");
+				if (j0 != std::string::npos)
+					contact_person[j0] = '\0';
+				std::string party_type = attendee->party_type;
+				std::string first_name = attendee->first_name;
+				std::string last_name = attendee->last_name;
+				std::string chinese_name = attendee->chinese_name;
+				std::string room_number = attendee->room;
+				std::string cell_group = attendee->cell_group;
+				bool need_room = attendee->need_room;
+				std::string age = attendee->age_group;
+				std::string gender = attendee->gender;
+				std::string grade = attendee->grade;
+				size_t j1 = grade.find_first_of(",");
+				if (j1 != std::string::npos)
+					grade[j1] = '-';
+				std::string need_ride = attendee->need_ride;
+				std::string offer_ride = attendee->offer_ride;
+				bool is_christian = attendee->is_christian;
+				std::string occupation = attendee->occupation;
+				std::string mobile = attendee->mobile_phone;
+				std::string email = attendee->email;
+				std::string city = attendee->city;
+				size_t j2 = city.find_first_of(",");
+				if(j2!= std::string::npos)
+					city[j2] = '\0';
+				std::string state = attendee->state;
+				int32_t zip = attendee->zip;
+				if (zip < 9999)
+					sprintf_s(zip_str, "%05d", zip);
+				else
+					sprintf_s(zip_str, "%d", zip);
+				std::string functional = attendee->functional_group;
+				std::string services = attendee->services;
+
+				fout << person_id << ", " << party_id << ", " << church << ", " << contact_person << ", " << party_type << ", "
+					<< first_name << ", " << last_name << ", " << chinese_name + " " << ", " << room_number << ", " << cell_group + " " << ", " << need_room << ", "
+					<< age << ", " << gender << ", " << grade + " " << ", " << need_ride << ", " << offer_ride << ", " << is_christian << ", "
+					<< occupation << ", " << mobile << ", " << email << ", " << city << ", " << state << ", " << zip_str << ", "
+					<< functional << ", " << services << std::endl;
+			}
+		}
+	}
+
 	for (i = 0; i < churches->size(); i++) {
 		ChurchList::QFLChurch achurch = (*churches)[i];
 		std::string name = achurch.church_name;
 		Church thechurch;
 		thechurch = m_attendee_list_byChurch[name];
 
-		std::map<int32_t, Party>::iterator it;
-		for (it = thechurch.family_list.begin(); it != thechurch.family_list.end(); it++) {
-			int32_t party_id = it->first;
-			std::map<int32_t, std::vector<Registrant*>> family_list = it->second.attendee_list_b;
-			std::map<int32_t, std::vector<Registrant*>>::iterator fit;
-			for (fit = family_list.begin(); fit != family_list.end(); fit++) {
-				int32_t family_id = fit->first;
-				std::vector<Registrant*> family = fit->second;
-				for (j = 0; j < family.size(); j++) {
-	
-				}
-			}
+		std::vector<Registrant*>::iterator it;
+		for (it = thechurch.persons.begin(); it != thechurch.persons.end(); it++) {
+			Registrant *attendee = *it;
+			int32_t person_id = attendee->person_id;
+			int32_t party_id = attendee->party;
+			std::string church = attendee->church;
+			std::string contact_person = attendee->contact_person;
+			size_t j0 = contact_person.find_first_of(",");
+			if (j0 != std::string::npos)
+				contact_person[j0] = '\0';
+			std::string party_type = attendee->party_type;
+			std::string first_name = attendee->first_name;
+			std::string last_name = attendee->last_name;
+			std::string chinese_name = attendee->chinese_name;
+			std::string room_number = attendee->room;
+			std::string cell_group = attendee->cell_group;
+			bool need_room = attendee->need_room;
+			std::string age = attendee->age_group;
+			std::string gender = attendee->gender;
+			std::string grade = attendee->grade;
+			size_t j1 = grade.find_first_of(",");
+			if (j1 != std::string::npos)
+				grade[j1] = '-';
+			std::string need_ride = attendee->need_ride;
+			std::string offer_ride = attendee->offer_ride;
+			bool is_christian = attendee->is_christian;
+			std::string occupation = attendee->occupation;
+			std::string mobile = attendee->mobile_phone;
+			std::string email = attendee->email;
+			std::string city = attendee->city;
+			std::string state = attendee->state;
+			int32_t zip = attendee->zip;
+			if (zip < 9999)
+				sprintf_s(zip_str, "%05d", zip);
+			else
+				sprintf_s(zip_str, "%d", zip);
+			std::string functional = attendee->functional_group;
+			std::string services = attendee->services;
+
+			fout << person_id << ", " << party_id << ", " << church << ", " << contact_person << ", " << party_type << ", "
+				<< first_name << ", " << last_name << ", " << chinese_name + " " << ", " << room_number << ", " << cell_group + " " << ", " << need_room << ", "
+				<< age << ", " << gender << ", " << grade + " " << ", " << need_ride << ", " << offer_ride << ", " << is_christian << ", "
+				<< occupation << ", " << mobile << ", " << email << ", " << city << ", " << state << ", " << zip_str << ", "
+				<< functional << ", " << services << std::endl;
 		}
 	}
 

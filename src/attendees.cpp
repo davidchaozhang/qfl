@@ -373,14 +373,19 @@ int32_t Attendees::parseAllFields()
 // m_family_info contains all families that need rooms in EU
 // m_male_list contains all individual males that need rooms in EU
 // m_female_list contains all individual females that need rooms in EU
+// the commuters are temprorally excluded
 //
 int32_t Attendees::separateEU_CabriniCampus()
 {
 	int32_t i;
-
+	int32_t commute = 0;
 	m_family_info.clear();
 	m_male_list.clear();
 	m_female_list.clear();
+
+	int32_t family_attendees = 0;
+	int32_t male_attendees = 0;
+	int32_t female_attendees = 0;
 
 	for (i = 0; i < m_registrants.size(); i++) {
 		Registrant rt = m_registrants[i];
@@ -398,8 +403,10 @@ int32_t Attendees::separateEU_CabriniCampus()
 			m_Cabrini_list.push_back(&m_registrants[i]);
 			continue;
 		}
-		if (!rt.need_room)
+		if (!rt.need_room) {
+			commute++;
 			continue;
+		}
 
 		if (is_family) {
 			if (m_family_info[family_id].size() == 0) {
@@ -410,23 +417,29 @@ int32_t Attendees::separateEU_CabriniCampus()
 			else {
 				m_family_info[family_id].push_back(&m_registrants[i]);
 			}
+			family_attendees++;
 		}
 		else {// individual
 			if (gender.compare("Male") == 0) {
 				m_male_list[family_id].push_back(&m_registrants[i]);
-
+				male_attendees++;
 			}
 			else if (gender.compare("Female") == 0) {
 				m_female_list[family_id].push_back(&m_registrants[i]);
+				female_attendees++;
 			}
 		}
+
+		// EU person and EU party do not contain youth camp and commute persons
 		m_EU_person_info[person_id] = &m_registrants[i];
 		m_EU_party_info[family_id].push_back(&m_registrants[i]);
 	}
 
 
 	printf("=== Lodging in EU: parties = %zd, attendees = %zd\n", m_EU_party_info.size(), m_EU_person_info.size());
-	printf("=== Lodging in EU: families = %zd, individual males = %zd, individual females = %zd\n", m_family_info.size(), m_male_list.size(), m_female_list.size());
+	printf("=== EU Commuters: %d\n", commute);
+	printf("=== EU lodging: family individual attendees=%d, individual male attendees=%d, individual female attendees=%d\n", family_attendees, male_attendees, female_attendees);
+	printf("=== Lodging in EU: families = %zd, male parties = %zd, female parties = %zd\n", m_family_info.size(), m_male_list.size(), m_female_list.size());
 	printf("=== Youth campers in Cabrini=%zd\n", m_Cabrini_list.size());
 	return 0;
 }
@@ -442,6 +455,9 @@ int32_t Attendees::classifications1()
 	m_speaker_list.clear();
 	m_special_need_list.clear();
 
+	int32_t total_parties = 0;
+	int32_t total_attendees = 0;
+
 	std::map<int32_t, std::vector<Registrant*>> *glists[3] = { &m_family_info , &m_male_list , &m_female_list};
 
 	std::map<int32_t, std::vector<Registrant*>>::iterator it, temp;
@@ -449,7 +465,18 @@ int32_t Attendees::classifications1()
 		for (it = glists[j]->begin(); it != glists[j]->end(); it++) {
 			int32_t party_id = it->first;
 			std::vector<Registrant*> attendees = it->second;
+			total_parties++;
+			for (i = 0; i < attendees.size(); i++) {
+				total_attendees++;
+			}
+		}
+	}
+	printf("Debug-: %d %d\n", total_parties, total_attendees);
 
+	for (j = 0; j < 3; j++) {
+		for (it = glists[j]->begin(); it != glists[j]->end(); it++) {
+			int32_t party_id = it->first;
+			std::vector<Registrant*> attendees = it->second;
 			bool child_leader_list = false;
 			bool choir_list = false;
 			bool recording_list = false;
@@ -542,10 +569,31 @@ int32_t Attendees::classifications1()
 			it = temp;
 		}
 	}
+
+	std::map<int32_t, std::vector<Registrant*>> *glists2[10] = 
+	{ &m_family_info , &m_male_list , &m_female_list,
+		&m_child_leader_list, &m_choir_list, &m_recording_list, &m_senior_list,
+		&m_baby_list, &m_speaker_list, &m_special_need_list };
+	 total_parties = 0;
+	 total_attendees = 0;
+
+	 total_parties = 0;
+	 total_attendees = 0;
+	for (j = 0; j < 10; j++) {
+		for (it = glists2[j]->begin(); it != glists2[j]->end(); it++) {
+			int32_t party_id = it->first;
+			std::vector<Registrant*> attendees = it->second;
+			total_parties++;
+			for (i = 0; i < attendees.size(); i++) {
+				total_attendees++;
+			}
+		}
+	}
+	printf("Debug#: %d %d\n", total_parties, total_attendees);
 	return 0;
 }
 
-
+// youth camp and commuters are not included
 int32_t Attendees::classifications()
 {
 	int32_t i;
@@ -761,11 +809,18 @@ int32_t Attendees::refinement()
 	return 0;
 }
 
+/*
+ 	Attendees are sorted by churchs:
+	  m_family_info , m_male_list ,m_female_list, m_senior_list, m_baby_list, m_special_need_list.
+	The following lists are not sorted by church:
+	  m_child_leader_list, m_choir_list, m_recording_list, m_speaker_list
+*/
 int32_t Attendees::sortAttendeesByChurches()
 {
 	int32_t i, j;
 	std::vector<ChurchList::QFLChurch> *churches = getChurchHandle()->getChurchList();
 	m_attendee_list_byChurch.clear();
+	int32_t lodging_attendees = 0;
 
 	for (i = 0; i < churches->size(); i++) {
 		ChurchList::QFLChurch achurch = (*churches)[i];
@@ -789,6 +844,8 @@ int32_t Attendees::sortAttendeesByChurches()
 			chname = rt->church;
 			party_id = rt->party;
 			m_attendee_list_byChurch[chname].male_list[party_id] = m_male_list[party_id];
+			m_attendee_list_byChurch[chname].persons.push_back(lst_male[0]);
+			lodging_attendees++;
 		}
 		else {
 			rt = lst_male[0];
@@ -796,6 +853,8 @@ int32_t Attendees::sortAttendeesByChurches()
 			party_id = rt->party;
 			for (j = 0; j < lst_male.size(); j++) {
 				assert(lst_male[j]->gender.compare("Male") == 0);
+				m_attendee_list_byChurch[chname].persons.push_back(lst_male[j]);
+				lodging_attendees++;
 			}
 			m_attendee_list_byChurch[chname].male_list[party_id] = m_male_list[party_id];
 		}
@@ -814,6 +873,8 @@ int32_t Attendees::sortAttendeesByChurches()
 			chname = rt->church;
 			party_id = rt->party;
 			m_attendee_list_byChurch[chname].female_list[party_id] = m_female_list[party_id];
+			m_attendee_list_byChurch[chname].persons.push_back(lst_female[0]);
+			lodging_attendees++;
 		}
 		else {
 			rt = lst_female[0];
@@ -821,6 +882,8 @@ int32_t Attendees::sortAttendeesByChurches()
 			party_id = rt->party;
 			for (j = 0; j < lst_female.size(); j++) {
 				assert(lst_female[j]->gender.compare("Female") == 0);
+				m_attendee_list_byChurch[chname].persons.push_back(lst_female[j]);
+				lodging_attendees++;
 			}
 			m_attendee_list_byChurch[chname].female_list[party_id] = m_female_list[party_id];
 		}
@@ -835,7 +898,9 @@ int32_t Attendees::sortAttendeesByChurches()
 			Registrant *rt = lst_senior[j];
 			std::string chname = rt->church;
 			int32_t party_id = rt->party;
-			m_attendee_list_byChurch[chname].senior_list.push_back(m_senior_list[party_id][0]);
+			m_attendee_list_byChurch[chname].senior_list.push_back(m_senior_list[party_id][j]);
+			m_attendee_list_byChurch[chname].persons.push_back(rt);
+			lodging_attendees++;
 		}
 	}
 
@@ -848,7 +913,9 @@ int32_t Attendees::sortAttendeesByChurches()
 			Registrant *rt = lst_baby[j];
 			std::string chname = rt->church;
 			int32_t party_id = rt->party;
-			m_attendee_list_byChurch[chname].baby_list.push_back(m_baby_list[party_id][0]);
+			m_attendee_list_byChurch[chname].baby_list.push_back(m_baby_list[party_id][j]);
+			m_attendee_list_byChurch[chname].persons.push_back(rt);
+			lodging_attendees++;
 		}
 	}
 
@@ -861,7 +928,9 @@ int32_t Attendees::sortAttendeesByChurches()
 			Registrant *rt = lst_special_need[j];
 			std::string chname = rt->church;
 			int32_t party_id = rt->party;
-			m_attendee_list_byChurch[chname].special_need_list.push_back(m_special_need_list[party_id][0]);
+			m_attendee_list_byChurch[chname].special_need_list.push_back(m_special_need_list[party_id][j]);
+			m_attendee_list_byChurch[chname].persons.push_back(rt);
+			lodging_attendees++;
 		}
 	}
 
@@ -889,6 +958,8 @@ int32_t Attendees::sortAttendeesByChurches()
 			int32_t party_id = rt->party;
 			int32_t person_id = rt->person_id;
 			pty.attendee_list_b[family_id].push_back(getRegistrant(person_id));
+			m_attendee_list_byChurch[chname].persons.push_back(rt);
+			lodging_attendees++;
 			eu_room = getRoom(person_id);
 			if (eu_room != NULL) {
 				for (i = 0; i < pty.assigned_rooms.size(); i++) {
@@ -904,5 +975,7 @@ int32_t Attendees::sortAttendeesByChurches()
 		m_attendee_list_byChurch[pty.church].family_list[pty.party] = pty;
 	}
 
+	// not include all attendees
+	printf("=== EU selected lodging attendees = %d\n", lodging_attendees);
 	return 0;
 }
