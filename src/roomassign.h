@@ -84,6 +84,8 @@ public:
 
 	/* only attendees lodge on EU campus is printed*/
 	bool printRoomAssignment(const char* filename);
+	bool printChurchDistributionPerBuilding(const char* filename);
+
 	int32_t printRooms2SpecialNeeds();
 	int32_t printRooms2Seniors();
 	int32_t printRooms2Babies();

@@ -22,6 +22,7 @@ int room_assignmentTest()
 	std::string brname = "E:/projects/qfl/doc/buildingAndRoom-1125_2017.csv";
 	const std::string filename = "E:/projects/qfl/doc/report1496368471394_checkout_0601.csv";
 	const std::string filename_new = "E:/projects/qfl/doc/report_new_assignment.csv";
+	const std::string filename_building_distr = "E:/projects/qfl/doc/report_church_buildings.csv";
 
 	int32_t status = 0;
 	RoomAssign ra;
@@ -86,5 +87,7 @@ int room_assignmentTest()
 	// print an updated document with the latest room assignment
 	ra.printRoomAssignment(filename_new.c_str());
 
+	// print updated document for attendees of each church distributed per building
+	ra.printChurchDistributionPerBuilding(filename_building_distr.c_str());
 	return status;
 }

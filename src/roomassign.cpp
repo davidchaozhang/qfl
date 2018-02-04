@@ -2021,3 +2021,90 @@ int32_t RoomAssign::trackStatus(const char* op)
 
 	return 0;
 }
+
+bool RoomAssign::printChurchDistributionPerBuilding(const char *filename)
+{
+	int32_t i, j;
+	int32_t cnt_family = 0, cnt_rooms = 0;
+	bool enable_extrabeds = true;
+	std::vector<ChurchList::QFLChurch> *churches = getChurchHandle()->getChurchList();
+
+	if (filename == NULL)
+		return false;
+
+	std::ofstream fout(filename);
+	if (!fout.is_open())
+		return false;
+
+	int32_t cnt = 0;
+	fout << "PersonId," << "PartyId," << "ContactPerson," << "PartyType," << "FirstName,"
+		<< "LastName," << "ChineseName," << "RoomNumber," << "CellGroup," << "NeedRoom," << "Age,"
+		<< "Gender," << "Grade," << "is_Christian," << "Occupation,"
+		<< "MobilePhone," << "Email," << "City," << "State," << "Zip," << "FunctionalGroup," << "Services" << std::endl;
+
+	char zip_str[128];
+	int32_t total_parties = 0;
+	int32_t total_attendees = 0;
+	std::map<int32_t, std::vector<Registrant*>>::iterator it;
+	std::map<std::string, std::vector<Registrant*>> church_distr_map;
+
+	for (i = 0; i < churches->size(); i++) {
+		church_distr_map.clear();
+		ChurchList::QFLChurch achurch = (*churches)[i];
+		std::string name = achurch.church_name;
+		Church thechurch;
+		thechurch = m_attendee_list_byChurch[name];
+
+		if (thechurch.persons.size() == 0)
+			continue;
+		std::vector<Registrant*>::iterator it;
+		for (it = thechurch.persons.begin(); it != thechurch.persons.end(); it++) {
+			Registrant *attendee = *it;
+			std::string building = attendee->building;
+			church_distr_map[building].push_back(attendee);
+		}
+		fout << name << ":" << std::endl;
+		std::map<std::string, std::vector<Registrant*>>::iterator cit;
+		for (cit = church_distr_map.begin(); cit != church_distr_map.end(); cit++) {
+			std::string bdname = cit->first;
+			std::vector<Registrant*> rlist = cit->second;
+			fout << bdname << ":" << std::endl;
+			for (j = 0; j < rlist.size(); j++) {
+				Registrant *attendee = rlist[j];
+				int32_t person_id = attendee->person_id;
+				int32_t party_id = attendee->party;
+				std::string church = attendee->church;
+				std::string contact_person = attendee->contact_person;
+				std::string party_type = attendee->party_type;
+				std::string first_name = attendee->first_name;
+				std::string last_name = attendee->last_name;
+				std::string chinese_name = attendee->chinese_name;
+				std::string room_number = attendee->room;
+				std::string cell_group = attendee->cell_group;
+				bool need_room = attendee->need_room;
+				std::string age = attendee->age_group;
+				std::string gender = attendee->gender;
+				std::string grade = attendee->grade;
+				bool is_christian = attendee->is_christian;
+				std::string occupation = attendee->occupation;
+				std::string mobile = attendee->mobile_phone;
+				std::string email = attendee->email;
+				std::string city = attendee->city;
+				std::string state = attendee->state;
+				std::string functional = attendee->functional_group;
+				std::string services = attendee->services;
+
+				fout << person_id << ", " << party_id << ", " << contact_person << ", " << party_type << ", "
+					<< first_name << ", " << last_name << ", " << chinese_name + " " << ", " << room_number << ", " 
+					<< cell_group + " " << ", " << need_room << ", "
+					<< age << ", " << gender << ", " << grade + " " << ", " << is_christian << ", "
+					<< occupation << ", " << mobile << ", " << email << ", " << city << ", " << state << ", " 
+					<< zip_str << ", " << functional << ", " << services << std::endl;
+
+			}
+		}
+	}
+
+	fout.close();
+	return true;
+}
