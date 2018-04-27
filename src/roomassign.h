@@ -65,7 +65,7 @@ public:
 	int32_t trackStatus(const char* op);
 
 	int32_t roomAllocationStats();
-	int32_t lodgePeopleStats();
+	int32_t lodgePeopleStats(const char* filename);
 
 	int32_t assignRooms2SpecialNeeds();
 	int32_t assignRooms2Seniors();
@@ -78,6 +78,7 @@ public:
 	int32_t assignRooms2Recordings();
 	int32_t assignRooms2Choir();
 	int32_t assignRooms2ChildcareWorkers();
+	int32_t assignRooms2DramaTeam();
 
 	std::vector<BuildingRoomList::EURoom*> queryRoomList(std::vector<BuildingRoomList::EURoom*> &myroomlist, int32_t num);
 	std::vector<BuildingRoomList::EURoom*> queryFamilyRoomList(std::vector<BuildingRoomList::EURoom*> &myroomlist, int32_t num, Registrant* registrant, bool enable_extrabed=false);
@@ -85,7 +86,7 @@ public:
 	/* only attendees lodge on EU campus is printed*/
 	bool printRoomAssignment(const char* filename);
 	bool printChurchDistributionPerBuilding(const char* filename);
-
+	int32_t printSortedAttendees(const char* filename, std::map<int32_t, std::vector<Registrant*>> slist, bool print_title=false);
 	int32_t printRooms2SpecialNeeds();
 	int32_t printRooms2Seniors();
 	int32_t printRooms2Babies();
@@ -93,6 +94,7 @@ public:
 	int32_t printRooms2Recordings();
 	int32_t printRooms2Choir();
 	int32_t printRooms2ChildcareWorkers();
+	int32_t printRooms2DramaTeam();
 	int32_t printRooms2Families();
 	int32_t printRooms2Males();
 	int32_t printRooms2Females();

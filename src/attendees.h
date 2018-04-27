@@ -30,6 +30,21 @@ namespace NeedRoom {
 	const char* const Commute = "Commute";
 };
 
+namespace Services {
+	const char* const CellGroupLeader = "Cell Group Leader";
+	const char* const ServiceChild_2_5 = "Service Child (2-5Yr)";
+	const char* const ServiceChild_6_11 = "Service Child (6-11Yr)";
+	const char* const QFL_Youth_Counselor = "QFL Youth Counselor";
+	const char* const Logistics = "Logistics";
+	const char* const QFL_Choir = "QFL Choir";
+	const char* const Recording = "Recording";
+	const char* const TrafficControl = "Traffic Control";
+	const char* const Usher = "Usher";
+	const char* const QFL_Drama = "QFL Drama";
+	const char* const Speaker = "Speaker";
+	const char* const Minister = "Minister";
+};
+
 namespace AgeGroup {
 	const char* const A1 = "0-1";
 	const char* const A2 = "2";
@@ -44,6 +59,17 @@ namespace AgeGroup {
 	const char* const A56_65 = "56-65";
 	const char* const A66_69 = "66-69";
 	const char* const A70 = "70+";
+};
+
+namespace GradeGroup {
+	const char* const G0[] = { "Toddler", "Tykes", "PreK", "KinderGarten" };
+	const char* const G1[] = { "1st Grade", "2nd Grade", "3rd Grade", "4th Grade", "5th Grade"};
+	const char* const G2[] = { "6th Grade", "7th Grade", "8th Grade", "9th Grade", "10th Grade", "11th Grade", "12th Grade" };
+	const char* const G2p[] = { "6th Grade,Stay with Parent", "7th Grade,Stay with Parent", "8th Grade,Stay with Parent", 
+		"9th Grade,Stay with Parent", "10th Grade,Stay with Parent", "11th Grade,Stay with Parent", "12th Grade,Stay with Parent" };
+	const char* const G3 = "College";
+	const char* const G4 = "Post College";
+	const char* const G5 = "";
 };
 
 namespace PartyType {
@@ -68,6 +94,7 @@ public:
 		int32_t family_babies;
 		int32_t family_speakers_recordings;
 		int32_t family_choir;
+		int32_t family_drama;
 		int32_t person_childcare_workers;
 		int32_t families;
 		int32_t single_males;
@@ -141,6 +168,7 @@ public:
 		qCabrini = 'c', // cabrini
 		qChild = 'b', // child
 		qSenior = 's', // senior
+		qNotSure = ' ' // not sure
 	} Campus;
 
 	typedef struct {
@@ -251,6 +279,7 @@ public:
 
 	std::string intToString(int i);
 	std::string getCurTime();
+	void gradeMapping();
 
 	protected:
 	//! raw input data
@@ -279,6 +308,8 @@ public:
 	std::map<int32_t, std::vector<Registrant*>> m_baby_list;// party id
 	std::map<int32_t, std::vector<Registrant*>> m_special_need_list;// party id
 	std::map<int32_t, std::vector<Registrant*>> m_note_pairup_list;// party id
+	std::map<int32_t, std::vector<Registrant*>> m_drama_list;// party id
+	std::map<std::string, int32_t> m_grade_map;
 
 	// statistics
 	std::vector<int32_t> m_christian_list;
