@@ -181,7 +181,7 @@ int32_t QflReg::parseAllFields()
 
 	std::vector<std::string> person = m_data[0];
 	for (i = 1; i < m_data.size(); i++){
-		available = false;
+		available = true;
 		person = m_data[i];
 		// cancelled persons are removed from the list
 		if (person[17].compare(Status::Cancelled) == 0) {
@@ -190,20 +190,16 @@ int32_t QflReg::parseAllFields()
 			continue;
 		}
 
-		if (person[32].compare(Status::CheckedIn) == 0 || person[36].compare(Status::KeyReturned) == 0 || person[38].compare(Status::YouthCheckedIn) == 0)
-			available = true;
-
 		if (!available) {
 			m_uncertain++;
 			continue;
 		}
 		if (person[5].substr(1, person[5].size() - 2).size() == 0 && person[6].substr(1, person[5].size() - 2).size() == 0)
 			continue;
-
 		if (person[0].size() > 2)
 			a_regist.person_id = std::stoi(person[0].substr(1, person[0].size() - 2));
 		if (person[1].size() > 2)
-			a_regist.party = std::stoi(person[1].substr(1, person[1].size() - 2));
+			a_regist.party = std::stoi(person[1].substr(2, person[1].size() - 2));
 		if (person[2].size() > 2)
 			a_regist.church = person[2].substr(1, person[2].size() - 2);
 		if (person[3].size() > 2)
@@ -212,7 +208,7 @@ int32_t QflReg::parseAllFields()
 		a_regist.first_name = person[5].substr(1, person[5].size() - 2);
 		a_regist.last_name = person[6].substr(1, person[6].size() - 2);
 		a_regist.chinese_name = person[7].substr(1, person[7].size() - 2);
-
+		// check if room is assigned
 		a_regist.room = person[8].substr(1, person[8].size() - 2);
 		a_regist.cell_group = person[9].substr(1, person[9].size() - 2);
 		a_regist.need_room = (person[10].substr(1, person[10].size() - 2).compare(NeedRoom::RoomNeeded) == 0);
@@ -222,8 +218,8 @@ int32_t QflReg::parseAllFields()
 		a_regist.grade = person[13].substr(1, person[13].size() - 2);
 		a_regist.registration_fee = std::stoi(person[14].substr(1, person[14].size() - 2));
 		a_regist.key_deposit = std::stoi(person[15].substr(1, person[15].size() - 2));
-		a_regist.notes = person[17].substr(1, person[17].size() - 2);
-		a_regist.special_need = person[18].substr(1, person[18].size() - 2);
+		a_regist.notes = person[18].substr(1, person[18].size() - 2);
+		a_regist.special_need = person[19].substr(1, person[19].size() - 2);
 
 		a_regist.need_ride = person[20].substr(1, person[20].size() - 2);
 		a_regist.offer_ride = person[21].substr(1, person[21].size() - 2);
@@ -231,20 +227,20 @@ int32_t QflReg::parseAllFields()
 		a_regist.occupation = person[23].substr(1, person[23].size() - 2);
 		a_regist.mobile_phone = person[24].substr(1, person[24].size() - 2);
 		a_regist.email = person[25].substr(1, person[25].size() - 2);
-		a_regist.city = person[26].substr(1, person[26].size() - 2);;
-		a_regist.state = person[27].substr(1, person[27].size() - 2);;
-		a_regist.zip = std::stoi(person[28].substr(1, person[28].size() - 2));
+		a_regist.city = person[26].substr(1, person[26].size() - 2);
+		a_regist.state = person[27].substr(1, person[27].size() - 2);
+		if (person[28].size() > 2)
+			a_regist.zip = std::stoi(person[28].substr(1, person[28].size() - 2));
+		else
+			a_regist.zip = 0;
+		
 		a_regist.functional_group = person[29].substr(1, person[29].size() - 2);
 		a_regist.services = person[30].substr(1, person[30].size() - 2);
-		a_regist.checkin = (std::stoi(person[32].substr(1, person[32].size() - 2)) > 0);
-
-		if (person[34].substr(1, person[34].size() - 2).size() > 0)
-			a_regist.paid = std::stoi(person[34].substr(1, person[34].size() - 2));
+		if (a_regist.services.find(Services::Minister) != std::string::npos)
+			a_regist.occupation = std::string(Services::Minister);
 		else
-			a_regist.paid = 0;
-
-		a_regist.key_returned = (std::stoi(person[36].substr(1, person[36].size() - 2)) > 0);
-		a_regist.youth_checkins = (std::stoi(person[38].substr(1, person[38].size() - 2)) > 0);
+			a_regist.occupation = "";
+		a_regist.checkin = (std::stoi(person[31].substr(1, person[31].size() - 2)) > 0);
 
 		m_registrants.push_back(a_regist);
 		m_person_info[a_regist.person_id] = a_regist;
@@ -257,26 +253,37 @@ int32_t QflReg::parseAllFields()
 
 int32_t QflReg::classifications()
 {
-	int32_t i;
+	int32_t i, j;
 	if (m_registrants.size() == 0)
 		return -1;
 
 	Registrant a_regist, b_regist;
 	Family a_family;
-	for (i = 0; i < m_registrants.size(); i++){
+	for (i = 0; i < m_registrants.size(); i++) {
 		a_regist = m_registrants[i];
-		bool available = a_regist.checkin || a_regist.key_returned || a_regist.youth_checkins;
-		if (!available)
-			continue;
+		bool youth_camp = false;
+		bool need_room = true;
 
-		if (a_regist.grade.find("Stay with Youth") != std::string::npos || a_regist.grade.find("stay with Youth") != std::string::npos)
+		for (j = 0; j < sizeof(GradeGroup::G2) / sizeof(GradeGroup::G2[0]); j++) {
+			if (a_regist.grade.compare(std::string(GradeGroup::G2[j])) == 0) {
+				youth_camp = true;
+				break;
+			}
+		}
+		// exclude students who serve childcare in EU
+		if (a_regist.services.find(Services::ServiceChild_2_5) != std::string::npos ||
+			a_regist.services.find(Services::ServiceChild_6_11) != std::string::npos)
+			youth_camp = false;
+
+		if (youth_camp)
 			m_youth_camp_list.push_back(a_regist.person_id);
-		if (a_regist.grade.find("Stay with Parent") != std::string::npos)
+		else if (a_regist.grade.find("Stay with Parent") != std::string::npos)
 			m_youth_stays_with_parent_list.push_back(a_regist.person_id);
-		if (a_regist.services.find("Service Youth") != std::string::npos || a_regist.cell_group.find("Youth SGLeaders") != std::string::npos)
+		else if (a_regist.services.find("Youth Counselor") != std::string::npos || a_regist.cell_group.find("Youth SGLeaders") != std::string::npos)
 			m_youth_leader_list.push_back(a_regist.person_id);
-		if (a_regist.services.find("Service Child") != std::string::npos)
+		else if (a_regist.services.find("Service Child") != std::string::npos)
 			m_child_leader_list.push_back(a_regist.person_id);
+
 		if (a_regist.is_christian)
 			m_christian_list.push_back(a_regist.person_id);
 		else
@@ -297,7 +304,8 @@ int32_t QflReg::classifications()
 
 		if (a_regist.services.find("Logistics") != std::string::npos || a_regist.services.find("Recording") != std::string::npos ||
 			a_regist.services.find("Traffic Control") != std::string::npos || a_regist.services.find("Usher") != std::string::npos ||
-			a_regist.services.find("Friday Snack Service") != std::string::npos || a_regist.services.find("Recording") != std::string::npos ||
+			a_regist.services.find("Recording") != std::string::npos || a_regist.services.find("Choir") != std::string::npos ||
+			a_regist.services.find("Drama") != std::string::npos ||
 			a_regist.services.find("Any of the above services") != std::string::npos)
 			m_logistics_list.push_back(a_regist.person_id);
 
@@ -344,7 +352,7 @@ int32_t QflReg::classifications()
 
 int32_t QflReg::sortAttendeesByChurches()
 {
-	int32_t i, j, cnt = 0;
+	int32_t i, j, k, cnt = 0;
 	int32_t adult_christians = 0;
 	int32_t adult_non_christians = 0;
 	int32_t adult_christians_in_cell_group = 0;
@@ -408,6 +416,17 @@ int32_t QflReg::sortAttendeesByChurches()
 		bool adult_have_cell_group = (a_regist.cell_group.find("Group-") != std::string::npos);
 		bool youth_have_cell_group = (a_regist.cell_group.find("Youth ") != std::string::npos);
 
+		bool match = false;
+		for (j = 0; j < church_list->size(); j++) {
+			std::string church_name = (*church_list)[j].church_name;
+			if (a_regist.church.compare(church_name) == 0) {
+				match = true;
+				break;
+			}
+		}
+		if (!match)
+			printf("%d\n", m_registrants[i].person_id);
+
 		for (j = 0; j < church_list->size(); j++) {
 			std::string church_name = (*church_list)[j].church_name;
 			std::string church_ini = (*church_list)[j].church_ini;
@@ -415,9 +434,38 @@ int32_t QflReg::sortAttendeesByChurches()
 
 			if (a_regist.church.compare(church_name) == 0) {
 				// check EU or Cabrini
-				bool youth = (a_regist.grade.find("Stay with Youth") != std::string::npos || a_regist.grade.find("stay with Youth") != std::string::npos
-					|| a_regist.grade.find("Stay with Parent") != std::string::npos || a_regist.services.find("Service Youth") != std::string::npos
-					|| a_regist.cell_group.find("Youth SGLeaders") != std::string::npos);
+
+				bool youth_camp = false;
+				bool need_room = true;
+
+				for (k = 0; k < sizeof(GradeGroup::G2) / sizeof(GradeGroup::G2[0]); k++) {
+					if (a_regist.grade.compare(std::string(GradeGroup::G2[k])) == 0) {
+						youth_camp = true;
+						break;
+					}
+				}
+				for (k = 0; k < sizeof(GradeGroup::G2p) / sizeof(GradeGroup::G2p[0]); k++) {
+					if (a_regist.grade.compare(std::string(GradeGroup::G2p[k])) == 0) {
+						youth_camp = true;
+						break;
+					}
+				}
+				// exclude students who serve childcare in EU
+				if (a_regist.services.find(Services::ServiceChild_2_5) != std::string::npos ||
+					a_regist.services.find(Services::ServiceChild_6_11) != std::string::npos)
+					youth_camp = false;
+
+				if (youth_camp)
+					m_youth_camp_list.push_back(a_regist.person_id);
+				else if (a_regist.grade.find("Stay with Parent") != std::string::npos)
+					m_youth_stays_with_parent_list.push_back(a_regist.person_id);
+				else if (a_regist.services.find("Youth Counselor") != std::string::npos || a_regist.cell_group.find("Youth SGLeaders") != std::string::npos)
+					m_youth_leader_list.push_back(a_regist.person_id);
+				else if (a_regist.services.find("Service Child") != std::string::npos)
+					m_child_leader_list.push_back(a_regist.person_id);
+
+				bool youth = (youth_camp || a_regist.services.find("Youth Counselor") != std::string::npos || 
+					a_regist.cell_group.find("Youth SGLeaders") != std::string::npos);
 
 				bool child = (a_regist.age_group.compare(AgeGroup::A1) == 0 ||
 					a_regist.age_group.compare(AgeGroup::A2) == 0) || (a_regist.age_group.compare(AgeGroup::A3) == 0)
@@ -425,7 +473,8 @@ int32_t QflReg::sortAttendeesByChurches()
 
 				bool senior = (a_regist.age_group.compare(AgeGroup::A66_69) == 0) || (a_regist.age_group.compare(AgeGroup::A70) == 0);
 
-				bool little_coworker = a_regist.functional_group.compare("Childcare Coworker") == 0;
+				bool little_coworker = (a_regist.services.find("Service Child") != std::string::npos) && 
+					(a_regist.age_group.compare(AgeGroup::A12_14) == 0) && (a_regist.age_group.compare(AgeGroup::A15_17) == 0);
 
 				bool stay_overnight = a_regist.need_room;
 
