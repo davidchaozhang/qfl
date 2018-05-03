@@ -644,7 +644,7 @@ int32_t Attendees::classifications1()
 // youth camp and commuters are not included
 int32_t Attendees::classifications()
 {
-	int32_t i;
+	int32_t i, j;
 	m_family_info.clear();
 	m_child_leader_list.clear();
 	m_male_list.clear();
@@ -664,16 +664,20 @@ int32_t Attendees::classifications()
 		bool is_family = (rt.party_type.find(PartyType::qFamily) != std::string::npos);
 		bool youth_camp = false;
 		bool need_room = true;
-		
-		if (rt.grade.find("Stay with Youth") != std::string::npos || rt.grade.find("stay with Youth") != std::string::npos ||
-			rt.services.find("Service Youth") != std::string::npos || rt.cell_group.find("Youth SGLeaders") != std::string::npos)
+	
+		for (j = 0; j < sizeof(GradeGroup::G2) / sizeof(GradeGroup::G2[0]); j++) {
+			youth_camp |= (rt.grade.compare(GradeGroup::G2[j]) == 0);
+		}
+		if (rt.services.find("Youth Counselor") != std::string::npos || rt.cell_group.find("Youth SGLeaders") != std::string::npos)
 			youth_camp = true;
+
 		if (youth_camp)
 			continue;
 		if (!rt.need_room)
 			continue;
 
-		if (rt.services.find("Service Child (6-11Yr)") != std::string::npos) {
+		bool adult = (rt.grade.compare(std::string(GradeGroup::G4)) == 0 || rt.grade.compare(std::string(GradeGroup::G5)) == 0);
+		if (rt.services.find(Services::ServiceChild_6_11) != std::string::npos && (!adult)) {
 			m_child_leader_list[family_id].push_back(&m_registrants[i]);
 			continue;
 		}

@@ -83,7 +83,16 @@ namespace BondType {
 	const char* const stayLevel = "SLV";
 	const char* const staySect = "SST";
 	const char* const stayBuilding = "SBD";
+	const char* const SpecialNeeded = "SPN";
 }
+
+typedef enum {
+	qEU = 'e', // EU
+	qCabrini = 'c', // cabrini
+	qChild = 'b', // child
+	qSenior = 's', // senior
+	qNotSure = ' ' // not sure
+} Campus;
 
 class QFLLIB_EXPORT Attendees {
 
@@ -162,14 +171,6 @@ public:
 		std::vector<BuildingRoomList::EURoom*> assigned_rooms;
 		ChurchList::QFLChurch* from_church;
 	} Party;
-
-	typedef enum {
-		qEU = 'e', // EU
-		qCabrini = 'c', // cabrini
-		qChild = 'b', // child
-		qSenior = 's', // senior
-		qNotSure = ' ' // not sure
-	} Campus;
 
 	typedef struct {
 		std::string church_name;
