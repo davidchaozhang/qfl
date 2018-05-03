@@ -4,7 +4,12 @@
 #include "attendees.h"
 #include "roomassign.h"
 
-static int32_t year = 2017;
+static int32_t year = 2018;
+std::string churchname = "D:/users/dzhang/QFL/roomassign/churchlist_20180429.csv";
+std::string brname = "D:/users/dzhang/QFL/roomassign/buildingAndRoom-0502_2018.csv";
+const std::string filename = "D:/users/dzhang/QFL/reports/report1525015569672.csv";
+std::string brname_updates = "D:/users/dzhang/QFL/roomassign/buildingAndRoom-new.csv";
+
 static int process_qfl_registrants();
 static int building_listTest();
 static int church_listTest();
@@ -24,24 +29,22 @@ int main()
 
 static int process_qfl_registrants()
 {
-	const std::string filename = "D:/users/dzhang/church/rccc/QFL2017/data/registration_reports/report1496368471394_checkout_0601.csv";
-	std::string churchname = "D:/users/dzhang/church/rccc/QFL2017/data/churchlist/churchlist_20170523.csv";
-	std::string allchurch_dir = "D:/users/dzhang/church/rccc/QFL2017/data/all_church";
-	std::string allchurch_EU_dir = "D:/users/dzhang/church/rccc/QFL2017/data/EU";
-	std::string allchurch_room_assign_dir = "D:/users/dzhang/church/rccc/QFL2017/data/room_assigns";
-	std::string statistics_file = "D:/users/dzhang/church/rccc/QFL2017/data/qfl_statistics.csv";
-	std::string eu_report = "D:/users/dzhang/church/rccc/QFL2017/data/EU/eu_report.csv";
-	std::string cabrini_report = "D:/users/dzhang/church/rccc/QFL2017/data/Cabrini/cabrini_report.csv";
-	std::string childcare_2_5yr_name = "D:/users/dzhang/church/rccc/QFL2017/data/childcare_coworkers_2_5yr.csv";
-	std::string childcare_6_11yr_name = "D:/users/dzhang/church/rccc/QFL2017/data/childcare_coworkers_6_11yr.csv";
-	std::string logistics_name = "D:/users/dzhang/church/rccc/QFL2017/data/logistics.csv";
-	std::string youth_name = "D:/users/dzhang/church/rccc/QFL2017/data/youthcamp.csv";
-	std::string doubtful_list = "D:/users/dzhang/church/rccc/QFL2017/data/doubtful.csv";
-	std::string rides_list = "D:/users/dzhang/church/rccc/QFL2017/data/rideslist.csv";
+	std::string allchurch_dir = "D:/users/dzhang/QFL/statistics/all_church";
+	std::string allchurch_EU_dir = "D:/users/dzhang/QFL/statistics/EU";
+	std::string allchurch_room_assign_dir = "D:/users/dzhang/QFL/statistics/room_assigns";
+	std::string statistics_file = "D:/users/dzhang/QFL/statistics/qfl_statistics.csv";
+	std::string eu_report = "D:/users/dzhang/QFL/statistics/EU/eu_report.csv";
+	std::string cabrini_report = "D:/users/dzhang/QFL/statistics/Cabrini/cabrini_report.csv";
+	std::string childcare_2_5yr_name = "D:/users/dzhang/QFL/statistics/childcare_coworkers_2_5yr.csv";
+	std::string childcare_6_11yr_name = "D:/users/dzhang/QFL/statistics/childcare_coworkers_6_11yr.csv";
+	std::string logistics_name = "D:/users/dzhang/QFL/statistics/logistics.csv";
+	std::string youth_name = "D:/users/dzhang/QFL/statistics/youthcamp.csv";
+	std::string doubtful_list = "D:/users/dzhang/QFL/statistics/doubtful.csv";
+	std::string rides_list = "D:/users/dzhang/QFL/statistics/rideslist.csv";
 
-	std::string rcccname = "D:/users/dzhang/church/rccc/QFL2017/data/rccc.csv";
-	std::string rccc_functions = "D:/users/dzhang/church/rccc/QFL2017/data";
-	std::string financial_report = "D:/users/dzhang/church/rccc/QFL2017/data/financial/financial.csv";
+	std::string rcccname = "D:/users/dzhang/QFL/statistics/rccc.csv";
+	std::string rccc_functions = "D:/users/dzhang/QFL/statistics";
+	std::string financial_report = "D:/users/dzhang/QFL/statistics/financial/financial.csv";
 	QflReg qfl_reg;
 	qfl_reg.readChurchList(churchname.c_str(), year);
 	qfl_reg.readRegistrants(filename.c_str());
@@ -76,7 +79,6 @@ static int process_qfl_registrants()
 int church_listTest()
 {
 	ChurchList clst;
-	std::string churchname = "D:/users/dzhang/church/rccc/QFL2018/building_layout/churchlist_20170523.csv";
 	clst.readInChurchList(churchname.c_str());
 	clst.sortbyState();
 	return 0;
@@ -87,8 +89,6 @@ int building_listTest()
 	int i;
 
 	BuildingRoomList bdlst;
-	std::string brname = "E:/projects/qfl/doc/buildingAndRoom-update.csv";
-	std::string brname_updates = "E:/projects/qfl/doc/buildingAndRoom-new.csv";
 	bdlst.readInBuildingLists(brname.c_str(), ',');
 	bdlst.accumulateRoomInfo();
 
@@ -115,19 +115,14 @@ int building_listTest()
 
 int attendee_listTest()
 {
-	std::string churchname = "D:/users/dzhang/church/rccc/QFL2018/churchlist/churchlist_20170523.csv";
-	std::string brname = "D:/users/dzhang/church/rccc/QFL2018/building_layout/buildingAndRoom-update.csv";
-	const std::string filename = "D:/users/dzhang/church/rccc/QFL2018/attendeelist/report1496368471394_checkout_0601.csv";
 	Attendees qfl_attendees;
-	qfl_attendees.readChurchList(churchname.c_str(), Attendees::fByRank, 2017);
+	qfl_attendees.readChurchList(churchname.c_str(), Attendees::fByRank, year);
 	qfl_attendees.readBuildingRooms(brname.c_str());
 	qfl_attendees.readRegistrants(filename.c_str());
 	qfl_attendees.parseAllFields();
 	qfl_attendees.classifications();
 	qfl_attendees.refinement();
 	qfl_attendees.sortAttendeesByChurches();
-	//qfl_attendees.classifications();
-	//qfl_attendees.sortAttendeesByChurches();
 	return 0;
 }
 
