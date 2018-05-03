@@ -10,8 +10,8 @@ static int parsing(int argc, char**argv);
 static int auto_roomassign_2018(int argc, char**argv);
 
 
-std::string churchname = "D:/users/dzhang/QFL/roomassign/churchlist_20170523.csv";
-std::string brname = "D:/users/dzhang/QFL/roomassign/buildingAndRoom-1125_2017.csv";
+std::string churchname = "D:/users/dzhang/QFL/roomassign/churchlist_20180429.csv";
+std::string brname = "D:/users/dzhang/QFL/roomassign/buildingAndRoom-0502_2018.csv";
 std::string filename = "D:/users/dzhang/QFL/reports/report1524597464105.csv";
 std::string sortedname = "D:/users/dzhang/QFL/reports/sorted_report.csv";
 std::string filename_new = "D:/users/dzhang/QFL/roomassign/report_new_assignment.csv";
