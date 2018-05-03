@@ -1097,10 +1097,10 @@ int BuildingRoomList::printRoomStats()
 
 	for (i = 0; i < m_eu_buildings.size(); i++) {
 		for (j = 0; j < m_eu_buildings[i].sects.size(); j++) {
-			printf("%s %s rooms=%d beds=%d\n", m_eu_buildings[i].building_name.c_str(), m_eu_buildings[i].sects[j].direction.c_str(),
-				m_eu_buildings[i].sects[j].sect_rooms, m_eu_buildings[i].sects[j].sect_beds);
+			printf("%s %s sect=%d level=%d rooms=%d beds=%d\n", m_eu_buildings[i].building_name.c_str(), m_eu_buildings[i].sects[j].direction.c_str(),
+				m_eu_buildings[i].sects[j].sect_number, m_eu_buildings[i].sects[j].level, m_eu_buildings[i].sects[j].sect_rooms, m_eu_buildings[i].sects[j].sect_beds);
 		}
-		printf("%s rooms=%d beds=%d\n", m_eu_buildings[i].building_name.c_str(), m_eu_buildings[i].building_rooms, m_eu_buildings[i].building_beds);
+		printf("== %s rooms=%d beds=%d ==\n", m_eu_buildings[i].building_name.c_str(), m_eu_buildings[i].building_rooms, m_eu_buildings[i].building_beds);
 	}
 
 	printf("=== Total rooms = %d, Total beds = %d\n", m_total_rooms, m_total_beds);
@@ -1120,7 +1120,7 @@ int BuildingRoomList::writeUpdatedBuildingRoomDoc(const char* filename)
 	fout << "Building No," << "Building Name," << "Direction," << "Room_ID," << "Room," << "Level,"
 		<< "Room Type," << "Bathroom," << "Room Status," << "Capacity," << "Bed Assigned," << "Extra,"
 		<< "Building Distance," << "Bath Distance," << "Score," << "AC," << "Fridge," << "Elevator,"
-		<< "Room Conditions," << "Note" << std::endl;
+		<< "Room Conditions," << "Sect," << "Note" << std::endl;
 
 	for (i = 0; i < m_eu_buildings.size(); i++) {
 		for (j = 0; j < m_eu_buildings[i].sects.size(); j++) {
@@ -1129,6 +1129,7 @@ int BuildingRoomList::writeUpdatedBuildingRoomDoc(const char* filename)
 				int32_t building_no = m_eu_buildings[i].build_no;
 				std::string building_name = m_eu_buildings[i].building_name;
 				std::string direction = m_eu_buildings[i].sects[j].direction;
+				int32_t sect_num = m_eu_buildings[i].sects[j].sect_number;
 				int32_t id = m_eu_buildings[i].sects[j].rooms[k].room_id;
 				std::string rm = m_eu_buildings[i].sects[j].rooms[k].room;
 				int32_t level = m_eu_buildings[i].sects[j].level;
@@ -1149,7 +1150,7 @@ int BuildingRoomList::writeUpdatedBuildingRoomDoc(const char* filename)
 				fout << building_no <<"," << building_name <<"," << direction << "," << id << "," << rm <<"," 
 					<< level << "," << rtype << "," << bath+" " << "," << status <<"," << capacity << "," << num_assigned_beds <<"," 
 					<< extra_bed <<"," << building_distance <<"," << bath_distance <<"," << score <<"," << ac <<"," << fridge <<"," 
-					<< elevator <<"," << room_conditions <<"," << " " << std::endl;
+					<< elevator <<"," << room_conditions <<"," << sect_num << "," << " " << std::endl;
 			}
 		}
 	}

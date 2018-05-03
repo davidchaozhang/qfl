@@ -194,7 +194,7 @@ public:
 		int32_t total_shared_family_beds; // rooms that shared beds
 	} RoomStats;
 
-	// score = BuildingCode*brBuilding + brLevel*OpLevel + brSect + room_number + bath_dist
+	// score = BuildingCode*brBuilding + brLevel*OpLevel + sect_number*brSect + room_number + bath_dist*value
 	typedef struct RoomMeasure {
 		int32_t brBuilding;
 		int32_t brLevel;
