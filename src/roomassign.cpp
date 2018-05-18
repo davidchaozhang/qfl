@@ -91,7 +91,7 @@ int32_t RoomAssign::preprocessData1()
 
 int32_t RoomAssign::assignRooms2SpecialNeeds()
 {
-	bool enable_extrabeds = false;
+	bool enable_extrabeds = true;
 	std::vector<BuildingRoomList::EURoom*> temp_roomlist;
 	std::vector<BuildingRoomList::EURoom*> roomlist = m_br_list.queryReservedSPRooms();
 	std::map<int32_t, std::vector<Registrant*>> spnlist = m_special_need_list;
@@ -137,21 +137,36 @@ int32_t RoomAssign::assignRooms2Choir()
 			female_lst[party_id] = (m_choir_list[party_id]);
 	}
 
-	// family assignment first
-	if (family_lst.size() > 0) {
-		if (familyRoomAssign(family_lst, roomlist, enable_extrabeds) <= 0)
-			printf("assignRooms2Choir(): Family room assignment failed\n");
+	if (male_lst.size() >= female_lst.size()) {
+		// male room assignment - male do not share bathroom with females 
+		if (male_lst.size() > 0) {
+			if (IndividualRoomAssign2(male_lst, BuildingRoomList::eMale, roomlist) <= 0)
+				printf("assignRooms2Choir(): Male room assignment failed\n");
+		}
+		// female room assignment - male do not share bathroom with females 
+		if (female_lst.size() > 0) {
+			if (IndividualRoomAssign2(female_lst, BuildingRoomList::eFemale, roomlist) <= 0)
+				printf("assignRooms2Choir(): Female room assignment failed\n");
+		}
+	}
+	else {
+		// female room assignment - male do not share bathroom with females 
+		if (female_lst.size() > 0) {
+			if (IndividualRoomAssign2(female_lst, BuildingRoomList::eFemale, roomlist) <= 0)
+				printf("assignRooms2Choir(): Female room assignment failed\n");
+		}
+		// male room assignment - male do not share bathroom with females 
+		if (male_lst.size() > 0) {
+			if (IndividualRoomAssign2(male_lst, BuildingRoomList::eMale, roomlist) <= 0)
+				printf("assignRooms2Choir(): Male room assignment failed\n");
+		}
 	}
 
-	// male room assignment - male do not share bathroom with females 
-	if (male_lst.size() > 0) {
-		if (IndividualRoomAssign2(male_lst, BuildingRoomList::eMale, roomlist) <= 0)
-			printf("assignRooms2Choir(): Male room assignment failed\n");
-	}
-	// female room assignment - male do not share bathroom with females 
-	if (female_lst.size() > 0) {
-		if (IndividualRoomAssign2(female_lst, BuildingRoomList::eFemale, roomlist) <= 0)
-			printf("assignRooms2Choir(): Female room assignment failed\n");
+	// family assignment first
+	bool enable_extrabeds_for_family = true;
+	if (family_lst.size() > 0) {
+		if (familyRoomAssign(family_lst, roomlist, enable_extrabeds_for_family) <= 0)
+			printf("assignRooms2Choir(): Family room assignment failed\n");
 	}
 
 	return 0;
@@ -189,21 +204,35 @@ int32_t RoomAssign::assignRooms2DramaTeam()
 			female_lst[party_id] = (m_drama_list[party_id]);
 	}
 
+	if (female_lst.size() > male_lst.size()) {
+		// female room assignment - male do not share bathroom with females 
+		if (female_lst.size() > 0) {
+			if (IndividualRoomAssign2(female_lst, BuildingRoomList::eFemale, roomlist) <= 0)
+				printf("assignRooms2DramaTeam(): Female room assignment failed\n");
+		}
+		// male room assignment - male do not share bathroom with females 
+		if (male_lst.size() > 0) {
+			if (IndividualRoomAssign2(male_lst, BuildingRoomList::eMale, roomlist) <= 0)
+				printf("assignRooms2DramaTeam(): Male room assignment failed\n");
+		}
+	}
+	else {
+		// male room assignment - male do not share bathroom with females 
+		if (male_lst.size() > 0) {
+			if (IndividualRoomAssign2(male_lst, BuildingRoomList::eMale, roomlist) <= 0)
+				printf("assignRooms2DramaTeam(): Male room assignment failed\n");
+		}
+		// female room assignment - male do not share bathroom with females 
+		if (female_lst.size() > 0) {
+			if (IndividualRoomAssign2(female_lst, BuildingRoomList::eFemale, roomlist) <= 0)
+				printf("assignRooms2DramaTeam(): Female room assignment failed\n");
+		}
+	}
+
 	// family assignment first
 	if (family_lst.size() > 0) {
 		if (familyRoomAssign(family_lst, roomlist, enable_extrabeds) <= 0)
 			printf("assignRooms2DramaTeam(): Family room assignment failed\n");
-	}
-
-	// male room assignment - male do not share bathroom with females 
-	if (male_lst.size() > 0) {
-		if (IndividualRoomAssign2(male_lst, BuildingRoomList::eMale, roomlist) <= 0)
-			printf("assignRooms2DramaTeam(): Male room assignment failed\n");
-	}
-	// female room assignment - male do not share bathroom with females 
-	if (female_lst.size() > 0) {
-		if (IndividualRoomAssign2(female_lst, BuildingRoomList::eFemale, roomlist) <= 0)
-			printf("assignRooms2DramaTeam(): Female room assignment failed\n");
 	}
 
 	return 0;
@@ -386,7 +415,7 @@ int32_t RoomAssign::assignRooms2Recordings()
 
 int32_t RoomAssign::assignRooms2Babies()
 {
-	bool enable_extrabeds = false; // can change to true since baby is likely to stay on floor when sleep
+	bool enable_extrabeds = true; // can change to true since baby is likely to stay on floor when sleep
 	std::vector<BuildingRoomList::EURoom*> temp_roomlist;
 	std::vector<BuildingRoomList::EURoom*> roomlist = m_br_list.queryReservedSPRooms();
 	std::map<int32_t, std::vector<Registrant*>> baby_list = m_baby_list;
@@ -429,8 +458,6 @@ int32_t RoomAssign::assignRooms2Families()
 	std::map<int32_t, std::vector<Registrant*>> all_family_list = m_family_info;
 	std::vector<ChurchList::QFLChurch> *churches = getChurchHandle()->getChurchList();
 
-	printf("=== Assign rooms to families: rooms = %zd, family size = %zd\n", m_br_list.queryFamilyPrivateRooms().size(), all_family_list.size());
-
 	for (i = 0; i < m_br_list.queryFamilyPrivateRooms().size(); i++) {
 		std::string status = m_br_list.queryFamilyPrivateRooms()[i]->room_status;
 		std::string room = m_br_list.queryFamilyPrivateRooms()[i]->room;
@@ -439,6 +466,8 @@ int32_t RoomAssign::assignRooms2Families()
 			//printf("Family Private: %s %s\n", room.c_str(), status.c_str());
 		}
 	}
+
+	printf("=== Available rooms to families: rooms = %zd, family size = %zd\n", roomlist.size(), all_family_list.size());
 
 	for (i = (int32_t)churches->size() - 1; i >= 0; i--) {
 		ChurchList::QFLChurch achurch = (*churches)[i];
@@ -1449,10 +1478,11 @@ bool RoomAssign::printRoomAssignment(const char* filename)
 		return false;
 
 	int32_t cnt = 0;
-	fout << "PersonId," << "PartyId," << "Church," << "ContactPerson," << "PartyType," << "FirstName,"
-		<< "LastName," << "ChineseName," << "RoomNumber," << "CellGroup," << "NeedRoom," << "Age,"
-		<< "Gender," << "Grade," << "NeedRide," << "OfferRide," << "is_Christian," << "Occupation,"
-		<< "MobilePhone," << "Email," << "City," << "State," << "Zip," << "FunctionalGroup," << "Services" << std::endl;
+	fout << "Church," << "PersonId," << "PartyId," << "ContactPerson," << "PartyType," << "FirstName,"
+		<< "LastName," << "ChineseName," << "RoomNumber," <<"extra_bed," << "CellGroup," << "NeedRoom," << "Age,"
+		<< "Gender," << "Grade," << "NeedRide," << "OfferRide," << "is_Christian," 
+		<< "MobilePhone," << "Email," << "City," << "State," << "Zip," << "FunctionalGroup," << "Services," 
+		<< "notes," << "needs" << std::endl;
 
 	char zip_str[128];
 	int32_t total_parties = 0;
@@ -1471,6 +1501,7 @@ bool RoomAssign::printRoomAssignment(const char* filename)
 				int32_t person_id = attendee->person_id;
 				int32_t party_id = attendee->party;
 				std::string church = attendee->church;
+				std::string church_chinese = attendee->church_cname;
 				std::string contact_person = attendee->contact_person;
 				size_t j0 = contact_person.find_first_of(",");
 				if (j0 != std::string::npos)
@@ -1480,6 +1511,9 @@ bool RoomAssign::printRoomAssignment(const char* filename)
 				std::string last_name = attendee->last_name;
 				std::string chinese_name = attendee->chinese_name;
 				std::string room_number = attendee->room;
+				int32_t extra_bed = 0;
+				if(attendee->assigned_room != NULL)
+					extra_bed = ((BuildingRoomList::EURoom*)(attendee->assigned_room))->extra;
 				std::string cell_group = attendee->cell_group;
 				bool need_room = attendee->need_room;
 				std::string age = attendee->age_group;
@@ -1506,12 +1540,14 @@ bool RoomAssign::printRoomAssignment(const char* filename)
 					sprintf_s(zip_str, "%d", zip);
 				std::string functional = attendee->functional_group;
 				std::string services = attendee->services;
+				std::string admin_notes = attendee->notes;
+				std::string needs = attendee->special_need;
 
-				fout << person_id << ", " << party_id << ", " << church << ", " << contact_person << ", " << party_type << ", "
-					<< first_name << ", " << last_name << ", " << chinese_name + " " << ", " << room_number << ", " << cell_group + " " << ", " << need_room << ", "
+				fout << church_chinese << ", " << person_id << ", " << party_id << ", " << contact_person << ", " << party_type << ", "
+					<< first_name << ", " << last_name << ", " << chinese_name + " " << ", " << room_number << ", " << extra_bed << ", " << cell_group + " " << ", " << need_room << ", "
 					<< age << ", " << gender << ", " << grade + " " << ", " << need_ride << ", " << offer_ride << ", " << is_christian << ", "
-					<< occupation << ", " << mobile << ", " << email << ", " << city << ", " << state << ", " << zip_str << ", "
-					<< functional << ", " << services << std::endl;
+					<< mobile << ", " << email << ", " << city << ", " << state << ", " << zip_str << ", "
+					<< functional << ", " << services << ", " << admin_notes << ", " << needs << std::endl;
 			}
 		}
 	}
@@ -1528,6 +1564,7 @@ bool RoomAssign::printRoomAssignment(const char* filename)
 			int32_t person_id = attendee->person_id;
 			int32_t party_id = attendee->party;
 			std::string church = attendee->church;
+			std::string church_chinese = attendee->church_cname;
 			std::string contact_person = attendee->contact_person;
 			size_t j0 = contact_person.find_first_of(",");
 			if (j0 != std::string::npos)
@@ -1537,6 +1574,9 @@ bool RoomAssign::printRoomAssignment(const char* filename)
 			std::string last_name = attendee->last_name;
 			std::string chinese_name = attendee->chinese_name;
 			std::string room_number = attendee->room;
+			int32_t extra_bed = 0;
+			if (attendee->assigned_room != NULL)
+				extra_bed = ((BuildingRoomList::EURoom*)(attendee->assigned_room))->extra;
 			std::string cell_group = attendee->cell_group;
 			bool need_room = attendee->need_room;
 			std::string age = attendee->age_group;
@@ -1560,12 +1600,14 @@ bool RoomAssign::printRoomAssignment(const char* filename)
 				sprintf_s(zip_str, "%d", zip);
 			std::string functional = attendee->functional_group;
 			std::string services = attendee->services;
+			std::string admin_notes = attendee->notes;
+			std::string needs = attendee->special_need;
 
-			fout << person_id << ", " << party_id << ", " << church << ", " << contact_person << ", " << party_type << ", "
-				<< first_name << ", " << last_name << ", " << chinese_name + " " << ", " << room_number << ", " << cell_group + " " << ", " << need_room << ", "
+			fout << church_chinese <<", " << person_id << ", " << party_id << ", " << contact_person << ", " << party_type << ", "
+				<< first_name << ", " << last_name << ", " << chinese_name + " " << ", " << room_number << ", " << extra_bed << ", " << cell_group + " " << ", " << need_room << ", "
 				<< age << ", " << gender << ", " << grade + " " << ", " << need_ride << ", " << offer_ride << ", " << is_christian << ", "
-				<< occupation << ", " << mobile << ", " << email << ", " << city << ", " << state << ", " << zip_str << ", "
-				<< functional << ", " << services << std::endl;
+				<< mobile << ", " << email << ", " << city << ", " << state << ", " << zip_str << ", "
+				<< functional << ", " << services << ", " << admin_notes << ", " << needs << std::endl;
 		}
 	}
 
@@ -1643,6 +1685,30 @@ int32_t RoomAssign::lodgePeopleStats(const char* filename)
 
 	return 0;
 }
+
+bool RoomAssign::extrabed_update()
+{
+	int32_t i;
+	std::vector<BuildingRoomList::EURoom*> roomlist = m_br_list.queryAssignedRooms();
+	int32_t extra_bed_rooms = 0;
+
+	for (i = 0; i < roomlist.size(); i++) {
+		BuildingRoomList::EURoom* aroom = roomlist[i];
+		int32_t num = aroom->persons.size();
+		int32_t assigned_beds = aroom->bed_assigned;
+
+		if (num > assigned_beds) {
+			aroom->extra = 1;
+			extra_bed_rooms++;
+		}
+		else
+			aroom->extra = 0;
+	}
+
+	printf("Out of %d assigned rooms, %d rooms need an extra bed\n", roomlist.size(), extra_bed_rooms);
+	return true;
+}
+
 
 int32_t RoomAssign::printRooms2Choir()
 {
@@ -1970,42 +2036,50 @@ int32_t RoomAssign::printRooms2Seniors()
 
 int32_t RoomAssign::printRooms2Families()
 {
-	int32_t i;
+	int32_t i, j;
+	int32_t available_rooms = 0;
 	int32_t assigned_room_cnt = 0;
 	int32_t unassigned_room_cnt = 0;
 	int32_t assigned_family_cnt = 0;
 	int32_t unassigned_family_cnt = 0;
+	int32_t family_list_size = 0;
 
 	std::map<std::string, int32_t> assigned_roomlist;
-	std::map<int32_t, std::vector<Registrant*>> family_list = m_family_info;
 	std::vector<BuildingRoomList::EURoom*> roomlist[3] = { m_br_list.queryFamilyPrivateRooms(),
 		m_br_list.queryFamilyMaleRooms(), m_br_list.queryFamilyFemaleRooms() };
 
-	std::map<int32_t, std::vector<Registrant*>>::iterator sit;
-	for (sit = family_list.begin(); sit != family_list.end(); sit++) {
-		int32_t party_id = sit->first;
-		std::vector<Registrant*> flist = sit->second;
-		bool room_assigned = true;
-		for (i = 0; i < flist.size(); i++) {
-			room_assigned = room_assigned && (flist[i]->assigned_room != NULL);
-		}
+	std::map<int32_t, std::vector<Registrant*>> *glists2[] =
+	{ &m_family_info , &m_choir_list, &m_recording_list, &m_senior_list,
+		&m_baby_list, &m_speaker_list, &m_special_need_list, &m_drama_list };
 
-		if (room_assigned) {
+	std::map<int32_t, std::vector<Registrant*>>::iterator sit;
+	for (j = 0; j < sizeof(glists2) / sizeof(glists2[0]); j++) {
+		family_list_size += glists2[j]->size();
+		for (sit = glists2[j]->begin(); sit != glists2[j]->end(); sit++) {
+			int32_t party_id = sit->first;
+			std::vector<Registrant*> flist = sit->second;
+			bool room_assigned = true;
 			for (i = 0; i < flist.size(); i++) {
-				assigned_roomlist[flist[i]->assigned_room->room] = 1;
+				room_assigned = room_assigned && (flist[i]->assigned_room != NULL);
 			}
-			assigned_family_cnt++;
+
+			if (room_assigned) {
+				for (i = 0; i < flist.size(); i++) {
+					assigned_roomlist[flist[i]->assigned_room->room] = 1;
+				}
+				assigned_family_cnt++;
+			}
+			else
+				unassigned_family_cnt++;
 		}
-		else
-			unassigned_family_cnt++;
 	}
 
 	assigned_room_cnt = (int32_t)assigned_roomlist.size();
-	unassigned_room_cnt = (int32_t)roomlist[0].size()+ (int32_t)roomlist[1].size()+ (int32_t)roomlist[2].size();
+	available_rooms = (int32_t)roomlist[0].size()+ (int32_t)roomlist[1].size()+ (int32_t)roomlist[2].size();
 	printf("=== Family room assignment:\n");
-	printf("Total assigned rooms = %d, Available rooms = %d\n", assigned_room_cnt, unassigned_room_cnt);
+	printf("Total assigned family (private, female, male) rooms = %d, Available family (private, female, male) rooms = %d\n", assigned_room_cnt, available_rooms - assigned_room_cnt);
 	//printf(" Out of %zd rooms, %d are assigned, %d are not assigned\n", roomlist.size(), assigned_room_cnt, unassigned_room_cnt);
-	printf("Out of %zd families, %d families are assigned with a room, and %d families are not assigned with a room\n", family_list.size(), assigned_family_cnt, unassigned_family_cnt);
+	printf("Out of %zd families, %d families are assigned with a room, and %d families are not assigned with a room\n", family_list_size, assigned_family_cnt, unassigned_family_cnt);
 
 	return 0;
 }
@@ -2042,7 +2116,7 @@ int32_t RoomAssign::printRooms2Males()
 	}
 
 	assigned_room_cnt = (int32_t)assigned_roomlist.size();
-	unassigned_room_cnt = (int32_t)roomlist.size();
+	unassigned_room_cnt = (int32_t)roomlist.size() - assigned_room_cnt;
 	printf("=== Male room assignment:\n");
 	printf("Total assigned rooms = %d, Available rooms = %d\n", assigned_room_cnt, unassigned_room_cnt);
 	//printf(" Out of %zd rooms, %d are assigned, %d are not assigned\n", roomlist.size(), assigned_room_cnt, unassigned_room_cnt);
@@ -2083,7 +2157,7 @@ int32_t RoomAssign::printRooms2Females()
 	}
 
 	assigned_room_cnt = (int32_t)assigned_roomlist.size();
-	unassigned_room_cnt = (int32_t)roomlist.size();
+	unassigned_room_cnt = (int32_t)roomlist.size() - assigned_room_cnt;
 	printf("=== Female room assignment:\n");
 	printf("Total assigned rooms = %d, Available rooms = %d\n", assigned_room_cnt, unassigned_room_cnt);
 	//printf(" Out of %zd rooms, %d are assigned, %d are not assigned\n", roomlist.size(), assigned_room_cnt, unassigned_room_cnt);
@@ -2163,10 +2237,10 @@ bool RoomAssign::printChurchDistributionPerBuilding(const char *filename)
 		return false;
 
 	int32_t cnt = 0;
-	fout << "PersonId," << "PartyId," << "ContactPerson," << "PartyType," << "FirstName,"
-		<< "LastName," << "ChineseName," << "RoomNumber," << "CellGroup," << "NeedRoom," << "Age,"
-		<< "Gender," << "Grade," << "is_Christian," << "Occupation,"
-		<< "MobilePhone," << "Email," << "City," << "State," << "Zip," << "FunctionalGroup," << "Services" << std::endl;
+	fout << "Church," << "PersonId," << "PartyId," << "ContactPerson," << "PartyType," << "FirstName,"
+		<< "LastName," << "ChineseName," << "RoomNumber," << "Extra_bed," << "CellGroup," << "NeedRoom," << "Age,"
+		<< "Gender," << "Grade," << "is_Christian," << "MobilePhone," << "Email," << "City," << "State," << "Zip," 
+		<< "FunctionalGroup," << "Services," << "Notes," << "Needs" << std::endl;
 
 	char zip_str[128];
 	int32_t total_parties = 0;
@@ -2200,12 +2274,16 @@ bool RoomAssign::printChurchDistributionPerBuilding(const char *filename)
 				int32_t person_id = attendee->person_id;
 				int32_t party_id = attendee->party;
 				std::string church = attendee->church;
+				std::string church_chinese = attendee->church_cname;
 				std::string contact_person = attendee->contact_person;
 				std::string party_type = attendee->party_type;
 				std::string first_name = attendee->first_name;
 				std::string last_name = attendee->last_name;
 				std::string chinese_name = attendee->chinese_name;
 				std::string room_number = attendee->room;
+				int32_t extra_bed = 0;
+				if (attendee->assigned_room != NULL)
+					extra_bed = ((BuildingRoomList::EURoom*)(attendee->assigned_room))->extra;
 				std::string cell_group = attendee->cell_group;
 				bool need_room = attendee->need_room;
 				std::string age = attendee->age_group;
@@ -2224,13 +2302,15 @@ bool RoomAssign::printChurchDistributionPerBuilding(const char *filename)
 				std::string functional = attendee->functional_group;
 				std::string services = attendee->services;
 				sprintf(zip_str, "%05d", attendee->zip);
+				std::string notes = attendee->notes;
+				std::string needs = attendee->special_need;
 
-				fout << person_id << ", " << party_id << ", " << contact_person << ", " << party_type << ", "
-					<< first_name << ", " << last_name << ", " << chinese_name + " " << ", " << room_number << ", " 
+				fout << church_chinese << ", " << person_id << ", " << party_id << ", " << contact_person << ", " << party_type << ", "
+					<< first_name << ", " << last_name << ", " << chinese_name + " " << ", " << room_number << ", " << extra_bed << ", "
 					<< cell_group + " " << ", " << need_room << ", "
 					<< age << ", " << gender << ", " << grade + " " << ", " << is_christian << ", "
-					<< occupation << ", " << mobile << ", " << email << ", " << city << ", " << state << ", " 
-					<< zip_str << ", " << functional << ", " << services << std::endl;
+					<< mobile << ", " << email << ", " << city << ", " << state << ", " 
+					<< zip_str << ", " << functional << ", " << services << ", " << notes << ", " << needs << std::endl;
 
 			}
 		}
@@ -2245,12 +2325,12 @@ int32_t RoomAssign::printSortedAttendees(const char* filename, std::map<int32_t,
 	int i, j;
 	char zip_str[128];
 	if (filename == NULL)
-		return false;
+		return -1;
 
 	std::ofstream fout;
 	fout.open(filename, std::ofstream::out | std::ofstream::app);
 	if (!fout.is_open())
-		return false;
+		return -2;
 
 	int32_t cnt = 0;
 	if (print_title) {
@@ -2309,4 +2389,81 @@ int32_t RoomAssign::printSortedAttendees(const char* filename, std::map<int32_t,
 	fout << "\n";
 	fout.close();
 	return cnt;
+}
+
+bool RoomAssign::printEU_for_cellgroup(const char* filename)
+{
+	int i, j;
+	char zip_str[128];
+	if (filename == NULL)
+		return false;
+
+	std::ofstream fout;
+	fout.open(filename, std::ofstream::out);
+	if (!fout.is_open())
+		return false;
+
+	int32_t cancelled = 0;
+	int32_t youth_camp = 0;
+	int32_t eu_camp = 0;
+	int32_t cnt = 0;
+	fout << "PersonId," << "Church," << "FirstName," << "LastName," << "ChineseName," << "NeedRoom," << "Age,"
+		<< "Gender," << "is_Christian," << "City," << "State," << "Zip," << "FunctionalGroup," << "Services" << std::endl;
+	
+	for (i = 0; i < m_registrants.size(); i++) {
+		Registrant attendee = m_registrants[i];
+		if (!attendee.cancelled) {
+			if (!attendee.youth_camp_flag) {
+				int32_t person_id = attendee.person_id;
+				int32_t party_id = attendee.party;
+				std::string church = attendee.church;
+				std::string church_chinese = attendee.church_cname;
+				std::string contact_person = attendee.contact_person;
+				std::string party_type = attendee.party_type;
+				std::string first_name = attendee.first_name;
+				std::string last_name = attendee.last_name;
+				std::string chinese_name = attendee.chinese_name;
+				std::string room_number = attendee.room;
+				std::string cell_group = attendee.cell_group;
+				bool need_room = attendee.need_room;
+				std::string age = attendee.age_group;
+				std::string gender = attendee.gender;
+				std::string grade = attendee.grade;
+				size_t found = grade.find(",");
+				if (found != string::npos) {
+					grade.replace(found, 1, "-");
+				}
+				bool is_christian = attendee.is_christian;
+				std::string church0 = attendee.church;
+				std::string mobile = attendee.mobile_phone;
+				std::string email = attendee.email;
+				std::string city = attendee.city;
+				std::string state = attendee.state;
+				std::string functional = attendee.functional_group;
+				std::string services = attendee.services;
+				sprintf(zip_str, "%05d", attendee.zip);
+
+				bool under_age = (age.compare(AgeGroup::A1) == 0 || age.compare(AgeGroup::A2) == 0 ||
+					age.compare(AgeGroup::A3) == 0 || age.compare(AgeGroup::A4_5) == 0 ||
+					age.compare(AgeGroup::A6_11) == 0);
+					//|| age.compare(AgeGroup::A12_14) == 0 || age.compare(AgeGroup::A15_17) == 0);
+				if (under_age)
+					continue;
+				fout << person_id << ", " << church_chinese << ", "<< first_name << ", " << last_name << ", " << chinese_name + " " << ", " 
+					<< need_room << ", " << age << ", " << gender << ", " << is_christian << ", " << city << ", " << state << ", " << zip_str << ", " << functional << ", " << services << std::endl;
+
+				eu_camp++;
+			}
+			else
+				youth_camp++;
+		}
+		else
+			cancelled++;
+	}
+
+	fout << "\n";
+	fout.close();
+
+
+	return true;
 }
