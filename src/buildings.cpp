@@ -698,7 +698,7 @@ void BuildingRoomList::findNeighbors()
 				EURoom eur = eus.rooms[k];
 				std::string room_name = eur.room;
 				std::string bath_name = eur.bathroom;
-				if (!bath_name.empty()) {
+				if (!bath_name.empty() && bath_name.compare(" ")!=0) {
 					size_t pos0 = room_name.find("-");
 					rm_pre = room_name.substr(0, pos0);
 					rm_num = room_name.substr(pos0 + 1);
@@ -708,6 +708,9 @@ void BuildingRoomList::findNeighbors()
 					if (pos1 != std::string::npos) {
 						room_a = bath_name.substr(0, pos1);
 						room_b = bath_name.substr(pos1 + 1);
+						size_t pos2 = room_b.find(" ");
+						if (pos2 != std::string::npos)
+							room_b = room_b.substr(0, pos2);
 					}
 					if (rm_num.compare(room_a) == 0) {
 						rm_pre = rm_pre + "-" + room_b;
