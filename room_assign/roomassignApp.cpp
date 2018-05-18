@@ -10,12 +10,14 @@ static int parsing(int argc, char**argv);
 static int auto_roomassign_2018(int argc, char**argv);
 
 
-std::string churchname = "D:/users/dzhang/QFL/roomassign/churchlist_20180429.csv";
-std::string brname = "D:/users/dzhang/QFL/roomassign/buildingAndRoom-0502_2018.csv";
-std::string filename = "D:/users/dzhang/QFL/reports/report1524597464105.csv";
+std::string churchname = "D:/users/dzhang/QFL/roomassign/churchlist_20180514_milestone.csv";
+std::string brname = "D:/users/dzhang/QFL/roomassign/buildingAndRoom-0514_2018.csv";
+std::string filename = "D:/users/dzhang/QFL/reports/report0517_2018_milestone.csv";
 std::string sortedname = "D:/users/dzhang/QFL/reports/sorted_report.csv";
 std::string filename_new = "D:/users/dzhang/QFL/roomassign/report_new_assignment.csv";
 std::string filename_building_distr = "D:/users/dzhang/QFL/roomassign/report_church_buildings.csv";
+std::string cellgroups_name = "D:/users/dzhang/QFL/roomassign/cell_groups.csv";
+std::string camp_all = "D:/users/dzhang/QFL/roomassign/camp_all.csv";
 
 int main(int argc, char**argv)
 {
@@ -79,6 +81,8 @@ int auto_roomassign_2018(int argc, char**argv)
 	status = ra.readInputs(churchname.c_str(), brname.c_str(), filename.c_str(), year);
 	status = ra.preprocessData1();
 
+	//ra.printEU_for_cellgroup(cellgroups_name.c_str());
+
 	// collect allocated room status
 	status = ra.roomAllocationStats();
 
@@ -139,11 +143,17 @@ int auto_roomassign_2018(int argc, char**argv)
 	ra.printRooms2Females();
 	ra.trackStatus("11.Females");
 
+	ra.extrabed_update();
+
 	// print an updated document with the latest room assignment
 	ra.printRoomAssignment(filename_new.c_str());
 
 	// print updated document for attendees of each church distributed per building
 	ra.printChurchDistributionPerBuilding(filename_building_distr.c_str());
+
+	// print the entire camp data
+	ra.printEU_for_cellgroup(cellgroups_name.c_str());
+
 	return 0;
 }
 
@@ -213,6 +223,8 @@ int room_assignmentTest()
 	status = ra.assignRooms2Females();
 	ra.printRooms2Females();
 	ra.trackStatus("10.Females");
+
+	ra.extrabed_update();
 
 	// print an updated document with the latest room assignment
 	ra.printRoomAssignment(filename_new.c_str());
