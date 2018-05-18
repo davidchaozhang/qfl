@@ -247,6 +247,9 @@ int32_t Attendees::readRegistrants(const char *filename)
 28: zip
 29: functional groups
 30: services
+31: check in status
+32: chinese church name
+33: qrcode
 */
 int32_t Attendees::parseAllFields()
 {
@@ -319,7 +322,8 @@ int32_t Attendees::parseAllFields()
 		a_regist.age_group = person[11].substr(1, person[11].size() - 2);
 		a_regist.gender = person[12].substr(1, person[12].size() - 2);
 		a_regist.grade = person[13].substr(1, person[13].size() - 2);
-		a_regist.registration_fee = std::stoi(person[14].substr(1, person[14].size() - 2));
+		if(person[14].size() > 2)
+			a_regist.registration_fee = std::stoi(person[14].substr(1, person[14].size() - 2));
 		a_regist.key_deposit = std::stoi(person[15].substr(1, person[15].size() - 2));
 		// person[16] is the assigned room status flag
 		// person[17] is the status (enrolled or cancelled)
@@ -344,6 +348,11 @@ int32_t Attendees::parseAllFields()
 		else
 			a_regist.occupation = "";
 		a_regist.checkin = std::stoi(person[31].substr(1, person[31].size() - 2)) > 0;
+		if (person[32].size() > 2)
+			a_regist.church_cname = person[32].substr(1, person[32].size() - 2);
+		else
+			a_regist.church_cname = a_regist.church;
+		a_regist.qrcode = person[33];
 		a_regist.cancelled = false;
 
 		m_registrants.push_back(a_regist);
@@ -416,24 +425,39 @@ int32_t Attendees::separateEU_CabriniCampus()
 		Registrant rt = m_registrants[i];
 		int32_t family_id = rt.party;
 		int32_t person_id = rt.person_id;
+
 		std::string gender = rt.gender;
 		bool is_family = (rt.party_type.find(PartyType::qFamily) != std::string::npos);
 		bool youth_camp = false;
 		bool need_room = true;
+		m_registrants[i].youth_camp_flag = false;
+
 		int32_t campus = Campus::qNotSure;
 		it = m_grade_map.find(rt.grade);
 		if (it != m_grade_map.end())
 			campus = it->second;
+
+		if (rt.grade.compare("") == 0) {
+			// if the grade is not set, check grade
+			if (rt.age_group.find(AgeGroup::A12_14) != std::string::npos || rt.age_group.find(AgeGroup::A15_17) != std::string::npos) {
+				campus = Campus::qCabrini;
+				printf("person id=%d, name=%s %s, age=%s, did not set grade...shall go to Youth camp\n",
+					rt.person_id, rt.first_name.c_str(), rt.last_name.c_str(), rt.age_group.c_str());
+			}
+		}
 		// exclude students who serve childcare in EU
 		if (rt.services.find(Services::ServiceChild_2_5) != std::string::npos ||
 			rt.services.find(Services::ServiceChild_6_11) != std::string::npos)
 			campus = Campus::qEU;
 
+		if (rt.notes.find("Cabrini") != std::string::npos)
+			printf("%s\n", rt.notes.c_str());
 		// find if the attendee goes to youth camp
 		if (campus == Campus::qCabrini || rt.services.find("QFL Youth Counselor") != std::string::npos ||
-			rt.cell_group.find("Youth SGLeaders") != std::string::npos)
+			rt.cell_group.find("Youth SGLeaders") != std::string::npos || rt.notes.find("Cabrini") != std::string::npos)
 			youth_camp = true;
 		if (youth_camp) {
+			m_registrants[i].youth_camp_flag = true;
 			m_Cabrini_list.push_back(&m_registrants[i]);
 			continue;
 		}
@@ -493,6 +517,9 @@ int32_t Attendees::classifications1()
 
 	int32_t total_parties = 0;
 	int32_t total_attendees = 0;
+	int32_t eu_adults = 0;
+	int32_t eu_children_11 = 0; // <= 11 year old, or 5th grade
+	int32_t eu_children_17 = 0; // <= 17 year old, or 5th grade
 
 	std::map<int32_t, std::vector<Registrant*>> *glists[3] = { &m_family_info , &m_male_list , &m_female_list};
 
@@ -503,14 +530,32 @@ int32_t Attendees::classifications1()
 			std::vector<Registrant*> attendees = it->second;
 			total_parties++;
 			for (i = 0; i < attendees.size(); i++) {
+				Registrant* registrant = attendees[i];
+				if (registrant->age_group.compare(AgeGroup::A1) == 0 || registrant->age_group.compare(AgeGroup::A2) == 0 || registrant->age_group.compare(AgeGroup::A3) == 0
+					|| registrant->age_group.compare(AgeGroup::A4_5) == 0 || registrant->age_group.compare(AgeGroup::A6_11) == 0) 
+				{
+					eu_children_11++;
+				}	
+				else if(registrant->age_group.compare(AgeGroup::A12_14) == 0 || registrant->age_group.compare(AgeGroup::A15_17) == 0)
+				{
+					eu_children_17++;
+				}
+				else
+					eu_adults++;
+
+
 				total_attendees++;
 			}
 		}
 	}
-	printf("Debug-: %d %d\n", total_parties, total_attendees);
-
+	printf("Debug-: %d %d %d %d %d\n", total_parties, total_attendees, eu_adults, eu_children_11, eu_children_17);
+	bool back_one = false;
 	for (j = 0; j < 3; j++) {
 		for (it = glists[j]->begin(); it != glists[j]->end(); it++) {
+			if (back_one) {
+				it--;
+				back_one = false;
+			}
 			int32_t party_id = it->first;
 			std::vector<Registrant*> attendees = it->second;
 			bool child_leader_list = false;
@@ -549,11 +594,12 @@ int32_t Attendees::classifications1()
 					recording_list = true;
 					break;
 				}
-				else if (rt->services.find(Services::Speaker) != std::string::npos) {
+				else if (rt->services.find(Services::Speaker) != std::string::npos && rt->special_need.compare("Special Arrangement") != 0) {
 					speaker_list = true;
 					break;
 				}
-				else if (rt->notes.find("轮椅通道") != std::string::npos || rt->special_need.find("轮椅通道") != std::string::npos) {
+				else if (rt->notes.find("轮椅通道") != std::string::npos || rt->special_need.find("轮椅通道") != std::string::npos ||
+					rt->special_need.compare("Special Arrangement") == 0) {
 					special_need_list = true;
 					break;
 				}
@@ -592,10 +638,12 @@ int32_t Attendees::classifications1()
 				m_senior_list[party_id] = attendees;
 
 			if (child_leader_list || choir_list || recording_list || speaker_list || special_need_list || baby_list || senior_list || drama_list) {
-				temp = it;
-				temp--;
-				glists[j]->erase(it);
-				it = temp;
+				it = glists[j]->erase(it); 
+				it--;
+				if (it == glists[j]->end()) {
+					it = glists[j]->begin();
+					back_one = true;
+				}
 			}
 		}
 	}
@@ -695,12 +743,14 @@ int32_t Attendees::classifications()
 			continue;
 		}
 
-		if (rt.special_need.find("speaker") != std::string::npos && rt.occupation.find("Minister") != std::string::npos) {
+		if (rt.special_need.find("speaker") != std::string::npos && rt.occupation.find("Minister") != std::string::npos &&
+			rt.notes.find("Special Arrangement") == std::string::npos) {
 			m_speaker_list[family_id].push_back(&m_registrants[i]);
 			continue;
 		}
 
-		if (rt.notes.find("轮椅通道") != std::string::npos || rt.special_need.find("轮椅通道") != std::string::npos) {
+		if (rt.notes.find("轮椅通道") != std::string::npos || rt.special_need.find("轮椅通道") != std::string::npos ||
+			rt.notes.find("Special Arrangement") != std::string::npos ) {
 			m_special_need_list[family_id].push_back(&m_registrants[i]);
 			continue;
 		}
@@ -890,7 +940,7 @@ int32_t Attendees::refinement()
  	Attendees are sorted by churchs:
 	  m_family_info , m_male_list ,m_female_list, m_senior_list, m_baby_list, m_special_need_list.
 	The following lists are not sorted by church:
-	  m_child_leader_list, m_choir_list, m_recording_list, m_speaker_list
+	  m_child_leader_list, m_choir_list, m_drama_list, m_recording_list, m_speaker_list
 */
 int32_t Attendees::sortAttendeesByChurches()
 {
@@ -949,6 +999,8 @@ int32_t Attendees::sortAttendeesByChurches()
 			rt = lst_female[0];
 			chname = rt->church;
 			party_id = rt->party;
+			if (party_id == 310)
+				party_id = 310;
 			m_attendee_list_byChurch[chname].female_list[party_id] = m_female_list[party_id];
 			m_attendee_list_byChurch[chname].persons.push_back(lst_female[0]);
 			lodging_attendees++;
@@ -957,6 +1009,8 @@ int32_t Attendees::sortAttendeesByChurches()
 			rt = lst_female[0];
 			chname = rt->church;
 			party_id = rt->party;
+			if (party_id == 310)
+				party_id = 310;
 			for (j = 0; j < lst_female.size(); j++) {
 				assert(lst_female[j]->gender.compare("Female") == 0);
 				m_attendee_list_byChurch[chname].persons.push_back(lst_female[j]);
@@ -1054,5 +1108,20 @@ int32_t Attendees::sortAttendeesByChurches()
 
 	// not include all attendees
 	printf("=== EU selected lodging attendees = %d\n", lodging_attendees);
+
+	// now add all the rest of the groups
+	std::map<int32_t, std::vector<Registrant*>>::iterator it;
+	std::map<int32_t, std::vector<Registrant*>> *glists[5] = { &m_child_leader_list , &m_choir_list , &m_drama_list, &m_recording_list,  &m_speaker_list};
+	int32_t other_attendees = 0;
+	for (j = 0; j < sizeof(glists) / sizeof(glists[0]); j++) {
+		for (it = glists[j]->begin(); it != glists[j]->end(); it++) {
+			int32_t party_id = it->first;
+			std::vector<Registrant*> attendees = it->second;
+			for (i = 0; i < attendees.size(); i++) {
+				other_attendees++;
+			}
+		}
+	}
+	printf("Debug!: attendees = %d\n", lodging_attendees + other_attendees);
 	return 0;
 }

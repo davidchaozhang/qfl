@@ -123,6 +123,7 @@ public:
 		std::string grade;
 		std::string contact_person;
 		std::string church;
+		std::string church_cname;
 		std::string email;
 		std::string city;
 		std::string state;
@@ -145,11 +146,12 @@ public:
 		int32_t key_deposit;
 		bool checkin;
 		bool youth_checkins;
+		bool youth_camp_flag;
 		bool key_returned;
 		int32_t paid;
 		std::string bond_type;
 		std::vector<int32_t> bond_parties;
-
+		std::string qrcode;
 		std::vector<Registrant*> party_members;
 		std::vector<Registrant*> room_shared;
 		std::vector<Registrant*> bathroom_shared;
