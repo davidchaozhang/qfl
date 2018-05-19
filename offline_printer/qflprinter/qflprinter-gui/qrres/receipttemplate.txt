@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>QFL Printable Tags</title>
+    <link href="labels.css" rel="stylesheet" type="text/css" >
+    <style>
+    @page  { 
+    size: auto;
+    margin: 0mm 0mm 0mm 10mm;  
+    } 
+    body {
+        width: 8.5in;
+    }
+    .card {
+        width: 5.6in;
+        height: 3in;
+        margin-right: 2%;
+        margin-left: 10px;
+        position:relative;
+        overflow: hidden;
+        float: left;
+    }
+    .toptext {
+        padding-left: 15px;
+        padding-top: 3px;
+        padding-bottom: 10px;
+    }
+    .nametext {
+        margin: auto;
+        position: relative;
+        padding-top: 5px;
+        padding-bottom: 10px;
+    }
+    .bottom {
+        left:15px;
+        bottom:5px;
+        position: absolute;
+    }
+    .qr{
+        position:absolute;
+        right:10px;
+        bottom:0px;
+    }
+    .imgtop{
+        position:absolute;
+        right:0px;
+        top:3px;
+    }
+    .spacer {
+        left: 4px;
+        right: 4px;
+    }
+    .page-break  {
+        clear: left;
+        display:block;
+        page-break-after:always;
+    }
+    </style>
+    
+</head>
+<body>
+
+<!--KEYWORD: HEADER END-DO NOT MODIFY THIS COMMENT-->
+
+<div class="card">
+    <div class="toptext">
+        <font size = 7>ID_FIELD<br></font> 
+        <font size = 5>PARTY_FIELD</font> 
+    </div>
+    <div class="nametext">
+        <font size = 7><center>NAMECHN_FIELD</center></font> 
+        <font size = 6><center>NAMEENG_FIELD</center></font> 
+        <font size = 5><center>CHURCH_FIELD</center></font> 
+    </div>
+    <div class="bottom">
+        <font size = 6>GROUP_FIELD</font>
+    </div>
+    <div class="qr">
+        <img src="QR_FIELD" align="right"; style="width:60%">
+    </div>
+    <div class="imgtop">
+        <img src="logo_binarized.jpg" align="right"; hspace="15"; style="width:130%"">
+    </div>
+</div>
+
+<!--KEYWORD: DIV END-DO NOT MODIFY THIS COMMENT-->
+
+</body>
+</html>

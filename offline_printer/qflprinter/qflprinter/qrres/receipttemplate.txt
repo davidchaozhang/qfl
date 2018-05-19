@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>QFL Printable Tags</title>
+    <link href="labels.css" rel="stylesheet" type="text/css" >
+    <style>
+    @page  { 
+    size: auto;
+    margin: 0mm 0mm 0mm 10mm;  
+    } 
+    body {
+        width: 8.5in;
+    }
+    .card {
+        width: 5.6in;
+        height: 3in;
+        margin-right: 2%;
+        margin-left: 10px;
+        position:relative;
+        overflow: hidden;
+        float: left;
+    }
+    .toptext {
+        padding-left: 340px;
+        padding-top: 30px;
+        padding-bottom: 80px;
+    }
+    .nametext {
+        margin: auto;
+        position: relative;
+        padding-top: 1px;
+        padding-bottom: 1px;
+        padding-left: 50px;
+    }
+    .bottom {
+        margin: auto;
+        position: absolute;
+        bottom:5px;
+        padding-left: 200px;
+    }
+    .qr{
+        position:absolute;
+        right:10px;
+        top:10px;
+    }
+    .imgtop{
+        position:absolute;
+        left:0px;
+        top:3px;
+    }
+    .spacer {
+        left: 4px;
+        right: 4px;
+    }
+    .page-break  {
+        clear: left;
+        display:block;
+        page-break-after:always;
+    }
+    </style>
+    
+</head>
+<body>
+
+<div class="card">
+    <div class="toptext">
+        <font size = 4><b>ID: PARTY_FIELD</b></font> 
+    </div>
+    <!--KEYWORD: HEADER END-DO NOT MODIFY THIS COMMENT-->
+    <div class="nametext">
+        <font size = 3>ID_FIELD | NAMEENG_FIELD | Room: ROOM_FIELD | Key: KEYSTATUS_FIELD | Card: CARDSTATUS_FIELD</font> 
+    </div>
+    <!--KEYWORD: DIV END-DO NOT MODIFY THIS COMMENT-->
+    <div class="bottom">
+        <font size = 4><center><b>QFL Key Receipt</b></center></font>
+    </div>
+    <div class="qr">
+        <img src="QR_FIELD" align="right"; style="width:40%">
+    </div>
+    <div class="imgtop">
+        <img src="logo_binarized.jpg" align="left"; hspace="5"; style="width:130%"">
+    </div>
+</div>
+
+</body>
+</html>
