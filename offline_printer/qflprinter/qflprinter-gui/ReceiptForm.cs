@@ -847,5 +847,10 @@ namespace qflprinter_gui
         {
 
         }
+
+        private void name1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }
