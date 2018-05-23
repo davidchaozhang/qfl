@@ -17,6 +17,11 @@ namespace qflprinter_gui
             InitializeComponent();
         }
 
+        private void PrintDocument(object sender, WebBrowserDocumentCompletedEventArgs ev)
+        {
+            ((WebBrowser)sender).ShowPrintPreviewDialog();
+        }
+
         private void pictureBox1_Click(object sender, EventArgs e)
         {
 
@@ -42,6 +47,13 @@ namespace qflprinter_gui
         private void label2_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            WebBrowser wBForPrinting = new WebBrowser();
+            wBForPrinting.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(PrintDocument);
+            wBForPrinting.Url = new Uri(Environment.CurrentDirectory + @"\qrres\printtag.html");
         }
     }
 }

@@ -30,6 +30,12 @@ namespace qflprinter_gui
         //constructor [read in data]
         public ReceiptForm()
         {
+            this.MinimumSize = new System.Drawing.Size(this.Width, this.Height);
+            // no larger than screen size
+            this.MaximumSize = new System.Drawing.Size(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+            this.AutoSize = true;
+            this.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+
             checkID = new bool[10000]; //arbitrary large number
             string[] lines = System.IO.File.ReadAllLines(Environment.CurrentDirectory + @"\qrres\qfl_checkedin-data.csv");
             if(!(lines.Length < 2))
@@ -40,6 +46,7 @@ namespace qflprinter_gui
                     string[] data = lines[i].Split(',');
                     checkID[Convert.ToInt32(data[0])] = true;
                 }
+            
             InitializeComponent();
         }
 
@@ -155,6 +162,8 @@ namespace qflprinter_gui
                             keyFee7.Text = "0";
                         if (adjustedFee7.Text.Length < 1)
                             adjustedFee7.Text = "0";
+                        break;
+                    default:
                         break;
                 }
 
@@ -772,6 +781,76 @@ namespace qflprinter_gui
             if (paidBox7.Text.Length > 0)
                 adjustedFee7.Text = Convert.ToString(Convert.ToDouble(adjustedFee7.Text) - Convert.ToDouble(paidBox7.Text));
             adjustDues();
+        }
+
+        private void mealBox1_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void mealBox2_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void mealBox3_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void mealBox4_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void mealBox5_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void mealBox6_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void mealBox7_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void payNote_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void contact_field_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label22_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label23_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void partyFee_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void adjustedDue_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label29_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
