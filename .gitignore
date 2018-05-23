@@ -154,3 +154,7 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
+/offline_printer/qflprinter/qflprinter/*.filters
+/offline_printer/qflprinter/qflprinter/*.db
+/offline_printer/qflprinter/qflprinter/*.opendb
+/offline_printer/qflprinter/qflprinter/*.vcxproj
