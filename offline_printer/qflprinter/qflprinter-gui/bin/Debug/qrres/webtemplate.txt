@@ -71,17 +71,16 @@
     <div class="nametext">
         <font size = 7><center>NAMECHN_FIELD</center></font> 
         <font size = 6><center>NAMEENG_FIELD</center></font> 
-        <font size = 5><center>CHURCH_FIELD</center></font> 
+        <font size = 6><center>CHURCH_FIELD</center></font> 
     </div>
     <div class="bottom">
-        <font size = 6>GROUP_FIELD<br></font>
-        <font size = 4>ROOM_FIELD</font>
+        <font size = 6>GROUP_FIELD</font>
     </div>
     <div class="qr">
-        <img src="QR_FIELD" align="right"; style="width:15%">
+        <img src="QR_FIELD" align="right"; style="width:60%">
     </div>
     <div class="imgtop">
-        <img src="logo_binarized.jpg" align="right"; hspace="15"; style="width:37%"">
+        <img src="logo_binarized.jpg" align="right"; hspace="15"; style="width:130%"">
     </div>
 </div>
 

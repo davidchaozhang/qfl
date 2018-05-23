@@ -24,7 +24,7 @@
     .toptext {
         padding-left: 275px;
         padding-top: 30px;
-        padding-bottom: 80px;
+        padding-bottom: 20px;
     }
     .nametext {
         margin: auto;
@@ -63,22 +63,27 @@
 </head>
 <body>
 
+<!--KEYWORD: CARD BEGIN-DO NOT MODIFY THIS COMMENT-->
+
 <div class="card">
     <div class="toptext">
         <font size = 4><b>Party ID: PARTY_FIELD</b></font> 
     </div>
     <!--KEYWORD: HEADER END-DO NOT MODIFY THIS COMMENT-->
     <div class="nametext">
-        <font size = 3>ID_FIELD | NAMEENG_FIELD | Room: ROOM_FIELD | Key: KEYSTATUS_FIELD             | Card: CARDSTATUS_FIELD             |</font> 
+        <font size = 2> ID_FIELD | NAMEENG_FIELD | Room: ROOM_FIELD | </font>
+        <font size = 2> Key: KEYSTATUS_FIELD | Card: CARDSTATUS_FIELD </font> 
     </div>
     <!--KEYWORD: DIV END-DO NOT MODIFY THIS COMMENT-->
     <div class="qr">
-        <img src="QR_FIELD" align="right"; style="width:15%">
+        <img src="QR_FIELD" align="right"; style="width:40%">
     </div>
     <div class="imgtop">
-        <img src="logo_binarized.jpg" align="left"; hspace="5"; style="width:37%"">
+        <img src="logo_binarized.jpg" align="left"; hspace="5"; style="width:90%"">
     </div>
 </div>
+
+<!--KEYWORD: CARD END-DO NOT MODIFY THIS COMMENT-->
 
 </body>
 </html>
