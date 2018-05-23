@@ -143,6 +143,7 @@ public:
 		std::string notes;
 		bool cancelled;
 		int32_t registration_fee;
+		bool need_key;
 		int32_t key_deposit;
 		bool checkin;
 		bool youth_checkins;
@@ -262,7 +263,7 @@ public:
 	int32_t readChurchList(const char* churchname, SortChurchList sortmethod, int32_t year);
 	int32_t readRegistrants(const char *filename);
 	int32_t readBuildingRooms(const char *filename);
-	int32_t parseAllFields();
+	int32_t parseAllFields(bool disable_old_assignment_flag=true);
 	int32_t separateEU_CabriniCampus();
 	int32_t classifications1();
 
