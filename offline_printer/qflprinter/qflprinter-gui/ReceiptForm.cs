@@ -30,8 +30,6 @@ namespace qflprinter_gui
         //constructor [read in data]
         public ReceiptForm()
         {
-            // no larger than screen size
-            this.MaximumSize = new System.Drawing.Size(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
 
             checkID = new bool[10000]; //arbitrary large number
             string[] lines = System.IO.File.ReadAllLines(Environment.CurrentDirectory + @"\qrres\qfl_checkedin-data.csv");

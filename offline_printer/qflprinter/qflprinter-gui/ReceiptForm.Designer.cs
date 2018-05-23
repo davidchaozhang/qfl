@@ -1750,8 +1750,8 @@
             // 
             // ReceiptForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(1618, 825);
             this.Controls.Add(this.label39);
             this.Controls.Add(this.label38);
@@ -1911,6 +1911,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.id_field1);
             this.Controls.Add(this.id);
+            this.DoubleBuffered = true;
             this.Name = "ReceiptForm";
             this.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.Text = "ID: ";
