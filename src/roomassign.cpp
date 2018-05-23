@@ -67,10 +67,10 @@ int32_t RoomAssign::preprocessData()
 	return status;
 }
 
-int32_t RoomAssign::preprocessData1()
+int32_t RoomAssign::preprocessData1(bool disable_old_assignment_flag)
 {
 	int32_t status = 0;
-	status = parseAllFields();
+	status = parseAllFields(disable_old_assignment_flag);
 	if (status < 0)
 		return status;
 

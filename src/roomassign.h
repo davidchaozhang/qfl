@@ -60,7 +60,7 @@ public:
 
 	int32_t readInputs(const char* church_name, const char *buildings_name, const char *registration_name, int32_t year);
 	int32_t preprocessData();
-	int32_t preprocessData1();
+	int32_t preprocessData1(bool disable_old_assignment_flag=true);
 
 	int32_t trackStatus(const char* op);
 

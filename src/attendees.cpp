@@ -247,11 +247,11 @@ int32_t Attendees::readRegistrants(const char *filename)
 28: zip
 29: functional groups
 30: services
-31: check in status
+31: need key
 32: chinese church name
 33: qrcode
 */
-int32_t Attendees::parseAllFields()
+int32_t Attendees::parseAllFields(bool disable_old_assignment_flag)
 {
 	int32_t i, j, datasz;
 	bool available;
@@ -311,10 +311,14 @@ int32_t Attendees::parseAllFields()
 
 		// check if room is assigned
 		a_regist.room = person[8].substr(1, person[8].size() - 2);
-		if (a_regist.room.size() == 0)
+		if(disable_old_assignment_flag)
 			a_regist.assigned_room = NULL;
-		else
-			printf("room = %s\n", a_regist.room.c_str());
+		else {
+			if (a_regist.room.size() == 0)
+				a_regist.assigned_room = NULL;
+			else
+				printf("room = %s\n", a_regist.room.c_str());
+		}
 
 		a_regist.cell_group = person[9].substr(1, person[9].size() - 2);
 		a_regist.need_room = (person[10].substr(1, person[10].size() - 2).compare(NeedRoom::RoomNeeded) == 0);
@@ -347,7 +351,7 @@ int32_t Attendees::parseAllFields()
 			a_regist.occupation = std::string(Services::Minister);
 		else
 			a_regist.occupation = "";
-		a_regist.checkin = std::stoi(person[31].substr(1, person[31].size() - 2)) > 0;
+		a_regist.need_key = std::stoi(person[31].substr(1, person[31].size() - 2)) > 0;
 		if (person[32].size() > 2)
 			a_regist.church_cname = person[32].substr(1, person[32].size() - 2);
 		else
@@ -451,7 +455,7 @@ int32_t Attendees::separateEU_CabriniCampus()
 			campus = Campus::qEU;
 
 		if (rt.notes.find("Cabrini") != std::string::npos)
-			printf("%s\n", rt.notes.c_str());
+			printf("%04d, %s\n", rt.person_id, rt.notes.c_str());
 		// find if the attendee goes to youth camp
 		if (campus == Campus::qCabrini || rt.services.find("QFL Youth Counselor") != std::string::npos ||
 			rt.cell_group.find("Youth SGLeaders") != std::string::npos || rt.notes.find("Cabrini") != std::string::npos)

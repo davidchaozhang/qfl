@@ -10,7 +10,7 @@ static int parsing(int argc, char**argv);
 static int auto_roomassign_2018(int argc, char**argv);
 
 
-std::string churchname = "D:/users/dzhang/QFL/roomassign/churchlist_20180514_milestone.csv";
+std::string churchname = "D:/users/dzhang/QFL/roomassign/churchlist_20180522_milestone.csv";
 std::string brname = "D:/users/dzhang/QFL/roomassign/buildingAndRoom-0514_2018.csv";
 std::string filename = "D:/users/dzhang/QFL/reports/report0517_2018_milestone.csv";
 std::string sortedname = "D:/users/dzhang/QFL/reports/sorted_report.csv";
@@ -77,9 +77,11 @@ int auto_roomassign_2018(int argc, char**argv)
 {
 	int32_t status = 0;
 	int32_t year = 2018;
+	bool disable_old_assign = true;
+
 	RoomAssign ra;
 	status = ra.readInputs(churchname.c_str(), brname.c_str(), filename.c_str(), year);
-	status = ra.preprocessData1();
+	status = ra.preprocessData1(disable_old_assign);
 
 	//ra.printEU_for_cellgroup(cellgroups_name.c_str());
 
