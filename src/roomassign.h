@@ -79,7 +79,8 @@ public:
 	int32_t assignRooms2Choir();
 	int32_t assignRooms2ChildcareWorkers();
 	int32_t assignRooms2DramaTeam();
-	bool extrabed_update();
+	bool extrabed_update(const char* room_with_extra_beds);
+	int32_t updateEURoomAssignment();
 
 	std::vector<BuildingRoomList::EURoom*> queryRoomList(std::vector<BuildingRoomList::EURoom*> &myroomlist, int32_t num);
 	std::vector<BuildingRoomList::EURoom*> queryFamilyRoomList(std::vector<BuildingRoomList::EURoom*> &myroomlist, int32_t num, Registrant* registrant, bool enable_extrabed=false);
@@ -88,6 +89,7 @@ public:
 	bool printRoomAssignment(const char* filename);
 	bool printChurchDistributionPerBuilding(const char* filename);
 	bool printEU_for_cellgroup(const char* filename);
+	bool printCamp_all(const char* filename);
 	int32_t printSortedAttendees(const char* filename, std::map<int32_t, std::vector<Registrant*>> slist, bool print_title=false);
 	int32_t printRooms2SpecialNeeds();
 	int32_t printRooms2Seniors();

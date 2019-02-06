@@ -250,11 +250,15 @@ int32_t Attendees::readRegistrants(const char *filename)
 31: need key
 32: chinese church name
 33: qrcode
+34: EU checked in
+35: Youth checked in
+36: Total paid
+37: Pay Special code
+38: Adjusted Due
 */
 int32_t Attendees::parseAllFields(bool disable_old_assignment_flag)
 {
 	int32_t i, j, datasz;
-	bool available;
 	if (m_data.size() == 0)
 		return -1;
 
@@ -263,7 +267,6 @@ int32_t Attendees::parseAllFields(bool disable_old_assignment_flag)
 	std::vector<std::string> person = m_data[0];
 	for (i = 1; i < datasz; i++){
 		Registrant a_regist;
-		available = true; // false
 		person = m_data[i];
 		// cancelled persons are removed from the list
 		if (person[17].compare(Status::Cancelled) == 0) {
@@ -272,10 +275,6 @@ int32_t Attendees::parseAllFields(bool disable_old_assignment_flag)
 			continue;
 		}
 
-		if (!available) {
-			m_uncertain++;
-			continue;
-		}
 		// check first name and last name: no empty fields
 		if (person[5].substr(1, person[5].size() - 2).size() == 0 && person[6].substr(1, person[5].size() - 2).size() == 0)
 			continue;
@@ -311,13 +310,16 @@ int32_t Attendees::parseAllFields(bool disable_old_assignment_flag)
 
 		// check if room is assigned
 		a_regist.room = person[8].substr(1, person[8].size() - 2);
-		if(disable_old_assignment_flag)
+		if (disable_old_assignment_flag) {
 			a_regist.assigned_room = NULL;
+			a_regist.room = "";
+		}
 		else {
 			if (a_regist.room.size() == 0)
 				a_regist.assigned_room = NULL;
-			else
-				printf("room = %s\n", a_regist.room.c_str());
+			else {
+				//printf("room = %s\n", a_regist.room.c_str());
+			}
 		}
 
 		a_regist.cell_group = person[9].substr(1, person[9].size() - 2);
@@ -357,18 +359,26 @@ int32_t Attendees::parseAllFields(bool disable_old_assignment_flag)
 		else
 			a_regist.church_cname = a_regist.church;
 		a_regist.qrcode = person[33];
+		a_regist.eu_checkin = std::stoi(person[34].substr(1, person[34].size() - 2)) > 0;
+		a_regist.youth_checkin = std::stoi(person[35].substr(1, person[35].size() - 2)) > 0;
+
+		if (person[36].size() > 2)
+			a_regist.paid = std::stoi(person[36].substr(1, person[36].size() - 2)) > 0;
+		else
+			a_regist.paid = false;
+
 		a_regist.cancelled = false;
 
 		m_registrants.push_back(a_regist);
 	}
 
-	// remove repeated entries
+	// detect repeated entries
 	std::vector<int32_t> entries;
 	for (i = 0; i < m_registrants.size(); i++) {
 		Registrant attdee_i = m_registrants[i];
 		for (j = i+1; j < m_registrants.size(); j++) {
 			Registrant attdee_j = m_registrants[j];
-			if (attdee_j.person_id == attdee_i.person_id) {
+			if (attdee_j.person_id != attdee_i.person_id) {
 				if (attdee_i.first_name.compare(attdee_j.first_name) == 0 && attdee_i.last_name.compare(attdee_j.last_name) == 0
 					&& attdee_i.contact_person.compare(attdee_j.contact_person) == 0 && attdee_i.church.compare(attdee_j.church) == 0) {
 					printf("repeat i=%d:%d  j=%d:%d\n", i, attdee_i.person_id, j, attdee_j.person_id);
@@ -379,11 +389,13 @@ int32_t Attendees::parseAllFields(bool disable_old_assignment_flag)
 				break;
 		}
 	}
-
+	// remove repeated entries
 	std::vector<Registrant>::iterator it = m_registrants.begin();
 	for (i = (int32_t)entries.size() - 1; i >= 0; i--) {
 		m_registrants.erase(it + entries[i]);
 	}
+
+	removeNoShowRegistrants();
 
 	for (i = 0; i < m_registrants.size(); i++) {
 		std::string chnm = m_registrants[i].church;
@@ -401,10 +413,48 @@ int32_t Attendees::parseAllFields(bool disable_old_assignment_flag)
 		m_party_info[party_id].push_back(&m_registrants[i]);
 	}
 
-	printf("=== Total registered attendees (EU+Cabrini) = %zd, Cancelled = %d, Attendee uncertain = %d\n", m_registrants.size(), m_cancelled, m_uncertain);
+	printf("=== Total registered attendees (EU+Cabrini) = %zd, checkin = %d, Attendee uncertain = %d, excluded cancellation = %d\n", m_registrants.size(), m_checkedin, m_uncertain, m_cancelled);
 	return 0;
 }
 
+int32_t Attendees::removeNoShowRegistrants()
+{
+	int32_t i;
+	m_uncertain = 0;
+	m_checkedin = 0;
+	bool available;
+
+	for (i = 0; i < m_registrants.size(); i++) {
+		Registrant attdee = m_registrants[i];
+		available = (attdee.eu_checkin || attdee.youth_checkin);
+		if (!available) {
+			m_uncertain++;
+			m_registrants[i].temp_flag = false;
+			if (attdee.paid) {
+				m_registrants[i].temp_flag = true;
+				m_uncertain--;
+				m_checkedin++;
+			}
+		}
+		else {
+			m_registrants[i].temp_flag = true;
+			m_checkedin++;
+		}
+	}
+
+	// remove uncertain entries
+	for (i = 0; i < m_registrants.size(); i++) {
+		Registrant attdee = m_registrants[i];
+		if (!attdee.temp_flag) {
+			m_registrants.erase(m_registrants.begin() + i);
+			i--;
+		}
+		
+	}
+
+	assert(m_registrants.size() == m_checkedin);
+	return 0;
+}
 //
 // Attendees on EU campus are seperated from Cabrini campus.
 // m_family_info contains all families that need rooms in EU
@@ -412,7 +462,7 @@ int32_t Attendees::parseAllFields(bool disable_old_assignment_flag)
 // m_female_list contains all individual females that need rooms in EU
 // the commuters are temprorally excluded
 //
-int32_t Attendees::separateEU_CabriniCampus()
+int32_t Attendees::separateEU_CabriniCampusByRoom()
 {
 	int32_t i;
 	int32_t commute = 0;
@@ -423,6 +473,7 @@ int32_t Attendees::separateEU_CabriniCampus()
 	int32_t family_attendees = 0;
 	int32_t male_attendees = 0;
 	int32_t female_attendees = 0;
+	int32_t stay_with_parent = 0;
 	std::map<std::string, int32_t>::iterator it;
 
 	for (i = 0; i < m_registrants.size(); i++) {
@@ -449,6 +500,9 @@ int32_t Attendees::separateEU_CabriniCampus()
 					rt.person_id, rt.first_name.c_str(), rt.last_name.c_str(), rt.age_group.c_str());
 			}
 		}
+		if (rt.grade.find("Stay with Parent") != std::string::npos)
+			stay_with_parent++;
+
 		// exclude students who serve childcare in EU
 		if (rt.services.find(Services::ServiceChild_2_5) != std::string::npos ||
 			rt.services.find(Services::ServiceChild_6_11) != std::string::npos)
@@ -503,9 +557,345 @@ int32_t Attendees::separateEU_CabriniCampus()
 	printf("=== EU Commuters: %d\n", commute);
 	printf("=== EU lodging: family individual attendees=%d, individual male attendees=%d, individual female attendees=%d\n", family_attendees, male_attendees, female_attendees);
 	printf("=== Lodging in EU: families = %zd, male parties = %zd, female parties = %zd\n", m_family_info.size(), m_male_list.size(), m_female_list.size());
+	printf("=== Stay with Parent youth = %d\n", stay_with_parent);
 	printf("=== Youth campers in Cabrini=%zd\n", m_Cabrini_list.size());
 	return 0;
 }
+
+int32_t Attendees::separateEU_CabriniCampusByAttendence()
+{
+	int32_t i;
+	int32_t commute_EU = 0;
+	int32_t commute_Cabrini = 0;
+	int32_t stay_with_parent = 0;
+	std::map<std::string, int32_t>::iterator it;
+
+	for (i = 0; i < m_registrants.size(); i++) {
+		Registrant rt = m_registrants[i];
+		int32_t family_id = rt.party;
+		int32_t person_id = rt.person_id;
+
+		std::string gender = rt.gender;
+		bool is_family = (rt.party_type.find(PartyType::qFamily) != std::string::npos);
+		bool youth_camp = false;
+		bool need_room = true;
+		m_registrants[i].youth_camp_flag = false;
+
+		int32_t campus = Campus::qNotSure;
+		it = m_grade_map.find(rt.grade);
+		if (it != m_grade_map.end())
+			campus = it->second;
+
+		if (rt.grade.compare("") == 0) {
+			// if the grade is not set, check grade
+			if (rt.age_group.find(AgeGroup::A12_14) != std::string::npos || rt.age_group.find(AgeGroup::A15_17) != std::string::npos) {
+				campus = Campus::qCabrini;
+				printf("person id=%d, name=%s %s, age=%s, did not set grade...shall go to Youth camp\n",
+					rt.person_id, rt.first_name.c_str(), rt.last_name.c_str(), rt.age_group.c_str());
+			}
+		}
+		if (rt.grade.find("Stay with Parent") != std::string::npos) {
+			stay_with_parent++;
+			campus = Campus::qCabrini;
+		}
+
+		// exclude students who serve childcare in EU
+		if (rt.services.find(Services::ServiceChild_2_5) != std::string::npos ||
+			rt.services.find(Services::ServiceChild_6_11) != std::string::npos)
+			campus = Campus::qEU;
+
+		if (rt.notes.find("Cabrini") != std::string::npos)
+			printf("%04d, %s\n", rt.person_id, rt.notes.c_str());
+		// find if the attendee goes to youth camp
+		if (campus == Campus::qCabrini || rt.services.find("QFL Youth Counselor") != std::string::npos ||
+			rt.cell_group.find("Youth SGLeaders") != std::string::npos || rt.notes.find("Cabrini") != std::string::npos)
+			youth_camp = true;
+		if (youth_camp) {
+			m_registrants[i].youth_camp_flag = true;
+			m_Cabrini_list.push_back(&m_registrants[i]);
+			// if Cabrini attendee is a commuter, we do not need to assign a room 
+			if (!m_registrants[i].need_room) {
+				commute_Cabrini++;
+			}
+		}
+		else {
+			m_registrants[i].youth_camp_flag = false;
+			m_EU_list.push_back(&m_registrants[i]);
+			// if EU attendee is a commuter, we do not need to assign a room 
+			if (!m_registrants[i].need_room) {
+				commute_EU++;
+			}
+		}
+	}
+
+	printf("=== EU Commuters: %d, Cabrini Commuters = %d\n", commute_EU, commute_Cabrini);
+	printf("=== Stay with Parent youth = %d\n", stay_with_parent);
+	printf("=== Campers in EU=%zd, Youth campers in Cabrini=%zd\n", m_EU_list.size(), m_Cabrini_list.size());
+	return 0;
+}
+
+// christians and non-christians
+// eu and youth camp
+// children
+int32_t Attendees::camper_christians_statistics()
+{
+	int i;
+	std::vector<Attendees::Registrant*> eu_rccc_christians_list;
+	std::vector<Attendees::Registrant*> eu_rccc_no_christians_list;
+	std::vector<Attendees::Registrant*> eu_other_christians_list;
+	std::vector<Attendees::Registrant*> eu_other_no_christians_list;
+	std::vector<Attendees::Registrant*> youth_rccc_christians_list;
+	std::vector<Attendees::Registrant*> youth_rccc_no_christians_list;
+	std::vector<Attendees::Registrant*> youth_other_christians_list;
+	std::vector<Attendees::Registrant*> youth_other_no_christians_list;
+	std::vector<Attendees::Registrant*> eu_rccc_children_list;
+	std::vector<Attendees::Registrant*> eu_other_children_list;
+
+	for (i = 0; i < m_EU_list.size(); i++) {
+		Registrant* rt = m_EU_list[i];
+		int32_t family_id = rt->party;
+		int32_t person_id = rt->person_id;
+		std::string church = rt->church;
+		bool is_christian = rt->is_christian;
+		std::string age = rt->age_group;
+		std::string grade = rt->grade;
+
+		bool is_child = (age.compare(AgeGroup::A1) == 0 || age.compare(AgeGroup::A2) == 0 || age.compare(AgeGroup::A3) == 0 ||
+			age.compare(AgeGroup::A4_5) == 0 || age.compare(AgeGroup::A6_11) == 0);
+
+		bool is_child_g = (grade.compare(GradeGroup::G0[0]) == 0 || grade.compare(GradeGroup::G0[1]) == 0 || grade.compare(GradeGroup::G0[2]) == 0 || grade.compare(GradeGroup::G0[3]) == 0 ||
+			grade.compare(GradeGroup::G1[0]) == 0 || grade.compare(GradeGroup::G1[1]) == 0 || grade.compare(GradeGroup::G1[2]) == 0 || grade.compare(GradeGroup::G1[3]) == 0);
+
+		is_child = (is_child || is_child_g);
+
+		if (is_child) {
+			if (church.compare("Rutgers Community Christian Church") == 0) {
+				eu_rccc_children_list.push_back(rt);
+			}
+			else {
+				eu_other_children_list.push_back(rt);
+			}
+		}
+		else {// adults
+		// rccc 
+			if (church.compare("Rutgers Community Christian Church") == 0) {
+				if (is_christian) {
+					eu_rccc_christians_list.push_back(rt);
+				}
+				else {
+					eu_rccc_no_christians_list.push_back(rt);
+
+				}
+			}
+			else // other churches
+			{
+				if (is_christian) {
+					eu_other_christians_list.push_back(rt);
+				}
+				else {
+					eu_other_no_christians_list.push_back(rt);
+				}
+			}
+		}
+	}
+
+	for (i = 0; i < m_Cabrini_list.size(); i++) {
+		Registrant* rt = m_Cabrini_list[i];
+		int32_t family_id = rt->party;
+		int32_t person_id = rt->person_id;
+		std::string church = rt->church;
+		bool is_christian = rt->is_christian;
+		// rccc 
+		if (church.compare("Rutgers Community Christian Church") == 0) {
+			if (is_christian) {
+				youth_rccc_christians_list.push_back(rt);
+			}
+			else {
+				youth_rccc_no_christians_list.push_back(rt);
+
+			}
+
+		}
+		else // other churches
+		{
+			if (is_christian) {
+				youth_other_christians_list.push_back(rt);
+			}
+			else {
+				youth_other_no_christians_list.push_back(rt);
+
+			}
+
+		}
+	}
+
+	printf("eu christians: rccc=%zd, other=%zd\n", eu_rccc_christians_list.size(), eu_other_christians_list.size());
+	printf("eu non-christians: rccc=%zd, other=%zd\n", eu_rccc_no_christians_list.size(), eu_other_no_christians_list.size());
+
+	printf("youth christians: rccc=%zd, other=%zd\n", youth_rccc_christians_list.size(), youth_other_christians_list.size());
+	printf("youth non-christians: rccc=%zd, other=%zd\n", youth_rccc_no_christians_list.size(), youth_other_no_christians_list.size());
+
+	printf("children: rccc=%zd, other=%zd\n", eu_rccc_children_list.size(), eu_other_children_list.size());
+	return 0;
+}
+
+int32_t Attendees::age_distributions()
+{
+	int32_t i;
+	int32_t age_group[13];
+
+	for (i = 0; i < 13; i++)
+		age_group[i] = 0;
+
+	for (i = 0; i < m_registrants.size(); i++) {
+		Registrant rt = m_registrants[i];
+		int32_t family_id = rt.party;
+		int32_t person_id = rt.person_id;
+		std::string church = rt.church;
+		bool is_christian = rt.is_christian;
+		std::string age = rt.age_group;
+		std::string grade = rt.grade;
+
+		if (age.compare(AgeGroup::A1) == 0) {
+			age_group[0]++;
+		}
+		else if (age.compare(AgeGroup::A2) == 0) {
+			age_group[1]++;
+		}
+		else if (age.compare(AgeGroup::A3) == 0) {
+			age_group[2]++;
+		}
+		else if (age.compare(AgeGroup::A4_5) == 0) {
+			age_group[3]++;
+		}
+		else if (age.compare(AgeGroup::A6_11) == 0) {
+			age_group[4]++;
+		}
+		else if (age.compare(AgeGroup::A12_14) == 0) {
+			age_group[5]++;
+		}
+		else if (age.compare(AgeGroup::A15_17) == 0) {
+			age_group[6]++;
+		}
+		else if (age.compare(AgeGroup::A18_25) == 0) {
+			age_group[7]++;
+		}
+		else if (age.compare(AgeGroup::A26_39) == 0) {
+			age_group[8]++;
+		}
+
+		else if (age.compare(AgeGroup::A40_55) == 0) {
+			age_group[9]++;
+		}
+		else if (age.compare(AgeGroup::A56_65) == 0) {
+			age_group[10]++;
+		}
+		else if (age.compare(AgeGroup::A66_69) == 0) {
+			age_group[11]++;
+		}
+		else if (age.compare(AgeGroup::A70) == 0) {
+			age_group[12]++;
+		}
+		else {
+			printf("person id = %d, no age input\n", person_id);
+		}
+	}
+
+	printf("Age distribution:\n");
+
+	for (i = 0; i < 13; i++) {
+		printf("%d ", age_group[i]);
+	}
+	printf("\n");
+	return 0;
+}
+
+int32_t Attendees::church_distributions()
+{
+	int32_t i;
+	std::vector<ChurchList::QFLChurch> *churchlist = m_church_list.getChurchList();
+	std::map<std::string, Roster> church_count;
+
+	for (i = 0; i < churchlist->size(); i++) {
+		std::string chname= (*churchlist)[i].church_name;
+		church_count[chname] = { 0,0 };
+	}
+
+	for (i = 0; i < m_registrants.size(); i++) {
+		Registrant rt = m_registrants[i];
+		int32_t family_id = rt.party;
+		int32_t person_id = rt.person_id;
+		std::string church = rt.church;
+		bool youth_flag = rt.youth_camp_flag;
+
+		Roster count = church_count[church];
+		if (youth_flag)
+			count.num_cabrini++;
+		else
+			count.num_eu++;
+
+		church_count[church] = count;
+	}
+
+	for (i = 0; i < churchlist->size(); i++) {
+		std::string chname = (*churchlist)[i].church_name;
+		printf("%s, %d, %d\n", chname.c_str(), church_count[chname].num_eu, church_count[chname].num_cabrini);
+	}
+
+	return 0;
+}
+
+int32_t Attendees::eu_room_distribution()
+{
+	int32_t i, j;
+	std::vector<BuildingRoomList::EURoom*> fpr = m_br_list.queryFamilyPrivateRooms();
+	std::vector<BuildingRoomList::EURoom*> fmr = m_br_list.queryFamilyMaleRooms();
+	std::vector<BuildingRoomList::EURoom*> ffr = m_br_list.queryFamilyFemaleRooms();
+	std::vector<BuildingRoomList::EURoom*> mr = m_br_list.queryMaleRooms();
+	std::vector<BuildingRoomList::EURoom*> fr = m_br_list.queryFemaleRooms();
+
+	int32_t total_rooms = m_br_list.getTotalActiveRooms();
+	int32_t total_beds = 0;
+
+	std::vector<BuildingRoomList::EURoom*> eu_rm_list[] = { fpr , fmr, ffr, mr, fr};
+
+	for (i = 0; i < sizeof(eu_rm_list) / sizeof(eu_rm_list[0]); i++) {
+		std::vector<BuildingRoomList::EURoom*> rmlist = eu_rm_list[i];
+		for (j = 0; j < rmlist.size(); j++) {
+			BuildingRoomList::EURoom* rm = rmlist[j];
+			total_beds += rm->capacity;
+		}
+	}
+
+	std::map<int32_t, int32_t> family_count;
+	int32_t male_count = 0;
+	int32_t female_count = 0;
+
+	for (i = 0; i < m_EU_list.size(); i++) {
+		Registrant rt = m_registrants[i];
+		int32_t family_id = rt.party;
+		int32_t person_id = rt.person_id;
+		std::string church = rt.church;
+		std::string party_type = rt.party_type;
+		std::string gender = rt.gender;
+		if (party_type.find("Family") != std::string::npos) {
+			family_count[family_id] = 1;
+		}
+		else {
+			if (gender.compare("Female") == 0) {
+				female_count++;
+			}
+			else {
+				male_count++;
+			}
+		}
+	}
+
+	printf("total rooms = %zd, total beds = %zd\n", total_rooms, total_beds);
+	printf("Families = %zd, male individuals = %d, female idividuals = %d\n", family_count.size(), male_count, female_count);
+	return 0;
+}
+
 
 int32_t Attendees::classifications1()
 {

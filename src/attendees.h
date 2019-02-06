@@ -145,11 +145,12 @@ public:
 		int32_t registration_fee;
 		bool need_key;
 		int32_t key_deposit;
-		bool checkin;
-		bool youth_checkins;
+		bool eu_checkin;
+		bool youth_checkin;
 		bool youth_camp_flag;
 		bool key_returned;
-		int32_t paid;
+		bool paid;
+		bool temp_flag;
 		std::string bond_type;
 		std::vector<int32_t> bond_parties;
 		std::string qrcode;
@@ -257,6 +258,11 @@ public:
 		fByRank = 5,
 	}SortChurchList;
 
+	typedef struct Roster {
+		int32_t num_eu;
+		int32_t num_cabrini;
+	} Roster;
+
 	Attendees();
 	~Attendees();
 
@@ -264,13 +270,20 @@ public:
 	int32_t readRegistrants(const char *filename);
 	int32_t readBuildingRooms(const char *filename);
 	int32_t parseAllFields(bool disable_old_assignment_flag=true);
-	int32_t separateEU_CabriniCampus();
+	int32_t camper_christians_statistics();
+	int32_t removeNoShowRegistrants(); // this is the function for post-camp processing
+
+	int32_t separateEU_CabriniCampusByRoom();
+	int32_t separateEU_CabriniCampusByAttendence();
 	int32_t classifications1();
 
 	int32_t classifications();
 	int32_t refinement();
 	int32_t sortAttendeesByChurches();
 
+	int32_t age_distributions();
+	int32_t church_distributions();
+	int32_t eu_room_distribution();
 
 	ChurchList::QFLChurch* getChurch(int32_t person_id);
 	BuildingRoomList::EURoom *getRoom(int32_t person_id);
@@ -331,6 +344,7 @@ public:
 	std::vector<int32_t> m_commute_list;
 
 	std::vector<Registrant*> m_Cabrini_list;
+	std::vector<Registrant*> m_EU_list;
 	std::map<std::string, std::vector<CellGroup>> m_cell_groups;
 
 	ChurchList m_church_list;
@@ -338,6 +352,7 @@ public:
 	int32_t m_cellid;
 	int32_t m_cancelled;
 	int32_t m_uncertain;
+	int32_t m_checkedin;
 	ChristianStats m_allchurch;
 
 	EULodgePeople m_eu_lodge_people;

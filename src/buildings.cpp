@@ -7,8 +7,8 @@ static bool BDbyNumber(const BuildingRoomList::EUBuilding &a, const BuildingRoom
 	return (a.build_no < b.build_no);
 }
 
-const std::string BuildingRoomList::m_buildings[7] = { BuildingNames::qEagleHall, BuildingNames::qGallup, BuildingNames::qGoughHall, BuildingNames::qGuffin,
-BuildingNames::qHainer, BuildingNames::qKea, BuildingNames::qSparrowk };
+const std::string BuildingRoomList::m_buildings[7] = { EUBuildingNames::qEagleHall, EUBuildingNames::qGallup, EUBuildingNames::qGoughHall, EUBuildingNames::qGuffin,
+EUBuildingNames::qHainer, EUBuildingNames::qKea, EUBuildingNames::qSparrowk };
 
 const int32_t BuildingRoomList::m_OpLevel[5] = {4, 0, 1, 2, 3};
 
@@ -24,13 +24,13 @@ BuildingRoomList::BuildingRoomList()
 	m_room_measure.brAC = -5;
 	m_room_measure.brElevator = 0;
 
-	m_buildingCode[BuildingNames::qEagleHall] = BuildingCode::pEagleHall;
-	m_buildingCode[BuildingNames::qGallup] = BuildingCode::pGallup;
-	m_buildingCode[BuildingNames::qGoughHall] = BuildingCode::pGoughHall;
-	m_buildingCode[BuildingNames::qGuffin] = BuildingCode::pGuffin;
-	m_buildingCode[BuildingNames::qHainer] = BuildingCode::pHainer;
-	m_buildingCode[BuildingNames::qKea] = BuildingCode::pKea;
-	m_buildingCode[BuildingNames::qSparrowk] = BuildingCode::pSparrowk;
+	m_buildingCode[EUBuildingNames::qEagleHall] = EUBuildingCode::pEagleHall;
+	m_buildingCode[EUBuildingNames::qGallup] = EUBuildingCode::pGallup;
+	m_buildingCode[EUBuildingNames::qGoughHall] = EUBuildingCode::pGoughHall;
+	m_buildingCode[EUBuildingNames::qGuffin] = EUBuildingCode::pGuffin;
+	m_buildingCode[EUBuildingNames::qHainer] = EUBuildingCode::pHainer;
+	m_buildingCode[EUBuildingNames::qKea] = EUBuildingCode::pKea;
+	m_buildingCode[EUBuildingNames::qSparrowk] = EUBuildingCode::pSparrowk;
 }
 
 BuildingRoomList::~BuildingRoomList()
@@ -963,7 +963,7 @@ int BuildingRoomList::scoreRooms()
 				int value;
 				char c;
 				std::stringstream ss(room_num);
-				if (eub.building_name.compare(BuildingNames::qGallup) == 0)
+				if (eub.building_name.compare(EUBuildingNames::qGallup) == 0)
 					ss >> c >> value;
 				else
 					ss >> value >> c;
@@ -973,7 +973,7 @@ int BuildingRoomList::scoreRooms()
 					pos = eur.neighbors[0]->room.find_first_of("-");
 					room_num = eur.neighbors[0]->room.substr(pos + 1, -1);
 					std::stringstream ss_2(room_num);
-					if (eub.building_name.compare(BuildingNames::qGallup) == 0)
+					if (eub.building_name.compare(EUBuildingNames::qGallup) == 0)
 						ss_2 >> c >> value;
 					else
 						ss_2 >> value >> c;

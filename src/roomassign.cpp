@@ -54,6 +54,11 @@ int32_t RoomAssign::preprocessData()
 	status = parseAllFields();
 	if (status < 0)
 		return status;
+
+	status = updateEURoomAssignment();
+	if (status < 0)
+		return status;
+
 	status = classifications();
 	if (status < 0)
 		return status;
@@ -74,7 +79,11 @@ int32_t RoomAssign::preprocessData1(bool disable_old_assignment_flag)
 	if (status < 0)
 		return status;
 
-	status = separateEU_CabriniCampus();
+	status = updateEURoomAssignment();
+	if (status < 0)
+		return status;
+
+	status = separateEU_CabriniCampusByRoom();
 	if (status < 0)
 		return status;
 
@@ -434,7 +443,7 @@ int32_t RoomAssign::assignRooms2Babies()
 // male room and female room do not share bathroom
 int32_t RoomAssign::assignRooms2Seniors()
 {
-	bool enable_extrabeds = false;
+	bool enable_extrabeds = true;
 	std::vector<BuildingRoomList::EURoom*> temp_roomlist;
 	std::vector<BuildingRoomList::EURoom*> roomlist = m_br_list.queryReservedSPRooms();
 	std::map<int32_t, std::vector<Registrant*>> senior_list = m_senior_list;
@@ -1454,8 +1463,20 @@ int32_t RoomAssign::roomAllocationStats()
 	m_alloc_rooms.rooms_males = (int32_t)male_roomlist.size();
 	m_alloc_rooms.rooms_females = (int32_t)female_roomlist.size();
 
+	int32_t beds = 0;
+	std::vector<BuildingRoomList::EURoom*> roomlists[] = { family_private_roomlist , family_male_roomlist , family_female_roomlist , male_roomlist , female_roomlist };
+	for (int i = 0; i < sizeof(roomlists)/sizeof(roomlists[0]); i++) {
+		std::vector<BuildingRoomList::EURoom*> roomlist = roomlists[i];
+		for (int j = 0; j < roomlist.size(); j++) {
+			BuildingRoomList::EURoom* r = roomlist[j];
+			if (r->room_status != RoomStatus::qInactive) {
+				beds += r->capacity;
+			}
+		}
+	}
+
 	printf("=== Room Statistics:\n");
-	printf("total active rooms=%d\n", m_alloc_rooms.total_rooms);
+	printf("total active rooms=%d, total beds = %d\n", m_alloc_rooms.total_rooms, beds);
 	printf("available = %d, childcare_rooms = %d, choir_rooms = %d, specialneeds_rooms = %d, speaker_rooms = %d, reserved_rooms = %d\n",
 		m_alloc_rooms.available_rooms, m_alloc_rooms.rooms_childcare_workers, m_alloc_rooms.rooms_choir, m_alloc_rooms.rooms_special_needs,
 		m_alloc_rooms.rooms_speakers_recordings, m_alloc_rooms.general_reserves);
@@ -1495,29 +1516,6 @@ int32_t RoomAssign::lodgePeopleStats(const char* filename)
 	printf("Males only=%d, females only=%d\n", m_eu_lodge_people.single_males, m_eu_lodge_people.single_females);
 
 	return 0;
-}
-
-bool RoomAssign::extrabed_update()
-{
-	int32_t i;
-	std::vector<BuildingRoomList::EURoom*> roomlist = m_br_list.queryAssignedRooms();
-	int32_t extra_bed_rooms = 0;
-
-	for (i = 0; i < roomlist.size(); i++) {
-		BuildingRoomList::EURoom* aroom = roomlist[i];
-		int32_t num = (int32_t)aroom->persons.size();
-		int32_t assigned_beds = aroom->bed_assigned;
-
-		if (num > assigned_beds) {
-			aroom->extra = 1;
-			extra_bed_rooms++;
-		}
-		else
-			aroom->extra = 0;
-	}
-
-	printf("Out of %d assigned rooms, %d rooms need an extra bed\n", (int)roomlist.size(), (int)extra_bed_rooms);
-	return true;
 }
 
 
@@ -2494,4 +2492,134 @@ bool RoomAssign::printRoomAssignment(const char* filename)
 
 	fout.close();
 	return true;
+}
+
+bool RoomAssign::extrabed_update(const char* room_with_extra_beds)
+{
+	std::ofstream fout(room_with_extra_beds);
+	if (!fout.is_open())
+		return false;
+
+
+	int32_t i, j;
+	std::vector<BuildingRoomList::EURoom*> roomlist = m_br_list.queryAssignedRooms();
+	std::vector<BuildingRoomList::EURoom*> _roomlist = m_br_list.queryAvailableRooms();
+	int32_t extra_bed_rooms = 0;
+	int32_t unassigned_rooms = 0;
+
+	fout << "Room Number," << "Capacity," << "Extra Bed" << std::endl;
+
+	for (i = 0; i < roomlist.size(); i++) {
+		BuildingRoomList::EURoom* aroom = roomlist[i];
+		int32_t num = (int32_t)aroom->persons.size();
+		int32_t assigned_beds = aroom->bed_assigned;
+		std::string room_num = aroom->room;
+		int capacity = aroom->capacity;
+		
+		if (num > assigned_beds) {
+			aroom->extra = 1;
+			extra_bed_rooms++;
+			fout << room_num << ", " << capacity << ", " << aroom->extra << std::endl;
+		}
+		else
+			aroom->extra = 0;
+
+		bool child = false;
+		for (j = 0; j < num; j++) {
+			int32_t id = aroom->persons[j];
+			Registrant *registrant = getRegistrant(id);
+			child = child || (registrant->age_group.compare(AgeGroup::A1) == 0 || registrant->age_group.compare(AgeGroup::A2) == 0 || registrant->age_group.compare(AgeGroup::A3) == 0
+				|| registrant->age_group.compare(AgeGroup::A4_5) == 0 || registrant->age_group.compare(AgeGroup::A6_11) == 0);
+		}
+
+		if (!child && aroom->extra)
+		{
+			printf("%s\n", room_num.c_str());
+		}
+	}
+
+	printf("Out of %d assigned rooms, %d rooms need an extra bed\n\n\n\n", (int)roomlist.size(), (int)extra_bed_rooms);
+
+	fout << "Room Number," << "Capacity," << "Empty" << std::endl;
+
+	for (i = 0; i < _roomlist.size(); i++) {
+		BuildingRoomList::EURoom* aroom = _roomlist[i];
+		int32_t num = (int32_t)aroom->persons.size();
+		int32_t assigned_beds = aroom->bed_assigned;
+		std::string room_num = aroom->room;
+		int capacity = aroom->capacity;
+
+		if (num == 0) {
+			fout << room_num << ", " << capacity << ", " << num << std::endl;
+			unassigned_rooms++;
+		}
+	}
+	printf("Out of %d assigned rooms, %d rooms are empty\n\n\n\n", (int)_roomlist.size(), (int)unassigned_rooms);
+
+	fout.close();
+	return true;
+}
+
+bool RoomAssign::printCamp_all(const char* filename)
+{
+	int i;
+	std::ofstream fout(filename);
+	if (!fout.is_open())
+		return false;
+
+	int32_t cnt = 0;
+	fout << "Church," << "PersonId," << "PartyId," << "FirstName,"
+		<< "LastName," << "ChineseName," << "RoomNumber," << "CellGroup" << std::endl;
+
+	for (i = 0; i < (int)m_registrants.size(); i++) {
+		Registrant areg = m_registrants[i];
+		int32_t person_id = areg.person_id;
+		int32_t party_id = areg.party;
+		std::string church = areg.church_cname;
+		std::string first_name = areg.first_name;
+		std::string last_name = areg.last_name;
+		std::string chinese_name = areg.chinese_name;
+		bool youth_camp = areg.youth_camp_flag;
+		std::string room_number = areg.room;
+		std::string cell_group = areg.cell_group;
+
+		char person_id_str[128];
+		char party_id_str[128];
+		sprintf(person_id_str, "%04d", person_id);
+		sprintf(party_id_str, "P%04d", party_id);
+
+		if (church.size() == 0)
+			church = areg.church;
+
+		fout << church << ", " << person_id_str << ", " << party_id_str << ", " << first_name << ", " << last_name << ", "
+			<< chinese_name + " " << ", " << room_number << ", " << cell_group + " " << std::endl;
+	}
+
+
+	fout.close();
+	return true;
+
+}
+
+int32_t  RoomAssign::updateEURoomAssignment()
+{
+	int32_t i, j;
+	std::vector<BuildingRoomList::EURoom*> _roomlist = m_br_list.queryAvailableRooms();
+	int32_t extra_bed_rooms = 0;
+	int32_t unassigned_rooms = 0;
+
+	for (i = 0; i < m_registrants.size(); i++) {
+		Registrant p = m_registrants[i];
+		std::string room_num = p.room;
+		if (room_num.size() > 0) {
+			int32_t person_id = p.person_id;
+			BuildingRoomList::EURoom *r = m_br_list.getRoomByName(room_num);
+			if (r != NULL) {
+				(r->bed_assigned)++;
+				r->persons.push_back(person_id);
+			}
+		}
+	}
+
+	return 0;
 }

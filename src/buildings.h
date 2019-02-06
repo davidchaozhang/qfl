@@ -76,7 +76,7 @@ namespace BuildingReport {
 	const char* const qNote = "Note";
 };
 
-namespace BuildingNames {
+namespace EUBuildingNames {
 	const char* const qEagleHall = "Eagle Hall";
 	const char* const qGallup = "Gallup";
 	const char* const qGoughHall = "Gough Hall";
@@ -86,7 +86,7 @@ namespace BuildingNames {
 	const char* const qSparrowk = "Sparrowk";
 };
 
-namespace BuildingCode {
+namespace EUBuildingCode {
 	const int32_t pEagleHall = 3;
 	const int32_t pGallup = 1;
 	const int32_t pGoughHall = 0;
@@ -94,6 +94,16 @@ namespace BuildingCode {
 	const int32_t pHainer = 4;
 	const int32_t pKea = 5;
 	const int32_t pSparrowk = 2;
+};
+
+namespace CabriniBuildingNames {
+	const char* const qWoodcrestHall = "Woodcreast Hall";
+	const char* const qEastResidenceHall = "East Residence Hall";
+};
+
+namespace CabriniBuildingCode {
+	const int32_t pWoodcrestHall = 1;
+	const int32_t pEastResidenceHall = 1;
 };
 
 class QFLLIB_EXPORT BuildingRoomList {
@@ -194,7 +204,7 @@ public:
 		int32_t total_shared_family_beds; // rooms that shared beds
 	} RoomStats;
 
-	// score = BuildingCode*brBuilding + brLevel*OpLevel + sect_number*brSect + room_number + bath_dist*value
+	// score = EUBuildingCode*brBuilding + brLevel*OpLevel + sect_number*brSect + room_number + bath_dist*value
 	typedef struct RoomMeasure {
 		int32_t brBuilding;
 		int32_t brLevel;
@@ -276,7 +286,7 @@ protected:
 	int updateAllSections_quotes();
 	int updateAllRooms_quotes();
 	/*! generate scores of each room
-	 *\note score = BuildingCode*brBuilding + brLevel*OpLevel + brSect + room_number + bath_dist
+	 *\note score = EUBuildingCode*brBuilding + brLevel*OpLevel + brSect + room_number + bath_dist
 	 *\return 0 if successful
 	 */
 	int scoreRooms();
