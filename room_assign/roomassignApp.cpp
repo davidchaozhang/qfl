@@ -10,14 +10,15 @@ static int parsing(int argc, char**argv);
 static int auto_roomassign_2018(int argc, char**argv);
 
 
-std::string churchname = "D:/users/dzhang/QFL/roomassign/churchlist_20180522_milestone.csv";
+std::string churchname = "D:/users/dzhang/QFL/roomassign/churchlist_20180523_milestone.csv";
 std::string brname = "D:/users/dzhang/QFL/roomassign/buildingAndRoom-0514_2018.csv";
-std::string filename = "D:/users/dzhang/QFL/reports/report0517_2018_milestone.csv";
+std::string filename = "D:/users/dzhang/QFL/reports/report0528_2018_after_camp.csv";
 std::string sortedname = "D:/users/dzhang/QFL/reports/sorted_report.csv";
 std::string filename_new = "D:/users/dzhang/QFL/roomassign/report_new_assignment.csv";
 std::string filename_building_distr = "D:/users/dzhang/QFL/roomassign/report_church_buildings.csv";
 std::string cellgroups_name = "D:/users/dzhang/QFL/roomassign/cell_groups.csv";
 std::string camp_all = "D:/users/dzhang/QFL/roomassign/camp_all.csv";
+std::string room_with_extra_beds = "D:/users/dzhang/QFL/roomassign/rooms_with_xbeds.csv";
 
 int main(int argc, char**argv)
 {
@@ -77,7 +78,8 @@ int auto_roomassign_2018(int argc, char**argv)
 {
 	int32_t status = 0;
 	int32_t year = 2018;
-	bool disable_old_assign = true;
+	bool disable_old_assign = false;/*true if I want to reset the room assignment*/
+	bool checked_in = true;
 
 	RoomAssign ra;
 	status = ra.readInputs(churchname.c_str(), brname.c_str(), filename.c_str(), year);
@@ -91,6 +93,9 @@ int auto_roomassign_2018(int argc, char**argv)
 	// collect lodging people status
 	status = ra.lodgePeopleStats(sortedname.c_str());
 	ra.trackStatus("0.Begin");
+
+	ra.printCamp_all(camp_all.c_str());
+	ra.extrabed_update(room_with_extra_beds.c_str());
 
 	// take reserved special need rooms
 	status = ra.assignRooms2SpecialNeeds();
@@ -145,7 +150,7 @@ int auto_roomassign_2018(int argc, char**argv)
 	ra.printRooms2Females();
 	ra.trackStatus("11.Females");
 
-	ra.extrabed_update();
+	ra.extrabed_update(room_with_extra_beds.c_str());
 
 	// print an updated document with the latest room assignment
 	ra.printRoomAssignment(filename_new.c_str());
@@ -226,7 +231,7 @@ int room_assignmentTest()
 	ra.printRooms2Females();
 	ra.trackStatus("10.Females");
 
-	ra.extrabed_update();
+	ra.extrabed_update(room_with_extra_beds.c_str());
 
 	// print an updated document with the latest room assignment
 	ra.printRoomAssignment(filename_new.c_str());
