@@ -1091,7 +1091,6 @@
             this.textBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox2.Location = new System.Drawing.Point(540, 557);
             this.textBox2.Name = "textBox2";
-            this.textBox2.ReadOnly = true;
             this.textBox2.Size = new System.Drawing.Size(103, 21);
             this.textBox2.TabIndex = 144;
             // 
@@ -1318,8 +1317,9 @@
             // 
             // adjustedDue
             // 
+            this.adjustedDue.BackColor = System.Drawing.Color.Red;
             this.adjustedDue.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.adjustedDue.Location = new System.Drawing.Point(328, 557);
+            this.adjustedDue.Location = new System.Drawing.Point(319, 557);
             this.adjustedDue.Name = "adjustedDue";
             this.adjustedDue.ReadOnly = true;
             this.adjustedDue.Size = new System.Drawing.Size(91, 21);
@@ -1330,7 +1330,8 @@
             // 
             this.label29.AutoSize = true;
             this.label29.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label29.Location = new System.Drawing.Point(323, 534);
+            this.label29.ForeColor = System.Drawing.Color.Red;
+            this.label29.Location = new System.Drawing.Point(314, 534);
             this.label29.Name = "label29";
             this.label29.Size = new System.Drawing.Size(105, 16);
             this.label29.TabIndex = 169;
@@ -1548,7 +1549,7 @@
             // adjustedFee1
             // 
             this.adjustedFee1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.adjustedFee1.Location = new System.Drawing.Point(572, 188);
+            this.adjustedFee1.Location = new System.Drawing.Point(570, 189);
             this.adjustedFee1.Name = "adjustedFee1";
             this.adjustedFee1.ReadOnly = true;
             this.adjustedFee1.Size = new System.Drawing.Size(52, 21);
@@ -1557,7 +1558,7 @@
             // adjustedFee2
             // 
             this.adjustedFee2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.adjustedFee2.Location = new System.Drawing.Point(572, 238);
+            this.adjustedFee2.Location = new System.Drawing.Point(570, 239);
             this.adjustedFee2.Name = "adjustedFee2";
             this.adjustedFee2.ReadOnly = true;
             this.adjustedFee2.Size = new System.Drawing.Size(52, 21);
@@ -1566,7 +1567,7 @@
             // adjustedFee3
             // 
             this.adjustedFee3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.adjustedFee3.Location = new System.Drawing.Point(572, 288);
+            this.adjustedFee3.Location = new System.Drawing.Point(570, 289);
             this.adjustedFee3.Name = "adjustedFee3";
             this.adjustedFee3.ReadOnly = true;
             this.adjustedFee3.Size = new System.Drawing.Size(52, 21);
@@ -1575,7 +1576,7 @@
             // adjustedFee4
             // 
             this.adjustedFee4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.adjustedFee4.Location = new System.Drawing.Point(572, 338);
+            this.adjustedFee4.Location = new System.Drawing.Point(570, 339);
             this.adjustedFee4.Name = "adjustedFee4";
             this.adjustedFee4.ReadOnly = true;
             this.adjustedFee4.Size = new System.Drawing.Size(52, 21);
@@ -1584,7 +1585,7 @@
             // adjustedFee5
             // 
             this.adjustedFee5.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.adjustedFee5.Location = new System.Drawing.Point(572, 388);
+            this.adjustedFee5.Location = new System.Drawing.Point(570, 389);
             this.adjustedFee5.Name = "adjustedFee5";
             this.adjustedFee5.ReadOnly = true;
             this.adjustedFee5.Size = new System.Drawing.Size(52, 21);
@@ -1593,7 +1594,7 @@
             // adjustedFee6
             // 
             this.adjustedFee6.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.adjustedFee6.Location = new System.Drawing.Point(572, 438);
+            this.adjustedFee6.Location = new System.Drawing.Point(570, 439);
             this.adjustedFee6.Name = "adjustedFee6";
             this.adjustedFee6.ReadOnly = true;
             this.adjustedFee6.Size = new System.Drawing.Size(52, 21);
@@ -1602,7 +1603,7 @@
             // adjustedFee7
             // 
             this.adjustedFee7.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.adjustedFee7.Location = new System.Drawing.Point(572, 488);
+            this.adjustedFee7.Location = new System.Drawing.Point(570, 489);
             this.adjustedFee7.Name = "adjustedFee7";
             this.adjustedFee7.ReadOnly = true;
             this.adjustedFee7.Size = new System.Drawing.Size(52, 21);
