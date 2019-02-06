@@ -32,3 +32,7 @@ if(neighbor)
 score[2] = (score[2] + score_neighbor) / 2 + 1;
 
 final_score = score[0] + score[1] + score[2];
+
+
+- How to run:
+roomassign.exe -c config/churchlist_20180430.csv -b config/buildingAndRoom-0509_2018.csv -r data/report1526266918506.csv -s results/sorted_report.csv -n results/report_new_assignment.csv -d results/report_church_per_building.csv
