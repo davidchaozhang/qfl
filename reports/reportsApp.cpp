@@ -5,9 +5,10 @@
 #include "roomassign.h"
 
 static int32_t year = 2018;
-std::string churchname = "D:/users/dzhang/QFL/roomassign/churchlist_20180429.csv";
-std::string brname = "D:/users/dzhang/QFL/roomassign/buildingAndRoom-0502_2018.csv";
-const std::string filename = "D:/users/dzhang/QFL/reports/report1525015569672.csv";
+
+std::string churchname = "D:/users/dzhang/QFL/roomassign/churchlist_20180514_milestone.csv";
+std::string brname = "D:/users/dzhang/QFL/roomassign/buildingAndRoom-0514_2018.csv";
+std::string filename = "D:/users/dzhang/QFL/reports/report0528_2018_after_camp.csv";
 std::string brname_updates = "D:/users/dzhang/QFL/roomassign/buildingAndRoom-new.csv";
 
 static int process_qfl_registrants();
@@ -18,8 +19,8 @@ static int attendee_listTest();
 int main()
 {
 	int ret = 0;
-	//ret = attendee_listTest();
-	ret = building_listTest();
+	ret = attendee_listTest();
+	//ret = building_listTest();
 	//ret = church_listTest();
 	//ret = process_qfl_registrants();
 	system("PAUSE");
@@ -94,18 +95,18 @@ int building_listTest()
 
 	for (i = (int)BuildingRoomList::tFamily_Private; i < (int)BuildingRoomList::tExtra_beds; i++) {
 		std::vector<BuildingRoomList::EURoom*> eurlst = bdlst.queryRoomList(BuildingRoomList::RoomState(i));
-		std::vector<BuildingRoomList::EURoom*> eubrlst = bdlst.queryRoomList(BuildingNames::qEagleHall, BuildingRoomList::RoomState(i));
+		std::vector<BuildingRoomList::EURoom*> eubrlst = bdlst.queryRoomList(EUBuildingNames::qEagleHall, BuildingRoomList::RoomState(i));
 	}
 
 	std::vector<BuildingRoomList::EURoom*> eub_shared = bdlst.queryBathSharedRooms();
-	std::vector<BuildingRoomList::EURoom*> eubr_shared = bdlst.queryBathSharedRooms(BuildingNames::qEagleHall);
+	std::vector<BuildingRoomList::EURoom*> eubr_shared = bdlst.queryBathSharedRooms(EUBuildingNames::qEagleHall);
 	std::vector<BuildingRoomList::EURoom*> eub_avail = bdlst.queryAvailableRooms();
-	std::vector<BuildingRoomList::EURoom*> eubr_avail = bdlst.queryAvailableRooms(BuildingNames::qEagleHall);
+	std::vector<BuildingRoomList::EURoom*> eubr_avail = bdlst.queryAvailableRooms(EUBuildingNames::qEagleHall);
 	std::vector<BuildingRoomList::EURoom*> eub_assign = bdlst.queryAssignedRooms();
-	std::vector<BuildingRoomList::EURoom*> eubr_assign = bdlst.queryAssignedRooms(BuildingNames::qEagleHall);
+	std::vector<BuildingRoomList::EURoom*> eubr_assign = bdlst.queryAssignedRooms(EUBuildingNames::qEagleHall);
 
 	std::vector<BuildingRoomList::EURoom*> eub_gerooms = bdlst.queryReservedGERooms();
-	std::vector<BuildingRoomList::EURoom*> eubr_gerooms = bdlst.queryReservedGERooms(BuildingNames::qEagleHall);
+	std::vector<BuildingRoomList::EURoom*> eubr_gerooms = bdlst.queryReservedGERooms(EUBuildingNames::qEagleHall);
 
 	bdlst.printRoomStats();
 	bdlst.writeUpdatedBuildingRoomDoc(brname_updates.c_str());
@@ -120,9 +121,12 @@ int attendee_listTest()
 	qfl_attendees.readBuildingRooms(brname.c_str());
 	qfl_attendees.readRegistrants(filename.c_str());
 	qfl_attendees.parseAllFields();
-	qfl_attendees.classifications();
-	qfl_attendees.refinement();
-	qfl_attendees.sortAttendeesByChurches();
+	qfl_attendees.separateEU_CabriniCampusByAttendence();
+	qfl_attendees.camper_christians_statistics();
+	qfl_attendees.age_distributions();
+	qfl_attendees.church_distributions();
+	qfl_attendees.eu_room_distribution();
+
 	return 0;
 }
 
