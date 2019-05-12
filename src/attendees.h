@@ -42,6 +42,7 @@ namespace Services {
 	const char* const Usher = "Usher";
 	const char* const QFL_Drama = "QFL Drama";
 	const char* const Speaker = "Speaker";
+	const char* const SpeakerFamily = "Speaker Family";
 	const char* const Minister = "Minister";
 };
 
@@ -50,7 +51,9 @@ namespace AgeGroup {
 	const char* const A2 = "2";
 	const char* const A3 = "3";
 	const char* const A4_5 = "4-5";
+	const char* const A6_10 = "6-10";
 	const char* const A6_11 = "6-11";
+	const char* const A11 = "11";
 	const char* const A12_14 = "12-14";
 	const char* const A15_17 = "15-17";
 	const char* const A18_25 = "18-25";
@@ -114,6 +117,7 @@ public:
 	typedef struct Registrant {
 		int32_t person_id;
 		int32_t party;
+		unsigned char campus;
 		std::string party_type;
 		std::string first_name;
 		std::string last_name;
@@ -129,6 +133,7 @@ public:
 		std::string state;
 		int32_t zip;
 		std::string mobile_phone;
+		std::string volunteer_service;
 		std::string services;
 		std::string functional_group;
 		bool need_room;
@@ -151,6 +156,8 @@ public:
 		bool key_returned;
 		bool paid;
 		bool temp_flag;
+		bool waiver_signed;
+		std::string meal_coupon;
 		std::string bond_type;
 		std::vector<int32_t> bond_parties;
 		std::string qrcode;
@@ -270,6 +277,7 @@ public:
 	int32_t readRegistrants(const char *filename);
 	int32_t readBuildingRooms(const char *filename);
 	int32_t parseAllFields(bool disable_old_assignment_flag=true);
+	int32_t parseAllFields1(bool disable_old_assignment_flag = true);
 	int32_t camper_christians_statistics();
 	int32_t removeNoShowRegistrants(); // this is the function for post-camp processing
 
@@ -297,6 +305,7 @@ public:
 	std::string intToString(int i);
 	std::string getCurTime();
 	void gradeMapping();
+	std::string convert2AgeGroup(int age);
 
 	protected:
 	//! raw input data
