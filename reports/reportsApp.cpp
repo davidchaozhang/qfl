@@ -4,12 +4,12 @@
 #include "attendees.h"
 #include "roomassign.h"
 
-static int32_t year = 2018;
+static int32_t year = 2019;
 
-std::string churchname = "D:/users/dzhang/QFL/roomassign/churchlist_20180514_milestone.csv";
-std::string brname = "D:/users/dzhang/QFL/roomassign/buildingAndRoom-0514_2018.csv";
-std::string filename = "D:/users/dzhang/QFL/reports/report0528_2018_after_camp.csv";
-std::string brname_updates = "D:/users/dzhang/QFL/roomassign/buildingAndRoom-new.csv";
+std::string churchname = "D:/users/dzhang/QFL2019/roomassign/churchlist_20190501.csv";
+std::string brname = "D:/users/dzhang/QFL2019/roomassign/buildingAndRoom-0411_2019.csv";
+std::string filename = "D:/users/dzhang/QFL2019/reports/report1556204515432.csv";
+std::string brname_updates = "D:/users/dzhang/QFL2019/roomassign/buildingAndRoom-new.csv";
 
 static int process_qfl_registrants();
 static int building_listTest();
@@ -19,10 +19,10 @@ static int attendee_listTest();
 int main()
 {
 	int ret = 0;
-	ret = attendee_listTest();
+	//ret = attendee_listTest();
 	//ret = building_listTest();
 	//ret = church_listTest();
-	//ret = process_qfl_registrants();
+	ret = process_qfl_registrants();
 	system("PAUSE");
 	return ret;
 }
@@ -30,22 +30,22 @@ int main()
 
 static int process_qfl_registrants()
 {
-	std::string allchurch_dir = "D:/users/dzhang/QFL/statistics/all_church";
-	std::string allchurch_EU_dir = "D:/users/dzhang/QFL/statistics/EU";
-	std::string allchurch_room_assign_dir = "D:/users/dzhang/QFL/statistics/room_assigns";
-	std::string statistics_file = "D:/users/dzhang/QFL/statistics/qfl_statistics.csv";
-	std::string eu_report = "D:/users/dzhang/QFL/statistics/EU/eu_report.csv";
-	std::string cabrini_report = "D:/users/dzhang/QFL/statistics/Cabrini/cabrini_report.csv";
-	std::string childcare_2_5yr_name = "D:/users/dzhang/QFL/statistics/childcare_coworkers_2_5yr.csv";
-	std::string childcare_6_11yr_name = "D:/users/dzhang/QFL/statistics/childcare_coworkers_6_11yr.csv";
-	std::string logistics_name = "D:/users/dzhang/QFL/statistics/logistics.csv";
-	std::string youth_name = "D:/users/dzhang/QFL/statistics/youthcamp.csv";
-	std::string doubtful_list = "D:/users/dzhang/QFL/statistics/doubtful.csv";
-	std::string rides_list = "D:/users/dzhang/QFL/statistics/rideslist.csv";
+	std::string allchurch_dir = "D:/users/dzhang/QFL2019/statistics/all_church";
+	std::string allchurch_EU_dir = "D:/users/dzhang/QFL2019/statistics/EU";
+	std::string allchurch_room_assign_dir = "D:/users/dzhang/QFL2019/statistics/room_assigns";
+	std::string statistics_file = "D:/users/dzhang/QFL2019/statistics/qfl_statistics.csv";
+	std::string eu_report = "D:/users/dzhang/QFL2019/statistics/EU/eu_report.csv";
+	std::string cabrini_report = "D:/users/dzhang/QFL2019/statistics/Cabrini/cabrini_report.csv";
+	std::string childcare_2_5yr_name = "D:/users/dzhang/QFL2019/statistics/childcare_coworkers_2_5yr.csv";
+	std::string childcare_6_11yr_name = "D:/users/dzhang/QFL2019/statistics/childcare_coworkers_6_11yr.csv";
+	std::string logistics_name = "D:/users/dzhang/QFL2019/statistics/logistics.csv";
+	std::string youth_name = "D:/users/dzhang/QFL2019/statistics/youthcamp.csv";
+	std::string doubtful_list = "D:/users/dzhang/QFL2019/statistics/doubtful.csv";
+	std::string rides_list = "D:/users/dzhang/QFL2019/statistics/rideslist.csv";
 
-	std::string rcccname = "D:/users/dzhang/QFL/statistics/rccc.csv";
-	std::string rccc_functions = "D:/users/dzhang/QFL/statistics";
-	std::string financial_report = "D:/users/dzhang/QFL/statistics/financial/financial.csv";
+	std::string rcccname = "D:/users/dzhang/QFL2019/statistics/rccc.csv";
+	std::string rccc_functions = "D:/users/dzhang/QFL2019/statistics";
+	std::string financial_report = "D:/users/dzhang/QFL2019/statistics/financial/financial.csv";
 	QflReg qfl_reg;
 	qfl_reg.readChurchList(churchname.c_str(), year);
 	qfl_reg.readRegistrants(filename.c_str());
