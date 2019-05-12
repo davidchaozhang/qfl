@@ -121,6 +121,7 @@ public:
 	int32_t readChurchList(const char* churchname, int32_t year);
 	int32_t readRegistrants(const char *filename);
 	int32_t parseAllFields();
+	int32_t parseAllFields1();
 	int32_t classifications();
 	int32_t sortAttendeesByChurches();
 	int32_t ageStatistics();
