@@ -61,6 +61,7 @@ public:
 	int32_t readInputs(const char* church_name, const char *buildings_name, const char *registration_name, int32_t year);
 	int32_t preprocessData();
 	int32_t preprocessData1(bool disable_old_assignment_flag=true);
+	int32_t preprocessData2(bool disable_old_assignment_flag = true);
 
 	int32_t trackStatus(const char* op);
 
@@ -89,7 +90,7 @@ public:
 	bool printRoomAssignment(const char* filename);
 	bool printChurchDistributionPerBuilding(const char* filename);
 	bool printEU_for_cellgroup(const char* filename);
-	bool printCamp_all(const char* filename);
+	bool printCamp_all(const char* filename, int32_t year=2018);
 	int32_t printSortedAttendees(const char* filename, std::map<int32_t, std::vector<Registrant*>> slist, bool print_title=false);
 	int32_t printRooms2SpecialNeeds();
 	int32_t printRooms2Seniors();

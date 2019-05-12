@@ -75,7 +75,33 @@ int32_t RoomAssign::preprocessData()
 int32_t RoomAssign::preprocessData1(bool disable_old_assignment_flag)
 {
 	int32_t status = 0;
-	status = parseAllFields(disable_old_assignment_flag);
+	status = parseAllFields1(disable_old_assignment_flag);
+	if (status < 0)
+		return status;
+
+	status = updateEURoomAssignment();
+	if (status < 0)
+		return status;
+
+	status = separateEU_CabriniCampusByRoom();
+	if (status < 0)
+		return status;
+
+	status = classifications1();
+	if (status < 0)
+		return status;
+
+	status = sortAttendeesByChurches();
+	if (status < 0)
+		return status;
+
+	return status;
+}
+
+int32_t RoomAssign::preprocessData2(bool disable_old_assignment_flag)
+{
+	int32_t status = 0;
+	status = parseAllFields1(disable_old_assignment_flag);
 	if (status < 0)
 		return status;
 
@@ -1510,7 +1536,7 @@ int32_t RoomAssign::lodgePeopleStats(const char* filename)
 
 	printf("=== Attendee Statistics:\n");
 	printf("Total attendees are %d\n", total_attendees);
-	printf("Total families=%d, family seniors=%d, family babies=%d, special needs=%d, speakers+recordings=%d, choir=%d, drama=%d, chilecare workders=%d\n",
+	printf("Total families=%d, family seniors=%d, family babies=%d, special needs=%d, speakers+recordings=%d, choir=%d, drama=%d, chilecare workers=%d\n",
 		m_eu_lodge_people.families, m_eu_lodge_people.family_seniors, m_eu_lodge_people.family_babies, m_eu_lodge_people.special_needs,
 		m_eu_lodge_people.family_speakers_recordings, m_eu_lodge_people.family_choir, m_eu_lodge_people.family_drama, m_eu_lodge_people.person_childcare_workers);
 	printf("Males only=%d, females only=%d\n", m_eu_lodge_people.single_males, m_eu_lodge_people.single_females);
@@ -2116,8 +2142,8 @@ bool RoomAssign::printChurchDistributionPerBuilding(const char *filename)
 
 				char person_id_str[128];
 				char party_id_str[128];
-				sprintf(person_id_str, "%04d", person_id);
-				sprintf(party_id_str, "P%04d", party_id);
+				sprintf(person_id_str, "Q19-%04d", person_id);
+				sprintf(party_id_str, "F-%04d", party_id);
 
 				fout << church_chinese << ", " << person_id_str << ", " << party_id_str << ", " << contact_person << ", " << party_type << ", "
 					<< first_name << ", " << last_name << ", " << chinese_name + " " << ", " << room_number << ", " << extra_bed << ", "
@@ -2193,8 +2219,8 @@ int32_t RoomAssign::printSortedAttendees(const char* filename, std::map<int32_t,
 
 			char person_id_str[128];
 			char party_id_str[128];
-			sprintf(person_id_str, "%04d", person_id);
-			sprintf(party_id_str, "P%04d", party_id);
+			sprintf(person_id_str, "Q19-%04d", person_id);
+			sprintf(party_id_str, "F-%04d", party_id);
 
 			fout << person_id_str << ", " << party_id_str << ", " << contact_person << ", " << party_type << ", "
 				<< first_name << ", " << last_name << ", " << chinese_name + " " << ", " << room_number << ", "
@@ -2271,8 +2297,8 @@ bool RoomAssign::printEU_for_cellgroup(const char* filename)
 
 				char person_id_str[128];
 				char party_id_str[128];
-				sprintf(person_id_str, "%04d", person_id);
-				sprintf(party_id_str, "P%04d", party_id);
+				sprintf(person_id_str, "Q19-%04d", person_id);
+				sprintf(party_id_str, "F-%04d", party_id);
 
 				fout << person_id_str << ", " << church_chinese << ", "<< first_name << ", " << last_name << ", " << chinese_name + " " << ", " 
 					<< need_room << ", " << age << ", " << gender << ", " << is_christian << ", " << city << ", " << state << ", " << zip_str << ", " << functional << ", " << services << std::endl;
@@ -2414,8 +2440,8 @@ bool RoomAssign::printRoomAssignment(const char* filename)
 
 				char person_id_str[128];
 				char party_id_str[128];
-				sprintf(person_id_str, "%04d", person_id);
-				sprintf(party_id_str, "P%04d", party_id);
+				sprintf(person_id_str, "Q19-%04d", person_id);
+				sprintf(party_id_str, "F-%04d", party_id);
 
 				fout << church_chinese << ", " << person_id_str << ", " << party_id_str << ", " << contact_person << ", " << party_type << ", "
 					<< first_name << ", " << last_name << ", " << chinese_name + " " << ", " << room_number << ", " << extra_bed << ", " << cell_group + " " << ", " << need_room << ", "
@@ -2479,8 +2505,8 @@ bool RoomAssign::printRoomAssignment(const char* filename)
 
 			char person_id_str[128];
 			char party_id_str[128];
-			sprintf(person_id_str, "%04d", person_id);
-			sprintf(party_id_str, "P%04d", party_id);
+			sprintf(person_id_str, "Q19-%04d", person_id);
+			sprintf(party_id_str, "F-%04d", party_id);
 
 			fout << church_chinese << ", " << person_id_str << ", " << party_id_str << ", " << contact_person << ", " << party_type << ", "
 				<< first_name << ", " << last_name << ", " << chinese_name + " " << ", " << room_number << ", " << extra_bed << ", " << cell_group + " " << ", " << need_room << ", "
@@ -2560,7 +2586,7 @@ bool RoomAssign::extrabed_update(const char* room_with_extra_beds)
 	return true;
 }
 
-bool RoomAssign::printCamp_all(const char* filename)
+bool RoomAssign::printCamp_all(const char* filename, int32_t year)
 {
 	int i;
 	std::ofstream fout(filename);
@@ -2569,7 +2595,7 @@ bool RoomAssign::printCamp_all(const char* filename)
 
 	int32_t cnt = 0;
 	fout << "Church," << "PersonId," << "PartyId," << "FirstName,"
-		<< "LastName," << "ChineseName," << "RoomNumber," << "CellGroup" << std::endl;
+		<< "LastName," << "ChineseName," << "Campus," << "RoomNumber," << "CellGroup" << std::endl;
 
 	for (i = 0; i < (int)m_registrants.size(); i++) {
 		Registrant areg = m_registrants[i];
@@ -2583,16 +2609,29 @@ bool RoomAssign::printCamp_all(const char* filename)
 		std::string room_number = areg.room;
 		std::string cell_group = areg.cell_group;
 
+		std::string campus;
+		if (areg.campus == qEU || areg.campus == qChild || areg.campus == qSenior)
+			campus = "EU";
+		else if (areg.campus == qCabrini)
+			campus = "Cabrini";
+
 		char person_id_str[128];
 		char party_id_str[128];
-		sprintf(person_id_str, "%04d", person_id);
-		sprintf(party_id_str, "P%04d", party_id);
-
+		if (year <= 2018) {
+			sprintf(person_id_str, "Q%s-%04d", person_id);
+			sprintf(party_id_str, "F-%04d", party_id);
+		}
+		else {
+			std::string yr = std::to_string(year);
+			yr = yr.substr(2);
+			sprintf(person_id_str, "Q%s-%04d", yr.c_str(), person_id);
+			sprintf(party_id_str, "F-%04d", party_id);
+		}
 		if (church.size() == 0)
 			church = areg.church;
 
 		fout << church << ", " << person_id_str << ", " << party_id_str << ", " << first_name << ", " << last_name << ", "
-			<< chinese_name + " " << ", " << room_number << ", " << cell_group + " " << std::endl;
+			<< chinese_name + " " << ", " << campus << ", " << room_number << ", " << cell_group + " " << std::endl;
 	}
 
 
