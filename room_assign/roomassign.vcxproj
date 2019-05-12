@@ -19,7 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ra2018.cpp" />
+    <ClCompile Include="ra2019.cpp" />
     <ClCompile Include="roomassignApp.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ra.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGUID>{1234DE35-67C7-8D90-00D7-BAA98611C9E2}</ProjectGUID>
