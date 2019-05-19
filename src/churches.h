@@ -20,7 +20,9 @@ public:
 		std::string church_ini;
 		std::string church_city;
 		int32_t church_zip;
+		std::string church_contact;
 		std::string church_state;
+		std::string church_phone;
 		std::string church_email;
 		std::string church_web;
 		int32_t rank; // order by church size in attendees

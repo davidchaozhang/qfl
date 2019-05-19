@@ -104,11 +104,25 @@ int ChurchList::readInChurchList(const char* churches)
 		else
 			qflc.church_state = "";
 
+		// contact
+		if (achurch[9].size() > 2)
+			qflc.church_contact = achurch[9].substr(1, achurch[12].size() - 2);
+		else
+			qflc.church_contact = "";
+
+		// phone number
+		if (achurch[10].size() > 2)
+			qflc.church_phone = achurch[10].substr(1, achurch[12].size() - 2);
+		else
+			qflc.church_phone = "";
+
+		// email
 		if (achurch[12].size() > 2)
 			qflc.church_email = achurch[12].substr(1, achurch[12].size() - 2);
 		else
 			qflc.church_email = "";
 
+		// church website
 		if (achurch[11].size() > 2)
 			qflc.church_web = achurch[11].substr(1, achurch[11].size() - 2);
 		else
