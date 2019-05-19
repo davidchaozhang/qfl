@@ -326,6 +326,9 @@ int32_t RoomAssign::assignRooms2ChildcareWorkers()
 			}
 			else
 				aparty.push_back(m_person_info[person_id]);
+
+			printf("party=%d, person = %d, name = %s %s, age=%s\n", party[i]->party, party[i]->person_id, 
+				party[i]->first_name.c_str(), party[i]->last_name.c_str(), party[i]->age_group.c_str());
 		}
 
 		if (coordinate_flag && aparty.size() != 0) {
@@ -478,6 +481,16 @@ int32_t RoomAssign::assignRooms2Seniors()
 	// family assignment first
 	if (senior_list.size() > 0) {
 		if (familyRoomAssign(senior_list, roomlist, enable_extrabeds) <= 0)
+			printf("assignRooms2Seniors(): SpecialNeed room assignment failed\n");
+	}
+
+	// check if all seniors are allocated with a room
+	std::map<int32_t, std::vector<Registrant*>> ulist = getUnAssignedList(senior_list);
+
+	// if SP rooms are all used, and senior list is not empty, then use family private rooms
+	if (ulist.size() > 0) {
+		std::vector<BuildingRoomList::EURoom*> fm_roomlist = m_br_list.queryFamilyPrivateRooms();
+		if (familyRoomAssign(ulist, fm_roomlist, enable_extrabeds) <= 0)
 			printf("assignRooms2Seniors(): Family room assignment failed\n");
 	}
 	return 0;
@@ -525,8 +538,21 @@ int32_t RoomAssign::assignRooms2Families()
 				room_nums = 0;
 			}
 			cnt_rooms += room_nums;
-			//printf("families %d, rooms %d\n", cnt_family, cnt_rooms);
+			printf("families %d, rooms %d\n", cnt_family, cnt_rooms);
 
+		}
+	}
+
+	// check at this stage if any family has not been assigned with room
+	int count1 = 0;
+	printf("Stage 1 in family room assignment, families missing room list:\n");
+	std::map<int32_t, std::vector<Registrant*>>::iterator it_family;
+	for (it_family = all_family_list.begin(); it_family != all_family_list.end(); it_family++) {
+		int32_t fid = it_family->first;
+		std::vector<Registrant* > afamily = it_family->second;
+		if (afamily[0]->room.size() == 0) {
+			count1++;
+			printf("family = F-%04d\n", afamily[0]->party);
 		}
 	}
 
@@ -536,7 +562,7 @@ int32_t RoomAssign::assignRooms2Families()
 		std::string room = m_br_list.queryFamilyMaleRooms()[i]->room;
 		if (status.compare("Available") == 0) {
 			male_roomlist.push_back(m_br_list.queryFamilyMaleRooms()[i]);
-			//printf("Family Male: %s %s\n", room.c_str(), status.c_str());
+			printf("Family Male: %s %s\n", room.c_str(), status.c_str());
 		}
 	}
 	// assign family_female rooms
@@ -545,7 +571,7 @@ int32_t RoomAssign::assignRooms2Families()
 		std::string room = m_br_list.queryFamilyFemaleRooms()[i]->room;
 		if (status.compare("Available") == 0) {
 			female_roomlist.push_back(m_br_list.queryFamilyFemaleRooms()[i]);
-			//printf("Family Female: %s %s\n", room.c_str(), status.c_str());
+			printf("Family Female: %s %s\n", room.c_str(), status.c_str());
 		}
 	}
 
@@ -580,7 +606,8 @@ int32_t RoomAssign::assignRooms2Families()
 					else if (registant->gender.compare("Female") == 0)
 						female_cnt++;
 					if (registant->age_group.compare(AgeGroup::A1) == 0 || registant->age_group.compare(AgeGroup::A2) == 0 || registant->age_group.compare(AgeGroup::A3) == 0
-						|| registant->age_group.compare(AgeGroup::A4_5) == 0 || registant->age_group.compare(AgeGroup::A6_11) == 0 || registant->age_group.compare(AgeGroup::A12_14) == 0) {
+						|| registant->age_group.compare(AgeGroup::A4_5) == 0 || registant->age_group.compare(AgeGroup::A6_10) == 0 
+						|| registant->age_group.compare(AgeGroup::A11) == 0 || registant->age_group.compare(AgeGroup::A12_14) == 0) {
 						youngest_male = (registant->gender.compare("Male") == 0);
 						if (youngest_male)
 							youngest_cnt++;
@@ -607,11 +634,22 @@ int32_t RoomAssign::assignRooms2Families()
 					room_nums = 0;
 				}
 				cnt_rooms += room_nums;
-				//printf("families %d, rooms %d\n", cnt_family, cnt_rooms);
+				printf("families %d, rooms %d\n", cnt_family, cnt_rooms);
 			}
 		}
 	}
 
+	// check at this stage if any family has not been assigned with room
+	int count2 = 0;
+	printf("Stage 2 in family room assignment, missing room family list:\n");
+	for (it_family = all_family_list.begin(); it_family != all_family_list.end(); it_family++) {
+		int32_t fid = it_family->first;
+		std::vector<Registrant* > afamily = it_family->second;
+		if (afamily[0]->room.size() == 0) {
+			count1++;
+			printf("family = F-%04d\n", afamily[0]->party);
+		}
+	}
 	return 0;
 }
 
@@ -848,8 +886,19 @@ int32_t RoomAssign::familyRoomAssign(std::map<int32_t, std::vector<Registrant*>>
 		int32_t party_id = it->first;
 		std::vector<Registrant*> aregist = it->second;
 		int32_t fs = (int32_t)aregist.size();
+		bool bed_rule = false;
 
-		temp_roomlist = queryFamilyRoomList(roomlist, fs, aregist[0], enable_extrabeds);
+		for (i = 0; i < fs; i++) {
+			Registrant* r = aregist[i];
+			if (r->age_group.compare(AgeGroup::A1) == 0 || r->age_group.compare(AgeGroup::A2) == 0
+				|| r->age_group.compare(AgeGroup::A3) == 0 || r->age_group.compare(AgeGroup::A4_5) == 0) {
+				bed_rule = true;
+				break;
+			}
+		}
+
+		bed_rule = (enable_extrabeds & bed_rule);
+		temp_roomlist = queryFamilyRoomList(roomlist, fs, aregist[0], bed_rule);
 		int32_t left = fs;
 		int32_t accumu = 0;
 		int32_t start = 0;
@@ -865,7 +914,7 @@ int32_t RoomAssign::familyRoomAssign(std::map<int32_t, std::vector<Registrant*>>
 			else
 				temp_roomlist[i]->room_status = RoomStatus::qFullyAssigned; // qPartiallyAssigned;
 
-			temp_roomlist[i]->extra = ((enable_extrabeds) ? 1 : 0);
+			temp_roomlist[i]->extra = ((bed_rule) ? 1 : 0);
 			accumu += temp_roomlist[i]->bed_assigned + temp_roomlist[i]->extra;
 			left = fs - accumu;
 			if (left < 0) {
@@ -2555,7 +2604,8 @@ bool RoomAssign::extrabed_update(const char* room_with_extra_beds)
 			int32_t id = aroom->persons[j];
 			Registrant *registrant = getRegistrant(id);
 			child = child || (registrant->age_group.compare(AgeGroup::A1) == 0 || registrant->age_group.compare(AgeGroup::A2) == 0 || registrant->age_group.compare(AgeGroup::A3) == 0
-				|| registrant->age_group.compare(AgeGroup::A4_5) == 0 || registrant->age_group.compare(AgeGroup::A6_11) == 0);
+				|| registrant->age_group.compare(AgeGroup::A4_5) == 0);
+//				|| registrant->age_group.compare(AgeGroup::A6_10) == 0);
 		}
 
 		if (!child && aroom->extra)
@@ -2661,4 +2711,32 @@ int32_t  RoomAssign::updateEURoomAssignment()
 	}
 
 	return 0;
+}
+
+std::map<int32_t, std::vector<Attendees::Registrant*>> RoomAssign::getUnAssignedList(std::map<int32_t, std::vector<Attendees::Registrant*>> &mylist)
+{
+	int i, j;
+	std::map<int32_t, std::vector<Attendees::Registrant*>>::iterator it;
+	std::map<int32_t, std::vector<Attendees::Registrant*>> templist;
+	if (mylist.size() == 0)
+		return templist;
+
+	for (it = mylist.begin(); it != mylist.end(); it++) {
+		int32_t fid = it->first;
+		std::vector<Attendees::Registrant*> family = it->second;
+		std::vector<Attendees::Registrant*> flist;
+		for (j = 0; j < family.size(); j++) {
+			Attendees::Registrant* reg = family[j];
+			// the attendee has not assigned a room yet
+			if (reg->room.size() == 0) {
+				fid = reg->party;
+				flist.push_back(reg);
+			}
+		}
+		if (flist.size() > 0) {
+			templist[fid] = flist;
+		}
+	}
+
+	return templist;
 }

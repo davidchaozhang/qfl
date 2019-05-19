@@ -83,6 +83,8 @@ public:
 	bool extrabed_update(const char* room_with_extra_beds);
 	int32_t updateEURoomAssignment();
 
+	std::map<int32_t, std::vector<Registrant*>> getUnAssignedList(std::map<int32_t, std::vector<Registrant*>> &mylist);
+
 	std::vector<BuildingRoomList::EURoom*> queryRoomList(std::vector<BuildingRoomList::EURoom*> &myroomlist, int32_t num);
 	std::vector<BuildingRoomList::EURoom*> queryFamilyRoomList(std::vector<BuildingRoomList::EURoom*> &myroomlist, int32_t num, Registrant* registrant, bool enable_extrabed=false);
 
