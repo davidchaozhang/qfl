@@ -97,6 +97,19 @@ typedef enum {
 	qNotSure = ' ' // not sure
 } Campus;
 
+namespace FunctionType {
+	const char* const Sheqing = "社青";
+	const char* const xiangying = "乡音";
+	const char* const studentfellowship = "学生團契";
+	const char* const edison1 = "Edison 1";
+	const char* const edison2 = "Edison 2";
+	const char* const edison3 = "Edison 3";
+	const char* const edison4 = "Edison 4";
+	const char* const edison5 = "Edison 5";
+	const char* const edison6 = "Edison 6";
+	const char* const edison7 = "Edison 7";
+};
+
 class QFLLIB_EXPORT Attendees {
 
 public:
@@ -122,6 +135,7 @@ public:
 		std::string first_name;
 		std::string last_name;
 		std::string chinese_name;
+		int32_t age;
 		std::string age_group;
 		std::string gender;
 		std::string grade;

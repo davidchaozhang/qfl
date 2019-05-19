@@ -533,6 +533,7 @@ int32_t Attendees::parseAllFields1(bool disable_old_assignment_flag)
 
 		// age, needs to be calculated
 		int age = std::stoi(person[11].substr(1, person[11].size() - 2));
+		a_regist.age = age;
 		a_regist.age_group = convert2AgeGroup(age);
 
 		// gender
@@ -686,6 +687,7 @@ int32_t Attendees::parseAllFields1(bool disable_old_assignment_flag)
 		m_registrants.push_back(a_regist);
 	}
 
+#if 0
 	// detect repeated entries
 	std::vector<int32_t> entries;
 	for (i = 0; i < m_registrants.size(); i++) {
@@ -711,6 +713,7 @@ int32_t Attendees::parseAllFields1(bool disable_old_assignment_flag)
 	for (i = (int32_t)entries.size() - 1; i >= 0; i--) {
 		m_registrants.erase(it + entries[i]);
 	}
+#endif
 
 	removeNoShowRegistrants();
 
@@ -996,7 +999,7 @@ int32_t Attendees::camper_christians_statistics()
 		std::string grade = rt->grade;
 
 		bool is_child = (age.compare(AgeGroup::A1) == 0 || age.compare(AgeGroup::A2) == 0 || age.compare(AgeGroup::A3) == 0 ||
-			age.compare(AgeGroup::A4_5) == 0 || age.compare(AgeGroup::A6_11) == 0);
+			age.compare(AgeGroup::A4_5) == 0 || age.compare(AgeGroup::A6_10) == 0 || age.compare(AgeGroup::A11) == 0);
 
 		bool is_child_g = (grade.compare(GradeGroup::G0[0]) == 0 || grade.compare(GradeGroup::G0[1]) == 0 || grade.compare(GradeGroup::G0[2]) == 0 || grade.compare(GradeGroup::G0[3]) == 0 ||
 			grade.compare(GradeGroup::G1[0]) == 0 || grade.compare(GradeGroup::G1[1]) == 0 || grade.compare(GradeGroup::G1[2]) == 0 || grade.compare(GradeGroup::G1[3]) == 0);
@@ -1261,7 +1264,8 @@ int32_t Attendees::classifications1()
 			for (i = 0; i < attendees.size(); i++) {
 				Registrant* registrant = attendees[i];
 				if (registrant->age_group.compare(AgeGroup::A1) == 0 || registrant->age_group.compare(AgeGroup::A2) == 0 || registrant->age_group.compare(AgeGroup::A3) == 0
-					|| registrant->age_group.compare(AgeGroup::A4_5) == 0 || registrant->age_group.compare(AgeGroup::A6_11) == 0)
+					|| registrant->age_group.compare(AgeGroup::A4_5) == 0 || registrant->age_group.compare(AgeGroup::A6_10) == 0 
+					|| registrant->age_group.compare(AgeGroup::A11) == 0)
 				{
 					eu_children_11++;
 				}
@@ -1336,7 +1340,8 @@ int32_t Attendees::classifications1()
 					baby_list = true;
 					break;
 				}
-				else if (rt->age_group.compare(AgeGroup::A66_69) == 0 || rt->age_group.compare(AgeGroup::A70) == 0) {
+				else if (rt->age_group.compare(AgeGroup::A70) == 0 || rt->age >= 67) {
+				//else if (rt->age_group.compare(AgeGroup::A66_69) == 0 || rt->age_group.compare(AgeGroup::A70) == 0) {
 					senior_list = true;
 					break;
 				}
