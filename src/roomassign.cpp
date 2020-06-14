@@ -9,6 +9,7 @@
 #include "roomassign.h"
 #include <string>
 #include <iostream>
+#include <cstdlib>
 
 #ifdef WIN32
 #include <windows.h>
@@ -20,6 +21,76 @@
 #endif
 
 using namespace std;
+
+static bool BDbyFunctionalGroup_Family(std::pair<int32_t, Attendees::Party> const &a, std::pair<int32_t, Attendees::Party> const &b)
+{
+	int32_t i;
+	int32_t aid = a.first;
+	Attendees::Party aparty = a.second;
+	int32_t bid = b.first;
+	Attendees::Party bparty = b.second;
+	std::string a_fid, b_fid;
+
+	std::map<int32_t, std::vector<Attendees::Registrant*>>::iterator it;
+	for (it = aparty.attendee_list_b.begin(); it != aparty.attendee_list_b.end(); it++) {
+		int32_t id = it->first;
+		std::vector<Attendees::Registrant*> reg = it->second;
+		std::string a_temp = reg[0]->functional_group;
+		for (i = 0; i < reg.size(); i++) {
+			if (reg[i]->functional_group.size() > 0) {
+				a_temp = reg[i]->functional_group;
+				break;
+			}
+		}
+			a_fid = a_temp;
+	}
+
+	for (it = bparty.attendee_list_b.begin(); it != bparty.attendee_list_b.end(); it++) {
+		int32_t id = it->first;
+		std::vector<Attendees::Registrant*> reg = it->second;
+		std::string b_temp = reg[0]->functional_group;
+		for (i = 0; i < reg.size(); i++) {
+			if (reg[i]->functional_group.size() > 0) {
+				b_temp = reg[i]->functional_group;
+				break;
+			}
+		}
+		b_fid = b_temp;
+	}
+	return (a_fid < b_fid);
+};
+
+static bool BDbyFunctionalGroup_Single(std::pair<int32_t, std::vector<Attendees::Registrant*>> const &a, std::pair<int32_t, std::vector<Attendees::Registrant*>> const &b)
+{
+	int32_t i;
+	int32_t aid = a.first;
+	std::vector<Attendees::Registrant*> alist = a.second;
+	int32_t bid = b.first;
+	std::vector<Attendees::Registrant*> blist = b.second;
+	std::string a_fid, b_fid;
+	std::string a_temp, b_temp;
+
+	for (i = 0; i < alist.size(); i++) {
+		a_temp = "";
+		if (alist[i]->functional_group.size() > 0) {
+			a_temp = alist[i]->functional_group;
+			break;
+		}
+	}
+	a_fid = a_temp;
+
+
+	for (i = 0; i < blist.size(); i++) {
+		b_temp = "";
+		if (blist[i]->functional_group.size() > 0) {
+			b_temp = blist[i]->functional_group;
+			break;
+		}
+	}
+	b_fid = b_temp;
+	
+	return (a_fid < b_fid);
+};
 
 RoomAssign::RoomAssign()
 {
@@ -498,7 +569,7 @@ int32_t RoomAssign::assignRooms2Seniors()
 
 int32_t RoomAssign::assignRooms2Families()
 {
-	int32_t i, j;
+	int32_t i, j, k;
 	int32_t cnt_family = 0, cnt_rooms = 0;
 	bool enable_extrabeds = true;
 	std::vector<BuildingRoomList::EURoom*> temp_roomlist;
@@ -522,6 +593,7 @@ int32_t RoomAssign::assignRooms2Families()
 		std::string name = achurch.church_name;
 		Church thechurch;
 		thechurch = m_attendee_list_byChurch[name];
+		sortFamilybyFunctionalGroup(thechurch, std::string("Rutgers Community Christian Church"));
 
 		std::map<int32_t, Party>::iterator it;
 		for (it = thechurch.family_list.begin(); it != thechurch.family_list.end(); it++) {
@@ -680,7 +752,10 @@ int32_t RoomAssign::assignRooms2Males()
 		Church thechurch;
 		thechurch = m_attendee_list_byChurch[name];
 
+		// soft male list based on functional group
+		sortMalesbyFunctionalGroup(thechurch, std::string("Rutgers Community Christian Church"));
 		std::map<int32_t, std::vector<Registrant*>> male_list = thechurch.male_list;
+
 
 		if (male_list.size() == 0)
 			continue;
@@ -726,6 +801,8 @@ int32_t RoomAssign::assignRooms2Females()
 		Church thechurch;
 		thechurch = m_attendee_list_byChurch[name];
 
+		// soft female list based on functional group
+		sortFemalesbyFunctionalGroup(thechurch, std::string("Rutgers Community Christian Church"));
 		std::map<int32_t, std::vector<Registrant*>> female_list = thechurch.female_list;
 
 		if (female_list.size() == 0)
@@ -891,9 +968,17 @@ int32_t RoomAssign::familyRoomAssign(std::map<int32_t, std::vector<Registrant*>>
 		for (i = 0; i < fs; i++) {
 			Registrant* r = aregist[i];
 			if (r->age_group.compare(AgeGroup::A1) == 0 || r->age_group.compare(AgeGroup::A2) == 0
-				|| r->age_group.compare(AgeGroup::A3) == 0 || r->age_group.compare(AgeGroup::A4_5) == 0) {
+				|| r->age_group.compare(AgeGroup::A3) == 0 || r->age_group.compare(AgeGroup::A4_5) == 0)
+			{
 				bed_rule = true;
 				break;
+			}
+			else if(r->age_group.compare(AgeGroup::A6_10) == 0) {
+				int v1 = rand() % 100; // randomly choose the kids to have matress in age of 6-10
+				if (v1 < 50) {
+					bed_rule = true;
+					break;
+				}
 			}
 		}
 
@@ -2582,11 +2667,12 @@ bool RoomAssign::extrabed_update(const char* room_with_extra_beds)
 	int32_t extra_bed_rooms = 0;
 	int32_t unassigned_rooms = 0;
 
-	fout << "Room Number," << "Capacity," << "Extra Bed" << std::endl;
+	fout << "Room Number," << "Room Type," << "Capacity," << "Extra Bed" << std::endl;
 
 	for (i = 0; i < roomlist.size(); i++) {
 		BuildingRoomList::EURoom* aroom = roomlist[i];
 		int32_t num = (int32_t)aroom->persons.size();
+		std::string room_type = aroom->room_type;
 		int32_t assigned_beds = aroom->bed_assigned;
 		std::string room_num = aroom->room;
 		int capacity = aroom->capacity;
@@ -2594,7 +2680,7 @@ bool RoomAssign::extrabed_update(const char* room_with_extra_beds)
 		if (num > assigned_beds) {
 			aroom->extra = 1;
 			extra_bed_rooms++;
-			fout << room_num << ", " << capacity << ", " << aroom->extra << std::endl;
+			fout << room_num << ", " << room_type.c_str() << ", " << capacity << ", " << aroom->extra << std::endl;
 		}
 		else
 			aroom->extra = 0;
@@ -2604,8 +2690,8 @@ bool RoomAssign::extrabed_update(const char* room_with_extra_beds)
 			int32_t id = aroom->persons[j];
 			Registrant *registrant = getRegistrant(id);
 			child = child || (registrant->age_group.compare(AgeGroup::A1) == 0 || registrant->age_group.compare(AgeGroup::A2) == 0 || registrant->age_group.compare(AgeGroup::A3) == 0
-				|| registrant->age_group.compare(AgeGroup::A4_5) == 0);
-//				|| registrant->age_group.compare(AgeGroup::A6_10) == 0);
+				|| registrant->age_group.compare(AgeGroup::A4_5) == 0
+				|| registrant->age_group.compare(AgeGroup::A6_10) == 0);
 		}
 
 		if (!child && aroom->extra)
@@ -2616,17 +2702,18 @@ bool RoomAssign::extrabed_update(const char* room_with_extra_beds)
 
 	printf("Out of %d assigned rooms, %d rooms need an extra bed\n\n\n\n", (int)roomlist.size(), (int)extra_bed_rooms);
 
-	fout << "Room Number," << "Capacity," << "Empty" << std::endl;
+	fout << "Room Number," << "Room Type," << "Capacity," << "Empty" << std::endl;
 
 	for (i = 0; i < _roomlist.size(); i++) {
 		BuildingRoomList::EURoom* aroom = _roomlist[i];
 		int32_t num = (int32_t)aroom->persons.size();
+		std::string room_type = aroom->room_type;
 		int32_t assigned_beds = aroom->bed_assigned;
 		std::string room_num = aroom->room;
 		int capacity = aroom->capacity;
 
 		if (num == 0) {
-			fout << room_num << ", " << capacity << ", " << num << std::endl;
+			fout << room_num << ", " << room_type.c_str() << ", " << capacity << ", " << num << std::endl;
 			unassigned_rooms++;
 		}
 	}
@@ -2715,7 +2802,6 @@ int32_t  RoomAssign::updateEURoomAssignment()
 
 std::map<int32_t, std::vector<Attendees::Registrant*>> RoomAssign::getUnAssignedList(std::map<int32_t, std::vector<Attendees::Registrant*>> &mylist)
 {
-	int i, j;
 	std::map<int32_t, std::vector<Attendees::Registrant*>>::iterator it;
 	std::map<int32_t, std::vector<Attendees::Registrant*>> templist;
 	if (mylist.size() == 0)
@@ -2725,7 +2811,7 @@ std::map<int32_t, std::vector<Attendees::Registrant*>> RoomAssign::getUnAssigned
 		int32_t fid = it->first;
 		std::vector<Attendees::Registrant*> family = it->second;
 		std::vector<Attendees::Registrant*> flist;
-		for (j = 0; j < family.size(); j++) {
+		for (int j = 0; j < family.size(); j++) {
 			Attendees::Registrant* reg = family[j];
 			// the attendee has not assigned a room yet
 			if (reg->room.size() == 0) {
@@ -2739,4 +2825,98 @@ std::map<int32_t, std::vector<Attendees::Registrant*>> RoomAssign::getUnAssigned
 	}
 
 	return templist;
+}
+
+bool RoomAssign::sortFamilybyFunctionalGroup(Attendees::Church &church, std::string &chname)
+{
+	int32_t j, k;
+	if (church.church_name.compare(chname) == 0) {
+		printf("%s\n", church.church_name.c_str());
+		std::vector<std::pair<int32_t, Attendees::Party>> vec;
+		auto t0 = church.family_list.begin();
+		auto t1 = church.family_list.end();
+		std::copy(t0, t1, std::back_inserter<std::vector<std::pair<int32_t, Attendees::Party>>>(vec));
+		std::sort(vec.begin(), vec.end(), BDbyFunctionalGroup_Family);
+
+		std::map<int32_t, Attendees::Party> newlist;
+		for (j = 0; j < vec.size(); j++) {
+			int32_t id = vec[j].first;
+			std::string fg = vec[j].second.attendee_list_b[id][0]->functional_group;
+			for (k = 0; k < vec[j].second.attendee_list_b[id].size(); k++) {
+				std::string fg1 = vec[j].second.attendee_list_b[id][k]->functional_group;
+				if (fg1.size() > 0) {
+					fg = fg1;
+					break;
+				}
+			}
+
+			church.family_list[id] = vec[j].second;
+			printf("%d - [F-%04d] %s\n", j, id, fg.c_str());
+		}
+	}
+
+	return true;
+}
+
+bool RoomAssign::sortMalesbyFunctionalGroup(Attendees::Church &church, std::string &chname)
+{
+	int32_t j, k;
+	if (church.church_name.compare(chname) == 0) {
+		printf("%s\n", church.church_name.c_str());
+		std::vector<std::pair<int32_t, std::vector<Registrant*>>> vec;
+		auto t0 = church.male_list.begin();
+		auto t1 = church.male_list.end();
+		std::copy(t0, t1, std::back_inserter<std::vector<std::pair<int32_t, std::vector<Registrant*>>>>(vec));
+		std::sort(vec.begin(), vec.end(), BDbyFunctionalGroup_Single);
+
+		std::map<int32_t, std::vector<Registrant*>> newlist;
+		for (j = 0; j < vec.size(); j++) {
+			int32_t id = vec[j].first;
+			std::vector<Registrant*> reglist = vec[j].second;
+			std::string fg =reglist[0]->functional_group;
+			for (k = 0; k < reglist.size(); k++) {
+				std::string fg1 = reglist[k]->functional_group;
+				if (fg1.size() > 0) {
+					fg = fg1;
+					break;
+				}
+			}
+
+			church.male_list[id] = vec[j].second;
+			printf("%d - [F-%04d] %s\n", j, id, fg.c_str());
+
+		}
+	}
+	return true;
+}
+
+bool RoomAssign::sortFemalesbyFunctionalGroup(Attendees::Church &church, std::string &chname)
+{
+	int32_t j, k;
+	if (church.church_name.compare(chname) == 0) {
+		printf("%s\n", church.church_name.c_str());
+		std::vector<std::pair<int32_t, std::vector<Registrant*>>> vec;
+		auto t0 = church.female_list.begin();
+		auto t1 = church.female_list.end();
+		std::copy(t0, t1, std::back_inserter<std::vector<std::pair<int32_t, std::vector<Registrant*>>>>(vec));
+		std::sort(vec.begin(), vec.end(), BDbyFunctionalGroup_Single);
+
+		std::map<int32_t, std::vector<Registrant*>> newlist;
+		for (j = 0; j < vec.size(); j++) {
+			int32_t id = vec[j].first;
+			std::vector<Registrant*> reglist = vec[j].second;
+			std::string fg = reglist[0]->functional_group;
+			for (k = 0; k < reglist.size(); k++) {
+				std::string fg1 = reglist[k]->functional_group;
+				if (fg1.size() > 0) {
+					fg = fg1;
+					break;
+				}
+			}
+
+			church.female_list[id] = vec[j].second;
+			printf("%d - [F-%04d] %s\n", j, id, fg.c_str());
+		}
+	}
+	return true;
 }

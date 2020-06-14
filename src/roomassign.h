@@ -82,6 +82,9 @@ public:
 	int32_t assignRooms2DramaTeam();
 	bool extrabed_update(const char* room_with_extra_beds);
 	int32_t updateEURoomAssignment();
+	bool sortFamilybyFunctionalGroup(Attendees::Church &church, std::string &chname);
+	bool sortMalesbyFunctionalGroup(Attendees::Church &church, std::string &chname);
+	bool sortFemalesbyFunctionalGroup(Attendees::Church &church, std::string &chname);
 
 	std::map<int32_t, std::vector<Registrant*>> getUnAssignedList(std::map<int32_t, std::vector<Registrant*>> &mylist);
 
