@@ -532,7 +532,9 @@ int32_t Attendees::parseAllFields1(bool disable_old_assignment_flag)
 		a_regist.cell_group = person[9].substr(1, person[9].size() - 2);
 
 		// age, needs to be calculated
-		int age = std::stoi(person[11].substr(1, person[11].size() - 2));
+		int age = -1;
+		if(person[11].size() > 2)
+			age = std::stoi(person[11].substr(1, person[11].size() - 2));
 		a_regist.age = age;
 		a_regist.age_group = convert2AgeGroup(age);
 
@@ -639,6 +641,8 @@ int32_t Attendees::parseAllFields1(bool disable_old_assignment_flag)
 		}
 		// functional group
 		a_regist.functional_group = person[25].substr(1, person[25].size() - 2);
+		if (a_regist.functional_group.compare("--None--") == 0)
+			a_regist.functional_group = "";
 
 		// volunteers
 		a_regist.volunteer_service = person[27].substr(1, person[27].size() - 2);
